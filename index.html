@@ -2419,11 +2419,7 @@ saveProducts();renderAdminProducts2();renderProducts();
 function saveProducts(){
 try{localStorage.setItem("nny_products",JSON.stringify(PRODUCTS.map(function(p){return Object.assign({},p,{img:p.img?p.img.substring(0,200)+"...":null});})));}catch(e){}
 try{
-var ps=PRODUCTS.map(function(p){
-var o=Object.assign({},p);
-delete o.pub;
-return o;
-});
+var ps=PRODUCTS.map(function(p){return Object.assign({},p);});
 localStorage.setItem("nny_products_full",JSON.stringify(ps));
 }catch(e){}
 }
@@ -2449,12 +2445,12 @@ if(saved.img)p.img=saved.img;
 if(saved.badge!==undefined)p.badge=saved.badge;
 if(saved.dja&&saved.dja!=="説明を入力")p.dja=saved.dja;
 if(saved.dvi&&saved.dvi!=="Nhập mô tả")p.dvi=saved.dvi;
-p.pub=true;
+if(saved.pub!==undefined)p.pub=saved.pub;else p.pub=true;
 }
 });
 arr.forEach(function(saved){
 var exists=PRODUCTS.find(function(p){return p.id===saved.id;});
-if(!exists&&saved.id&&saved.ja){PRODUCTS.push(saved);}
+if(!exists&&saved.id&&saved.ja){saved.pub=true;PRODUCTS.push(saved);}
 });
 }
 }
@@ -3120,8 +3116,8 @@ function saveVariantPrice(id,v,val){var p=PRODUCTS.find(function(x){return Numbe
 function addVariantToCart(id,v,price){var p=PRODUCTS.find(function(x){return Number(x.id)===Number(id);});if(!p)return;var sk="stock"+v.replace("g","");var stk=p[sk]!==undefined?p[sk]:p.stock;var ck=id+"_"+v;if(stk>0&&(cart[ck]||0)>=stk){showToast(L("在庫がありません","Out of stock","Hết hàng"));return;}cart[ck]=(cart[ck]||0)+1;CART_META[ck]={id:Number(id),variant:v,price:price};updateCartBtn();showToast(p.e+" "+p.ja+" "+v+" "+L("をカートに追加しました","added to cart","đã thêm vào giỏ"));}
 function chgVariantQty(ck,d){cart[ck]=(cart[ck]||0)+d;if(cart[ck]<=0){delete cart[ck];delete CART_META[ck];}updateCartBtn();renderProducts();if(curView==="cart")renderCartView();}
 function closeVariantModal(){}
-function openOwnerScreen(){var os=document.getElementById("owner-screen");if(!os)return;document.querySelectorAll(".admin-screen,#admin-screen,[id=admin-screen]").forEach(function(el){el.style.display="none";el.classList.remove("on");});var us=document.getElementById("user-screen");if(us)us.style.display="none";os.style.display="flex";os.style.flexDirection="column";os.style.zIndex="99990";os.classList.add("on");if(typeof fbEnabled!=="undefined"&&fbEnabled&&typeof fbDb!=="undefined"&&fbDb){fbDb.collection("orders").get().then(function(snap){var a=[];snap.forEach(function(doc){a.push(doc.data());});if(a.length)ORDERS=a;renderOwnerDashboard();}).catch(function(){renderOwnerDashboard();});}else{renderOwnerDashboard();}}
-function closeOwnerScreen(){var os=document.getElementById("owner-screen");if(os){os.style.display="none";os.classList.remove("on");}var us=document.getElementById("user-screen");if(us)us.style.display="block";renderProducts();}
+function openOwnerScreen(){var os=document.getElementById("owner-screen");if(!os)return;document.querySelectorAll(".admin-screen,#admin-screen,[id=admin-screen]").forEach(function(el){el.style.cssText="display:none!important";el.classList.remove("on");});var us=document.getElementById("user-screen");if(us)us.style.cssText="display:none!important";os.style.cssText="display:flex!important;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:#f0f4f0;overflow-y:auto;";os.classList.add("on");if(typeof fbEnabled!=="undefined"&&fbEnabled&&typeof fbDb!=="undefined"&&fbDb){fbDb.collection("orders").get().then(function(snap){var a=[];snap.forEach(function(doc){a.push(doc.data());});if(a.length)ORDERS=a;renderOwnerDashboard();}).catch(function(){renderOwnerDashboard();});}else{renderOwnerDashboard();}}
+function closeOwnerScreen(){var os=document.getElementById("owner-screen");if(os){os.style.cssText="display:none;";}var us=document.getElementById("user-screen");if(us){us.style.cssText="";us.style.display="block";}renderProducts();}
 var EM_HANOI_LNG=105.8417,EM_HANOI_LAT=21.0335,_shippingFee=0,_shippingDist=0,_shippingLoading=false;
 function calcGrabFee(km){if(km<=2)return 15000;return Math.ceil((15000+Math.ceil(km-2)*5000)/1000)*1000;}
 function updateShippingDisplay(msg,loading){var el=document.getElementById("shipping-fee-row"),valEl=document.getElementById("shipping-fee-val");if(!el||!valEl)return;if(typeof selDel==="undefined"||selDel!=="deliver"){el.style.display="none";return;}el.style.display="flex";if(loading||msg){valEl.textContent=msg||L("計算中...","Calculating...","Đang tính...");return;}valEl.textContent=_shippingFee>0?vnd(_shippingFee):L("住所を入力してください","Enter address","Nhập địa chỉ");}
