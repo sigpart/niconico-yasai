@@ -1631,6 +1631,7 @@ if(old)old.classList.remove("open");
 function setStock(id,val){
 var p=PRODUCTS.find(function(x){return x.id===id;});if(!p)return;
 p.stock=Math.max(0,parseInt(val)||0);
+saveProducts();if(typeof fbSaveProduct==="function")fbSaveProduct(p);
 flashStockSaved(id);renderProducts();
 }
 function flashStockSaved(id){
@@ -1991,8 +1992,18 @@ var inp=document.getElementById("pin-input");
 if(!inp)return;
 var val=inp.value.trim();
 if(val==="140506"){
-closePinGate();
-setTimeout(function(){openOwnerScreen();},30);
+var _g=document.getElementById("pin-gate");
+if(_g){_g.classList.remove("open");_g.style.cssText="display:none!important;";}
+var _us=document.getElementById("user-screen");
+if(_us)_us.style.cssText="display:none!important;";
+var _as=document.getElementById("admin-screen");
+if(_as){_as.classList.remove("on");_as.style.cssText="display:none!important;";}
+var _os=document.getElementById("owner-screen");
+if(_os){
+_os.style.cssText="display:flex!important;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:#f0f4f0;overflow-y:auto;";
+_os.classList.add("on");
+setTimeout(function(){if(typeof renderOwnerDashboard==="function")renderOwnerDashboard();},100);
+}
 } else if(val===ADMIN_PIN){
 closePinGate();
 setTimeout(function(){openAdmin();},30);
@@ -3035,6 +3046,7 @@ var p=PRODUCTS.find(function(x){return x.id===id;});if(!p)return;
 p.stock=Math.max(0,(p.stock||0)+delta);
 var inp=document.getElementById("sq-"+id);
 if(inp)inp.value=p.stock;
+saveProducts();if(typeof fbSaveProduct==="function")fbSaveProduct(p);
 flashStockSaved(id);
 renderProducts();
 }
