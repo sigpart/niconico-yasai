@@ -3325,6 +3325,135 @@ function saveNewPin(){
   if(clearBtn)clearBtn.onclick=clearOrders;
 })();
 
+// ════════════════════════════════════════════
+//  SYSTEM ADMIN
+// ════════════════════════════════════════════
+var SYS_PIN = "140506";
+var logoClickCount = 0;
+var logoClickTimer = null;
+
+function handleLogoClick(){
+  goShop();
+  logoClickCount++;
+  if(logoClickTimer) clearTimeout(logoClickTimer);
+  logoClickTimer = setTimeout(function(){logoClickCount=0;},2000);
+  if(logoClickCount>=5){
+    logoClickCount=0;
+    clearTimeout(logoClickTimer);
+    openSysPinGate();
+  }
+}
+
+function openSysPinGate(){
+  var gate=document.getElementById("sys-pin-gate");
+  if(gate){gate.classList.add("open");}
+  var inp=document.getElementById("sys-pin-input");
+  if(inp){inp.value="";inp.focus();}
+}
+
+function closeSysPinGate(){
+  var gate=document.getElementById("sys-pin-gate");
+  if(gate)gate.classList.remove("open");
+}
+
+function checkSysPin(){
+  var inp=document.getElementById("sys-pin-input");
+  if(!inp)return;
+  var val=inp.value.trim();
+  if(val===SYS_PIN){
+    closeSysPinGate();
+    openSysAdmin();
+  } else {
+    inp.value="";
+    var err=document.getElementById("sys-pin-error");
+    if(err){err.style.display="block";setTimeout(function(){err.style.display="none";},2000);}
+  }
+}
+
+document.addEventListener("keydown",function(e){
+  var gate=document.getElementById("sys-pin-gate");
+  if(gate&&gate.classList.contains("open")&&e.key==="Enter")checkSysPin();
+});
+
+function openSysAdmin(){
+  var us=document.getElementById("user-screen");
+  var as=document.getElementById("admin-screen");
+  var ss=document.getElementById("sys-admin-screen");
+  if(us)us.style.display="none";
+  if(as)as.classList.remove("on");
+  if(ss)ss.classList.add("on");
+  renderSysAdmin();
+}
+
+function exitSysAdmin(){
+  var ss=document.getElementById("sys-admin-screen");
+  var us=document.getElementById("user-screen");
+  if(ss)ss.classList.remove("on");
+  if(us)us.style.display="block";
+  renderProducts();
+}
+
+function renderSysAdmin(){
+  var orders=ORDERS;
+  var totalRev=orders.reduce(function(s,o){return s+o.tot;},0);
+  var commission=Math.round(totalRev*0.13);
+  var farmerPayout=totalRev-commission;
+  var avg=orders.length?Math.round(totalRev/orders.length):0;
+
+  function setEl(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+  setEl("sys-comm-val",vnd(commission));
+  setEl("sys-total-orders",orders.length);
+  setEl("sys-total-rev",vnd(totalRev));
+  setEl("sys-farmer-payout",vnd(farmerPayout));
+  setEl("sys-avg-order",vnd(avg));
+
+  // Orders table
+  var tbody=document.getElementById("sys-orders-tbody");
+  var empty=document.getElementById("sys-orders-empty");
+  if(!orders.length){
+    if(tbody)tbody.innerHTML="";
+    if(empty)empty.style.display="block";
+  } else {
+    if(empty)empty.style.display="none";
+    var html="";
+    [].concat(orders).reverse().forEach(function(o){
+      var items=(o.items||[]).map(function(it){return it.e+"×"+it.qty;}).join(" ");
+      var comm13=Math.round(o.tot*0.13);
+      var farm87=o.tot-comm13;
+      var stCls=o.status==="done"?"color:#72c47f":o.status==="pending_payment"?"color:#c9960a":"color:#ff9999";
+      var stTxt=o.status==="done"?"✅ 完了":o.status==="pending_payment"?"💳 入金待":"🆕 新規";
+      html+="<tr><td style='font-weight:800;'>"+o.no+"</td><td>"+o.ts+"</td><td>"+o.name+"</td><td>"+items+"</td><td>"+vnd(o.tot)+"</td><td style='color:#c9960a;font-weight:800;'>"+vnd(comm13)+"</td><td style='color:#72c47f;font-weight:800;'>"+vnd(farm87)+"</td><td style='"+stCls+"'>"+stTxt+"</td></tr>";
+    });
+    if(tbody)tbody.innerHTML=html;
+  }
+
+  // Product stats
+  var pmap={};
+  orders.forEach(function(o){
+    (o.items||[]).forEach(function(it){
+      var k=it.ja;
+      if(!pmap[k])pmap[k]={e:it.e,name:it.ja,qty:0,rev:0};
+      pmap[k].qty+=it.qty;
+      pmap[k].rev+=it.qty*it.price;
+    });
+  });
+  var pstats=Object.values(pmap).sort(function(a,b){return b.rev-a.rev;});
+  var pEl=document.getElementById("sys-product-stats");
+  if(pEl){
+    if(!pstats.length){
+      pEl.innerHTML='<div style="text-align:center;padding:20px;color:#72c47f;font-size:12px;">データなし</div>';
+    } else {
+      var ph="<table class='sys-tbl'><thead><tr><th>商品</th><th>販売数</th><th>売上</th><th>手数料(13%)</th><th>農家収入(87%)</th></tr></thead><tbody>";
+      pstats.forEach(function(p){
+        var comm=Math.round(p.rev*0.13);
+        ph+="<tr><td>"+p.e+" "+p.name+"</td><td>"+p.qty+"点</td><td>"+vnd(p.rev)+"</td><td style='color:#c9960a;'>"+vnd(comm)+"</td><td style='color:#72c47f;'>"+vnd(p.rev-comm)+"</td></tr>";
+      });
+      ph+="</tbody></table>";
+      pEl.innerHTML=ph;
+    }
+  }
+}
+
 // ════ INIT ════
 applyI18n();
 renderProducts();
@@ -3344,5 +3473,54 @@ loadSheetUrl();
 
 
 
+<!-- ══ SYSTEM ADMIN PIN GATE ══ -->
+<div id="sys-pin-gate">
+  <div class="sys-pin-box">
+    <div style="font-size:48px;margin-bottom:8px;">🌿</div>
+    <div class="sys-pin-title">NICO NICO YASAI</div>
+    <div class="sys-pin-sub">システム管理者専用 / Quản trị hệ thống</div>
+    <input class="sys-pin-input" id="sys-pin-input" type="password" placeholder="••••••" maxlength="8" onkeydown="if(event.key==='Enter')checkSysPin()">
+    <button class="sys-pin-btn" onclick="checkSysPin()">🔐 ログイン</button>
+    <button class="sys-pin-cancel" onclick="closeSysPinGate()">キャンセル</button>
+    <div id="sys-pin-error" style="display:none;color:#c0392b;font-size:11px;margin-top:6px;font-weight:700;">PINが違います</div>
+  </div>
+</div>
+
+<!-- ══ SYSTEM ADMIN SCREEN ══ -->
+<div id="sys-admin-screen">
+  <div class="sys-topbar">
+    <div class="sys-topbar-title">🌿 NICO NICO YASAI — システム管理</div>
+    <button class="sys-exit-btn" onclick="exitSysAdmin()">← 終了</button>
+  </div>
+  <div class="sys-main">
+    <div class="sys-section">
+      <div class="sys-section-title">📊 プラットフォーム収益（13%手数料）</div>
+      <div class="sys-commission-box">
+        <div class="sys-comm-val" id="sys-comm-val">0 ₫</div>
+        <div class="sys-comm-lbl">NICO NICO YASAI プラットフォーム手数料（売上の13%）</div>
+      </div>
+      <div class="sys-kpi-grid">
+        <div class="sys-kpi"><div class="sys-kpi-val" id="sys-total-orders">0</div><div class="sys-kpi-lbl">総注文数</div></div>
+        <div class="sys-kpi"><div class="sys-kpi-val" id="sys-total-rev">0 ₫</div><div class="sys-kpi-lbl">総売上</div></div>
+        <div class="sys-kpi"><div class="sys-kpi-val" id="sys-farmer-payout">0 ₫</div><div class="sys-kpi-lbl">農家支払額（87%）</div></div>
+        <div class="sys-kpi"><div class="sys-kpi-val" id="sys-avg-order">0 ₫</div><div class="sys-kpi-lbl">平均注文金額</div></div>
+      </div>
+    </div>
+    <div class="sys-section">
+      <div class="sys-section-title">📋 注文一覧</div>
+      <div style="overflow-x:auto;">
+        <table class="sys-tbl">
+          <thead><tr><th>注文番号</th><th>日時</th><th>お名前</th><th>商品</th><th>売上</th><th>手数料(13%)</th><th>農家収入(87%)</th><th>状態</th></tr></thead>
+          <tbody id="sys-orders-tbody"></tbody>
+        </table>
+        <div id="sys-orders-empty" style="display:none;text-align:center;padding:32px;color:#72c47f;font-size:13px;">まだ注文がありません 📭</div>
+      </div>
+    </div>
+    <div class="sys-section">
+      <div class="sys-section-title">🥦 商品別売上</div>
+      <div id="sys-product-stats"></div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
