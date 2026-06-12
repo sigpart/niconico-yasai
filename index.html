@@ -2459,6 +2459,14 @@ if(saved.badge!==undefined)p.badge=saved.badge;
 if(saved.dja&&saved.dja!=="説明を入力")p.dja=saved.dja;
 if(saved.dvi&&saved.dvi!=="Nhập mô tả")p.dvi=saved.dvi;
 if(saved.pub!==undefined)p.pub=saved.pub;else p.pub=true;
+if(saved.ja&&saved.ja.trim())p.ja=saved.ja;
+if(saved.vi&&saved.vi.trim())p.vi=saved.vi;
+if(saved.en&&saved.en.trim())p.en=saved.en;
+if(saved.e&&saved.e.trim())p.e=saved.e;
+if(saved.unit&&saved.unit.trim())p.unit=saved.unit;
+if(saved.unitvi&&saved.unitvi.trim())p.unitvi=saved.unitvi;
+if(saved.uniten&&saved.uniten.trim())p.uniten=saved.uniten;
+if(saved.season!==undefined)p.season=saved.season;
 }
 });
 arr.forEach(function(saved){
