@@ -3362,7 +3362,7 @@ function checkSysPin(){
   var val=inp.value.trim();
   if(val===SYS_PIN){
     closeSysPinGate();
-    openSysAdmin();
+    openOwnerPanel();
   } else {
     inp.value="";
     var err=document.getElementById("sys-pin-error");
@@ -3391,6 +3391,101 @@ function exitSysAdmin(){
   if(ss)ss.classList.remove("on");
   if(us)us.style.display="block";
   renderProducts();
+}
+
+// ── Owner Panel (modal) ──────────────────────────────────────────────
+function openOwnerPanel(){
+  var panel=document.getElementById("owner-panel");
+  if(panel){panel.style.display="flex";}
+  renderOwnerDashboard();
+  // restore saved settings
+  var savedEmail=localStorage.getItem("ownerFarmEmail")||"";
+  var savedRate=localStorage.getItem("ownerCommissionRate")||"13";
+  var emailEl=document.getElementById("owner-farm-email");
+  var rateEl=document.getElementById("owner-commission-rate");
+  if(emailEl)emailEl.value=savedEmail;
+  if(rateEl)rateEl.value=savedRate;
+}
+
+function closeOwnerPanel(){
+  var panel=document.getElementById("owner-panel");
+  if(panel)panel.style.display="none";
+}
+
+function switchOwnerTab(tab){
+  var rev=document.getElementById("otab-revenue-content");
+  var sett=document.getElementById("otab-settings-content");
+  var btnRev=document.getElementById("otab-revenue");
+  var btnSett=document.getElementById("otab-settings");
+  if(tab==="revenue"){
+    if(rev)rev.style.display="block";
+    if(sett)sett.style.display="none";
+    if(btnRev){btnRev.style.background="var(--g1)";btnRev.style.color="#fff";}
+    if(btnSett){btnSett.style.background="#fafafa";btnSett.style.color="#555";}
+  } else {
+    if(rev)rev.style.display="none";
+    if(sett)sett.style.display="block";
+    if(btnRev){btnRev.style.background="#fafafa";btnRev.style.color="#555";}
+    if(btnSett){btnSett.style.background="var(--g1)";btnSett.style.color="#fff";}
+  }
+}
+
+function saveOwnerSettings(){
+  var emailEl=document.getElementById("owner-farm-email");
+  if(emailEl){localStorage.setItem("ownerFarmEmail",emailEl.value);}
+  alert("保存しました。");
+}
+
+function saveCommissionRate(){
+  var rateEl=document.getElementById("owner-commission-rate");
+  if(rateEl){
+    var r=parseInt(rateEl.value,10);
+    if(isNaN(r)||r<1||r>50){alert("手数料率は1〜50%で入力してください。");return;}
+    localStorage.setItem("ownerCommissionRate",r);
+    alert("手数料率を"+r+"%に変更しました。");
+  }
+}
+
+function renderOwnerDashboard(){
+  var body=document.getElementById("owner-dashboard-body");
+  if(!body)return;
+  var orders=ORDERS||[];
+  var commRate=parseInt(localStorage.getItem("ownerCommissionRate")||"13",10);
+  var totalRev=orders.reduce(function(s,o){return s+(o.total||0);},0);
+  var commission=Math.round(totalRev*commRate/100);
+  var farmerPay=totalRev-commission;
+  body.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px;">'
+    +'<div style="background:var(--gp);border-radius:10px;padding:16px;text-align:center;">'
+    +'<div style="font-size:22px;font-weight:800;color:var(--g1);">'+totalRev.toLocaleString()+'₫</div>'
+    +'<div style="font-size:11px;color:var(--muted);margin-top:4px;">総売上</div></div>'
+    +'<div style="background:#fff8e1;border-radius:10px;padding:16px;text-align:center;">'
+    +'<div style="font-size:22px;font-weight:800;color:#c9960a;">'+commission.toLocaleString()+'₫</div>'
+    +'<div style="font-size:11px;color:var(--muted);margin-top:4px;">手数料（'+commRate+'%）</div></div>'
+    +'<div style="background:#e8f5e9;border-radius:10px;padding:16px;text-align:center;">'
+    +'<div style="font-size:22px;font-weight:800;color:#2e7d32;">'+farmerPay.toLocaleString()+'₫</div>'
+    +'<div style="font-size:11px;color:var(--muted);margin-top:4px;">農家支払額（'+(100-commRate)+'%）</div></div>'
+    +'<div style="background:#f3e5f5;border-radius:10px;padding:16px;text-align:center;">'
+    +'<div style="font-size:22px;font-weight:800;color:#7b1fa2;">'+orders.length+'</div>'
+    +'<div style="font-size:11px;color:var(--muted);margin-top:4px;">総注文数</div></div>'
+    +'</div>'
+    +'<table style="width:100%;border-collapse:collapse;font-size:12px;">'
+    +'<thead><tr style="background:#f5f5f5;">'
+    +'<th style="padding:8px;text-align:left;border-bottom:1px solid #eee;">注文ID</th>'
+    +'<th style="padding:8px;text-align:left;border-bottom:1px solid #eee;">顧客</th>'
+    +'<th style="padding:8px;text-align:right;border-bottom:1px solid #eee;">金額</th>'
+    +'<th style="padding:8px;text-align:right;border-bottom:1px solid #eee;">手数料</th>'
+    +'</tr></thead><tbody>'
+    +orders.slice(-20).reverse().map(function(o){
+      var comm=Math.round((o.total||0)*commRate/100);
+      return '<tr style="border-bottom:1px solid #f0f0f0;">'
+        +'<td style="padding:8px;">#'+(o.id||o.ts||"")+'</td>'
+        +'<td style="padding:8px;">'+(o.name||o.customer||"")+'</td>'
+        +'<td style="padding:8px;text-align:right;">'+(o.total||0).toLocaleString()+'₫</td>'
+        +'<td style="padding:8px;text-align:right;color:#c9960a;">'+comm.toLocaleString()+'₫</td>'
+        +'</tr>';
+    }).join('')
+    +'</tbody></table>'
+    +(orders.length===0?'<div style="text-align:center;padding:32px;color:var(--muted);">注文がまだありません</div>':'');
 }
 
 function renderSysAdmin(){
@@ -3522,5 +3617,37 @@ loadSheetUrl();
     </div>
   </div>
 </div>
+
+<!-- ═══ 運営者パネル ═══ -->
+<div id="owner-panel" style="display:none;position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,0.6);align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px 0;">
+<div style="background:#fff;border-radius:16px;width:100%;max-width:860px;margin:0 auto;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.3);">
+<div style="background:linear-gradient(135deg,#1a4f1a,#2d6a2d);padding:18px 24px;display:flex;align-items:center;justify-content:space-between;">
+<div>
+<div style="color:#fff;font-size:18px;font-weight:800;">🌿 NICO NICO YASAI</div>
+<div style="color:rgba(255,255,255,0.8);font-size:12px;margin-top:2px;">運営者管理パネル / Bảng quản lý vận hành</div>
+</div>
+<button onclick="closeOwnerPanel()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;">✕</button>
+</div>
+<div style="display:flex;border-bottom:2px solid #eee;background:#fafafa;">
+<button onclick="switchOwnerTab('revenue')" id="otab-revenue" style="flex:1;padding:12px;background:var(--g1);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">📊 売上管理</button>
+<button onclick="switchOwnerTab('settings')" id="otab-settings" style="flex:1;padding:12px;background:#fafafa;color:#555;border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">⚙️ 設定</button>
+</div>
+<div id="otab-revenue-content" style="padding:20px;">
+<div id="owner-dashboard-body">読み込み中...</div>
+</div>
+<div id="otab-settings-content" style="padding:20px;display:none;">
+<div style="font-size:14px;font-weight:800;color:#333;margin-bottom:12px;">📧 農家メールアドレス</div>
+<input type="email" id="owner-farm-email" placeholder="農家のメールアドレス（請求書送付先）" style="width:100%;padding:10px 14px;border:1.5px solid #ccc;border-radius:8px;font-size:14px;margin-bottom:12px;box-sizing:border-box;">
+<button onclick="saveOwnerSettings()" style="background:var(--g1);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">保存</button>
+<div style="margin-top:20px;font-size:14px;font-weight:800;color:#333;margin-bottom:12px;">💹 手数料率</div>
+<div style="display:flex;align-items:center;gap:8px;">
+<input type="number" id="owner-commission-rate" value="13" min="1" max="50" style="width:80px;padding:8px;border:1.5px solid #ccc;border-radius:6px;font-size:14px;text-align:center;">
+<span style="font-size:14px;color:#555;">%</span>
+<button onclick="saveCommissionRate()" style="background:var(--g1);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">変更</button>
+</div>
+</div>
+</div>
+</div>
+
 </body>
 </html>
