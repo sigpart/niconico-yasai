@@ -977,7 +977,7 @@ z=document.getElementById("inp-zalo").value, a=document.getElementById("inp-addr
 document.getElementById("cc-cust").innerHTML=n+"<br>"+ph+(z?" · Zalo:"+z:"")+"<br>"+a+(em?"<br>📧 "+em:"");
 var dmap={deliver:T("delDeliver"),pickup:T("delPickup")};
 document.getElementById("cc-del").textContent=dmap[selDel]||selDel;
-var pmap={momo:"💜 MoMo",zalopay:"💙 ZaloPay",vnpay:"❤️ VNPay",cash:"💵 "+T("payCash")};
+var pmap={momo:"💜 MoMo",zalopay:"💙 ZaloPay",vnpay:"❤️ VNPay"};
 document.getElementById("cc-pay").textContent=pmap[selPay]||selPay;
 var note=document.getElementById("inp-note").value;
 document.getElementById("cc-note-sec").style.display=note?"":"none";
@@ -1002,8 +1002,7 @@ Object.keys(cart).forEach(function(id){var qty=cart[id];var p=PRODUCTS.find(func
 if(p)items.push({id:p.id,qty:qty,ja:p.ja,vi:p.vi,e:p.e,price:p.price,unit:p.unit,unitvi:p.unitvi});});
 pendingOrder={no:no,ts:ts,tot:tot,name:name,phone:phone,zalo:zalo,addr:addr,email:email,delivery:selDel,payment:selPay,note:note,items:items,status:"new"};
 if(selPay==="vietqr"){showPayModal();}
-else if(selPay!=="cash"){showQR(selPay);}
-else{finalizeOrder();}
+else{showQR(selPay);}
 }
 function finalizeOrder(){
 if(!pendingOrder)return;
@@ -1054,7 +1053,7 @@ document.getElementById("rmv-addr").textContent=o.addr;
 document.getElementById("rmv-email").textContent=o.email||"—";
 var dmap={deliver:T("delDeliver"),pickup:T("delPickup")};
 document.getElementById("rmv-del").textContent=dmap[o.delivery]||o.delivery;
-var pmap={momo:"💜 MoMo",zalopay:"💙 ZaloPay",vnpay:"❤️ VNPay",cash:"💵 "+T("payCash")};
+var pmap={momo:"💜 MoMo",zalopay:"💙 ZaloPay",vnpay:"❤️ VNPay"};
 document.getElementById("rmv-pay").textContent=pmap[o.payment]||o.payment;
 var rhtml="";
 o.items.forEach(function(item){var nm=lang==="ja"?item.ja:item.vi, unit=lang==="ja"?item.unit:item.unitvi;
@@ -1232,7 +1231,7 @@ var r=new FileReader();r.onload=function(e){QR_IMGS[currentQRMethod]=e.target.re
 }
 function buildEmailBody(o){
 var dmap={deliver:T("delDeliver"),pickup:T("delPickup")};
-var pmap={momo:"MoMo",zalopay:"ZaloPay",vnpay:"VNPay",cash:T("payCash")};
+var pmap={momo:"MoMo",zalopay:"ZaloPay",vnpay:"VNPay"};
 var lines=o.items.map(function(i){var nm=lang==="ja"?i.ja:i.vi,unit=lang==="ja"?i.unit:i.unitvi;return " "+i.e+" "+nm+" × "+i.qty+" "+unit+" = "+vnd(i.qty*i.price);}).join("\n");
 if(lang==="ja"){
 return o.name+" 様\n\nNICO NICO YASAIをご利用いただきありがとうございます。\nご注文を承りました。\n\n"+
@@ -1854,8 +1853,8 @@ return{label:k,val:m[k],display:m[k]+(adminLang==="vi"?" sp":" 個")};
 }).sort(function(a,b){return b.val-a.val;}).slice(0,8));
 }
 function renderPayDonut(orders){
-var m={vietqr:0,cash:0};orders.forEach(function(o){var k=(o.payment==="momo"||o.payment==="zalopay")?"vietqr":o.payment;if(m.hasOwnProperty(k))m[k]++;});
-renderDonut("donut-pay","legend-pay",[{label:"VietQR",val:m.vietqr,color:"#1a6b2a"},{label:adminLang==="vi"?"Tiền mặt":"現金",val:m.cash,color:"#c9960a"}].filter(function(d){return d.val>0;}));
+var m={vietqr:0};orders.forEach(function(o){m.vietqr++;});
+renderDonut("donut-pay","legend-pay",[{label:"VietQR",val:m.vietqr,color:"#1a6b2a"}].filter(function(d){return d.val>0;}));
 }
 function renderAgeDonut(orders){
 var m={"20s":0,"30s":0,"40s":0,"50plus":0,"":0};orders.forEach(function(o){var k=o.age||"";if(!m.hasOwnProperty(k))k="";m[k]++;});
@@ -1935,7 +1934,7 @@ closeHistReceiptModal();
 setTimeout(function(){openReceiptPDF();},300);
 }
 function buildReceiptHTML(o){
-var pm={vietqr:"🏦 "+L("銀行振込","Bank Transfer","Chuyển khoản"),cash:"💵 "+L("現金","Cash","Tiền mặt")};
+var pm={vietqr:"🏦 "+L("銀行振込","Bank Transfer","Chuyển khoản")};
 var dm={deliver:L("配達","Delivery","Giao hàng"),pickup:L("受取","Pickup","Tự lấy"),ship:L("配送","Shipping","Giao hàng")};
 var rows="";
 (o.items||[]).forEach(function(it){
