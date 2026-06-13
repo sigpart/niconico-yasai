@@ -998,8 +998,8 @@ var name=document.getElementById("inp-name").value, phone=document.getElementByI
 zalo=document.getElementById("inp-zalo").value, addr=document.getElementById("inp-addr").value,
 email=document.getElementById("inp-email").value, note=document.getElementById("inp-note").value;
 var items=[];
-Object.keys(cart).forEach(function(id){var qty=cart[id];var p=PRODUCTS.find(function(x){return x.id==id;});
-if(p)items.push({id:p.id,qty:qty,ja:p.ja,vi:p.vi,e:p.e,price:p.price,unit:p.unit,unitvi:p.unitvi});});
+Object.keys(cart).forEach(function(ck){var qty=cart[ck];if(!qty)return;var meta=CART_META[ck];var pid=meta?meta.id:(ck.indexOf("_")>0?ck.split("_")[0]:ck);var p=PRODUCTS.find(function(x){return Number(x.id)===Number(pid);});if(!p)return;var price=meta?meta.price:p.price;var variant=meta?meta.variant:"";var nm_ja=p.ja+(variant?" "+variant:""),nm_vi=p.vi+(variant?" "+variant:"");var unit=p.unit,unitvi=p.unitvi;
+items.push({id:p.id,qty:qty,ja:nm_ja,vi:nm_vi,e:p.e,price:price,unit:unit,unitvi:unitvi});});
 pendingOrder={no:no,ts:ts,tot:tot,name:name,phone:phone,zalo:zalo,addr:addr,email:email,delivery:selDel,payment:selPay,note:note,items:items,status:"new"};
 if(selPay==="vietqr"){showPayModal();}
 else{showQR(selPay);}
@@ -1056,7 +1056,7 @@ document.getElementById("rmv-del").textContent=dmap[o.delivery]||o.delivery;
 var pmap={momo:"💜 MoMo",zalopay:"💙 ZaloPay",vnpay:"❤️ VNPay"};
 document.getElementById("rmv-pay").textContent=pmap[o.payment]||o.payment;
 var rhtml="";
-o.items.forEach(function(item){var nm=lang==="ja"?item.ja:item.vi, unit=lang==="ja"?item.unit:item.unitvi;
+(o.items||[]).forEach(function(item){var nm=lang==="ja"?item.ja:item.vi, unit=lang==="ja"?item.unit:item.unitvi;
 rhtml+="<tr><td>"+item.e+" "+nm+"</td><td style='text-align:center'>"+item.qty+" "+unit+"</td><td style='text-align:right'>"+vnd(item.price)+"</td><td style='text-align:right;font-weight:800'>"+vnd(item.qty*item.price)+"</td></tr>";});
 document.getElementById("rpt-rows").innerHTML=rhtml;
 document.getElementById("rgt-val").textContent=vnd(o.tot);
