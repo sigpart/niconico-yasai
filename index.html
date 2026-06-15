@@ -1258,7 +1258,7 @@ if(EJ.service&&EJ.template&&EJ.pubkey){
 var ov=document.getElementById("email-overlay"),tx=document.getElementById("email-txt");
 tx.textContent=L("確認メールを送信中...","Sending confirmation email...","Đang gửi email...");
 ov.classList.add("show");
-emailjs.send(EJ.service,EJ.template,{to_email:o.email,to_name:o.name,from_name:"NICO NICO YASAI",reply_to:EJ.from||"",subject:subject,message:body,order_no:o.no,order_date:o.ts,total:vnd(o.tot)})
+emailjs.send(EJ.service,EJ.template,{to_email:o.email,to_name:o.name,from_name:"NICO NICO YASAI",reply_to:"bachhasonmochi@gmail.com",subject:subject,message:body,order_no:o.no,order_date:o.ts,total:vnd(o.tot)})
 .then(function(){ov.classList.remove("show");showToast("✅ "+(lang==="ja"?"確認メールを自動送信しました":"Đã tự động gửi email xác nhận"));},
 function(){ov.classList.remove("show");fallbackMail(o.email,subject,body);showToast("⚠ "+L("メールアプリで再送します","Opening mail app","Đang mở ứng dụng mail"));});
 } else {
