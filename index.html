@@ -1257,12 +1257,13 @@ if(!o.email)return;
 var subject=(lang==="ja"?"【ご注文確認】NICO NICO YASAI ":"【Xác nhận đơn hàng】NICO NICO YASAI ")+o.no;
 var body=buildEmailBody(o);
 if(EJ.service&&EJ.template&&EJ.pubkey){
+try{emailjs.init({publicKey:EJ.pubkey});}catch(e){}
 var ov=document.getElementById("email-overlay"),tx=document.getElementById("email-txt");
-tx.textContent=L("確認メールを送信中...","Sending confirmation email...","Đang gửi email...");
-ov.classList.add("show");
+if(tx)tx.textContent=L("確認メールを送信中...","Sending confirmation email...","Đang gửi email...");
+if(ov)ov.classList.add("show");
 emailjs.send(EJ.service,EJ.template,{to_email:o.email,to_name:o.name,from_name:"NICO NICO YASAI",reply_to:"bachhasonmochi@gmail.com",subject:subject,message:body,order_no:o.no,order_date:o.ts,total:vnd(o.tot)})
-.then(function(){ov.classList.remove("show");showToast("✅ "+(lang==="ja"?"確認メールを自動送信しました":"Đã tự động gửi email xác nhận"));},
-function(err){ov.classList.remove("show");showToast("⚠ "+L("メール送信に失敗しました。管理画面でEmailJS設定を確認してください。","Email send failed. Check EmailJS settings in admin.","Gửi email thất bại. Kiểm tra cài đặt EmailJS."));console.error("[NNY] EmailJS error:",err);});
+.then(function(){if(ov)ov.classList.remove("show");showToast("✅ "+(lang==="ja"?"確認メールを自動送信しました":"Đã tự động gửi email xác nhận"));},
+function(err){if(ov)ov.classList.remove("show");showToast("⚠ "+L("メール送信に失敗しました。管理画面でEmailJS設定を確認してください。","Email send failed. Check EmailJS settings in admin.","Gửi email thất bại. Kiểm tra cài đặt EmailJS."));console.error("[NNY] EmailJS error:",err);});
 } else {
 showToast("⚠ "+L("EmailJSが未設定のため自動送信できませんでした。管理画面→設定で設定してください。","EmailJS not configured. Please set up in Admin → Settings.","EmailJS chưa được cấu hình. Vui lòng cài đặt trong Admin → Cài đặt."));
 }
