@@ -54,6 +54,9 @@
 <span class="lpi-flag">🇺🇸</span><span>English</span>
 </button>
 <div class="lang-panel-sep"></div>
+<button class="lang-panel-item lang-panel-admin" onclick="openPinGate();closeLangPanel()">
+<span class="lpi-flag">⚙️</span><span id="lpi-admin-lbl">管理者ログイン</span>
+</button>
 </div>
 </div>
 <button class="cart-btn" id="cart-btn" onclick="goCart()">🛒 <span id="hdr-cart-lbl">カート</span><span class="cbadge" id="cart-badge">0</span></button>
@@ -581,6 +584,39 @@ giữa người sản xuất và người tiêu dùng</textarea></div>
 <div class="email-toast" id="email-toast"></div>
 
 <script src="main.js"></script>
+
+<div id="qr-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;flex-direction:column;align-items:center;justify-content:center;">
+<div style="background:#fff;border-radius:16px;padding:24px;max-width:360px;width:90%;text-align:center;">
+<div id="qr-logo" style="font-size:48px;margin-bottom:8px;"></div>
+<div id="qr-title" style="font-size:18px;font-weight:bold;margin-bottom:8px;"></div>
+<div id="qr-amount" style="font-size:22px;font-weight:bold;color:#e53935;margin-bottom:12px;"></div>
+<div id="qr-note" style="font-size:13px;color:#666;margin-bottom:12px;"></div>
+<div id="qr-photo" style="margin-bottom:12px;">
+<label style="display:inline-block;cursor:pointer;background:#f5f5f5;border:2px dashed #ccc;border-radius:8px;padding:12px 24px;color:#555;">
+ 📷 スクリーンショットをアップロード
+<input type="file" id="qr-ph" accept="image/*" style="display:none;" onchange="window._handleQRPhoto&&window._handleQRPhoto(this)">
+</label>
+<div id="qr-photo-preview" style="margin-top:8px;"></div>
+</div>
+<button id="qr-done-btn" onclick="confirmQR&&confirmQR()" style="background:#43a047;color:#fff;border:none;border-radius:8px;padding:12px 32px;font-size:16px;cursor:pointer;width:100%;">注文確定</button>
+<button onclick="closeQR&&closeQR()" style="background:#eee;color:#333;border:none;border-radius:8px;padding:10px 24px;font-size:14px;cursor:pointer;margin-top:8px;width:100%;">キャンセル</button>
+</div>
+</div>
+<div class="modal-overlay" id="review-modal">
+<div class="modal-box">
+<div class="modal-head"><span class="modal-title" id="rv-modal-title">レビュー</span><button class="modal-close" onclick="closeReview()">✕</button></div>
+<div class="review-list" id="rv-list"></div>
+<div class="write-review">
+<div class="wr-title" id="wr-title">✍ レビューを書く</div>
+<div class="star-picker" id="star-picker">
+<span class="sp" onclick="setRating(1)">★</span><span class="sp" onclick="setRating(2)">★</span><span class="sp" onclick="setRating(3)">★</span><span class="sp" onclick="setRating(4)">★</span><span class="sp" onclick="setRating(5)">★</span>
+</div>
+<input class="rv-name-inp" id="rv-name-inp" placeholder="お名前（任意）">
+<textarea class="rv-inp" id="rv-text-inp" placeholder="野菜の感想をお聞かせください..."></textarea>
+<button class="rv-submit" onclick="submitReview()" id="rv-submit-btn">投稿する</button>
+</div>
+</div>
+</div>
 
 </div>
 <div id="owner-screen">
