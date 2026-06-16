@@ -1235,17 +1235,19 @@ var r=new FileReader();r.onload=function(e){QR_IMGS[currentQRMethod]=e.target.re
 function buildEmailBody(o){
 var dmap={deliver:T("delDeliver"),pickup:T("delPickup")};
 var pmap={momo:"MoMo",zalopay:"ZaloPay",vnpay:"VNPay",vietqr:L("🏦 銀行振込（VietQR）","🏦 Bank Transfer (VietQR)","🏦 Chuyển khoản ngân hàng (VietQR)")};
-var lines=o.items.map(function(i){var nm=lang==="ja"?i.ja:i.vi,unit=lang==="ja"?i.unit:i.unitvi;return " "+i.e+" "+nm+" × "+i.qty+" "+unit+" = "+vnd(i.qty*i.price);}).join("\n");
+var lines=(o.items||[]).map(function(i){var nm=lang==="ja"?i.ja:i.vi,unit=lang==="ja"?i.unit:i.unitvi;return " "+i.e+" "+nm+" × "+i.qty+" "+unit+" = "+vnd(i.qty*i.price);}).join("\n");
+var shipFee=o.shippingFee||0;
+var shipLine=shipFee>0?(lang==="ja"?"\n 🛵 送料（Grab）= "+vnd(shipFee):"\n 🛵 Phí giao hàng (Grab) = "+vnd(shipFee)):"";
 if(lang==="ja"){
 return o.name+" 様\n\nNICO NICO YASAIをご利用いただきありがとうございます。\nご注文を承りました。\n\n"+
 "━━━━━━━━━━━━━━━━\n■ 注文番号："+o.no+"\n■ 日時："+o.ts+"\n━━━━━━━━━━━━━━━━\n\n"+
-"【ご注文内容】\n"+lines+"\n\n【合計金額】"+vnd(o.tot)+"\n【受け取り方法】"+(dmap[o.delivery]||o.delivery)+"\n【お支払い】"+(pmap[o.payment]||o.payment)+"\n【お届け先】"+o.addr+
+"【ご注文内容】\n"+lines+shipLine+"\n\n【合計金額】"+vnd(o.tot)+"\n【受け取り方法】"+(dmap[o.delivery]||o.delivery)+"\n【お支払い】"+(pmap[o.payment]||o.payment)+"\n【お届け先】"+o.addr+
 (o.note?"\n【備考】"+o.note:"")+
 "\n\n━━━━━━━━━━━━━━━━\nご確認・配達についてはZaloまたはGmailにてご連絡いたします。\n\nNICO NICO YASAI\n※ニコニコ野菜バンホー農場\n━━━━━━━━━━━━━━━━";
 } else {
 return "Kính gửi "+o.name+"\n\nCảm ơn bạn đã đặt hàng tại NICO NICO YASAI.\n\n"+
 "━━━━━━━━━━━━━━━━\n■ Mã đơn: "+o.no+"\n■ Ngày: "+o.ts+"\n━━━━━━━━━━━━━━━━\n\n"+
-"【Chi tiết】\n"+lines+"\n\n【Tổng】"+vnd(o.tot)+"\n【Hình thức】"+(dmap[o.delivery]||o.delivery)+"\n【Thanh toán】"+(pmap[o.payment]||o.payment)+"\n【Địa chỉ】"+o.addr+
+"【Chi tiết】\n"+lines+shipLine+"\n\n【Tổng】"+vnd(o.tot)+"\n【Hình thức】"+(dmap[o.delivery]||o.delivery)+"\n【Thanh toán】"+(pmap[o.payment]||o.payment)+"\n【Địa chỉ】"+o.addr+
 (o.note?"\n【Ghi chú】"+o.note:"")+
 "\n\n━━━━━━━━━━━━━━━━\nChúng tôi sẽ liên hệ xác nhận qua Zalo hoặc Gmail.\n\nNICO NICO YASAI\n※ Trang trại Vân Hòa\n━━━━━━━━━━━━━━━━";
 }
@@ -1260,10 +1262,9 @@ tx.textContent=L("確認メールを送信中...","Sending confirmation email...
 ov.classList.add("show");
 emailjs.send(EJ.service,EJ.template,{to_email:o.email,to_name:o.name,from_name:"NICO NICO YASAI",reply_to:"bachhasonmochi@gmail.com",subject:subject,message:body,order_no:o.no,order_date:o.ts,total:vnd(o.tot)})
 .then(function(){ov.classList.remove("show");showToast("✅ "+(lang==="ja"?"確認メールを自動送信しました":"Đã tự động gửi email xác nhận"));},
-function(){ov.classList.remove("show");fallbackMail(o.email,subject,body);showToast("⚠ "+L("メールアプリで再送します","Opening mail app","Đang mở ứng dụng mail"));});
+function(err){ov.classList.remove("show");showToast("⚠ "+L("メール送信に失敗しました。管理画面でEmailJS設定を確認してください。","Email send failed. Check EmailJS settings in admin.","Gửi email thất bại. Kiểm tra cài đặt EmailJS."));console.error("[NNY] EmailJS error:",err);});
 } else {
-fallbackMail(o.email,subject,body);
-showToast("📧 "+L("メールアプリを開きました（EmailJS未設定）","Mail app opened (EmailJS not set)","Đã mở ứng dụng mail"));
+showToast("⚠ "+L("EmailJSが未設定のため自動送信できませんでした。管理画面→設定で設定してください。","EmailJS not configured. Please set up in Admin → Settings.","EmailJS chưa được cấu hình. Vui lòng cài đặt trong Admin → Cài đặt."));
 }
 }
 function fallbackMail(email,subject,body){var a=document.createElement("a");a.href="mailto:"+email+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);a.target="_blank";document.body.appendChild(a);a.click();document.body.removeChild(a);}
