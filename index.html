@@ -580,6 +580,13 @@ giữa người sản xuất và người tiêu dùng</textarea></div>
 <div class="email-toast" id="email-toast"></div>
 
 <script>
+window.onerror=function(msg,src,line,col,err){
+var d=document.createElement("div");
+d.style="position:fixed;top:0;left:0;right:0;background:#c00;color:#fff;padding:12px;font-size:13px;z-index:99999;word-break:break-all;";
+d.textContent="JS Error: "+msg+" (line "+line+")";
+document.body?document.body.appendChild(d):document.addEventListener("DOMContentLoaded",function(){document.body.appendChild(d);});
+return false;
+};
 
 // DATA
 function L(ja,en,vi){return lang==="ja"?ja:lang==="en"?en:vi;}
