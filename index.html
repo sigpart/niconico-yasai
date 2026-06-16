@@ -580,6 +580,18 @@ giữa người sản xuất và người tiêu dùng</textarea></div>
 <div class="email-toast" id="email-toast"></div>
 
 <script>
+// ---- PHASE 1: pre-main error handler ----
+window.onerror=function(msg,src,line,col,err){
+var d=document.getElementById("js-loading-msg");
+if(d)d.innerHTML='<span style="color:red">❌ JSエラー: '+msg+' (line '+line+')</span>';
+return false;
+};
+(function(){
+var m=document.getElementById("js-loading-msg");
+if(m)m.textContent="⚠️ JS起動中 — メインスクリプトを読み込み中...";
+})();
+</script>
+<script>
 window.onerror=function(msg,src,line,col,err){
 var d=document.createElement("div");
 d.style="position:fixed;top:0;left:0;right:0;background:#c00;color:#fff;padding:12px;font-size:13px;z-index:99999;word-break:break-all;";
