@@ -2532,6 +2532,10 @@ var saved=arr.find(function(s){return s.id===p.id;});
 if(saved){
 if(saved.stock!==undefined&&saved.stock>=0)p.stock=saved.stock;
 if(saved.price!==undefined&&saved.price>0)p.price=saved.price;
+if(saved.price250!==undefined&&saved.price250>0)p.price250=saved.price250;
+if(saved.price500!==undefined&&saved.price500>0)p.price500=saved.price500;
+if(saved.stock250!==undefined&&saved.stock250>=0)p.stock250=saved.stock250;
+if(saved.stock500!==undefined&&saved.stock500>=0)p.stock500=saved.stock500;
 if(saved.img)p.img=saved.img;
 if(saved.badge!==undefined)p.badge=saved.badge;
 if(saved.dja&&saved.dja!=="説明を入力")p.dja=saved.dja;
