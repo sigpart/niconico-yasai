@@ -1245,7 +1245,7 @@ return o.name+" 様\n\nNICO NICO YASAIをご利用いただきありがとうご
 "注文番号: "+o.no+"\n日時: "+o.ts+"\n\n"+
 "ご注文内容:\n"+lines+shipLine+"\n\n合計金額: "+vndEmail(o.tot)+"\n受け取り方法: "+(dmap[o.delivery]||o.delivery)+"\nお支払い: "+(pmap[o.payment]||o.payment)+"\nお届け先: "+o.addr+
 (o.note?"\n備考: "+o.note:"")+
-"\n\n配達日時は原則毎週日曜日の直売会開催時にエムハノイより順次お届けいたします。\nご質問等がございましたらお手数ですが、NICONICOYASAI公式LINEにてお気軽にご連絡ください。\n担当者が確認後、ご返信いたします。\n\nNICO NICO YASAI";
+"\n\n配達日時は原則毎週日曜日の直売会開催時にエムハノイより順次お届けいたします。\nご質問等がございましたらお手数ですが、NICONICOYASAI公式LINEにてお気軽にご連絡ください。\n担当者が確認後、ご返信いたします。\nLINE: https://line.me/ti/p/@646ykbrl\n\nNICO NICO YASAI";
 } else if(lang==="en"){
 var lines=(o.items||[]).map(function(i){return " "+(i.en||i.vi)+" x "+i.qty+" "+(i.uniten||i.unitvi)+" = "+vndEmail(i.qty*i.price);}).join("\n");
 var shipLine=shipFee>0?"\n Shipping fee (Grab) = "+vndEmail(shipFee):"";
@@ -1253,7 +1253,7 @@ return "Dear "+o.name+"\n\nThank you for your order at NICO NICO YASAI.\n\n"+
 "Order No.: "+o.no+"\nDate: "+o.ts+"\n\n"+
 "Order Details:\n"+lines+shipLine+"\n\nTotal: "+vndEmail(o.tot)+"\nDelivery: "+(dmap[o.delivery]||o.delivery)+"\nPayment: "+(pmap[o.payment]||o.payment)+"\nAddress: "+o.addr+
 (o.note?"\nNote: "+o.note:"")+
-"\n\nDelivery is every Sunday from em Hanoi store.\nFor any inquiries, please contact us via the official NICONICOYASAI LINE account.\nWe will get back to you after confirmation.\n\nNICO NICO YASAI";
+"\n\nDelivery is every Sunday from em Hanoi store.\nFor any inquiries, please contact us via the official NICONICOYASAI LINE account.\nLINE: https://line.me/ti/p/@646ykbrl\nWe will get back to you after confirmation.\n\nNICO NICO YASAI";
 } else {
 var lines=(o.items||[]).map(function(i){return " "+i.vi+" x "+i.qty+" "+i.unitvi+" = "+vndEmail(i.qty*i.price);}).join("\n");
 var shipLine=shipFee>0?"\n Phi giao hang (Grab) = "+vndEmail(shipFee):"";
@@ -1261,7 +1261,7 @@ return "Kinh gui "+o.name+"\n\nCam on ban da dat hang tai NICO NICO YASAI.\n\n"+
 "Ma don: "+o.no+"\nNgay: "+o.ts+"\n\n"+
 "Chi tiet don hang:\n"+lines+shipLine+"\n\nTong: "+vndEmail(o.tot)+"\nHinh thuc: "+(dmap[o.delivery]||o.delivery)+"\nThanh toan: "+(pmap[o.payment]||o.payment)+"\nDia chi: "+o.addr+
 (o.note?"\nGhi chu: "+o.note:"")+
-"\n\nHang se duoc giao vao Chu nhat hang tuan tu cua hang em Hanoi.\nNeu co thac mac, vui long lien he qua tai khoan LINE chinh thuc cua NICONICOYASAI.\nChung toi se phan hoi sau khi xac nhan.\n\nNICO NICO YASAI";
+"\n\nHang se duoc giao vao Chu nhat hang tuan tu cua hang em Hanoi.\nNeu co thac mac, vui long lien he qua tai khoan LINE chinh thuc cua NICONICOYASAI.\nLINE: https://line.me/ti/p/@646ykbrl\nChung toi se phan hoi sau khi xac nhan.\n\nNICO NICO YASAI";
 }
 }
 function sendEmail(o){
