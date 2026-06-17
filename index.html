@@ -855,48 +855,40 @@ rowNum++;
 return "<tr><td>"+rowNum+"</td><td>"+nm+"</td><td>"+(p.stock||0)+" "+unit+"</td><td>"+vnd(p.price)+"</td></tr>";
 }).join("");
 var title=lang==="ja"?"今週の野菜リスト":lang==="en"?"This Week's Vegetable List":"Danh sách rau tuần này";
-var html="<!DOCTYPE html><html><head><meta charset='utf-8'><title>"+title+"</title><style>"+
-"body{font-family:'Noto Sans JP',sans-serif;padding:32px;color:#1a2b1c;background:#fff}"+
-"h1{font-size:20px;font-weight:800;margin-bottom:4px;color:#1a6b2a}"+
-"p.date{font-size:12px;color:#5a7060;margin-bottom:20px}"+
-"table{width:100%;border-collapse:collapse;font-size:13px}"+
-"th{background:#1a6b2a;color:#fff;padding:8px 12px;text-align:left;font-weight:700}"+
-"td{padding:8px 12px;border-bottom:1px solid #c4dcc8}"+
-"tr:nth-child(even) td{background:#f2faf3}"+
-"th:nth-child(1),td:nth-child(1){width:40px;text-align:center}"+
-"th:nth-child(3),td:nth-child(3){width:90px}"+
-"th:nth-child(4),td:nth-child(4){width:110px;text-align:right}"+
-"p.footer{font-size:11px;color:#9ab0a0;margin-top:20px;text-align:right}"+
-"@media print{body{padding:16px}}"+
-"</style></head><body>"+
-"<h1>NICO NICO YASAI — "+title+"</h1>"+
-"<p class='date'>"+dateStr+"</p>"+
-"<table><thead><tr>"+
-"<th>No.</th>"+
-"<th>"+(lang==="ja"?"野菜名":lang==="en"?"Item":"Tên rau")+"</th>"+
-"<th>"+(lang==="ja"?"在庫数":lang==="en"?"Stock":"Tồn kho")+"</th>"+
-"<th>"+(lang==="ja"?"価格":lang==="en"?"Price":"Giá")+"</th>"+
-"</tr></thead><tbody>"+rows+"</tbody></table>"+
-"<p class='footer'>NICO NICO YASAI</p>"+
-"</body></html>";
-var pa=document.getElementById("nny-print-area");
-if(pa)pa.parentNode.removeChild(pa);
-var ps=document.getElementById("nny-print-style");
-if(ps)ps.parentNode.removeChild(ps);
-var style=document.createElement("style");
-style.id="nny-print-style";
-style.textContent="@media print{body>*:not(#nny-print-area){display:none!important}#nny-print-area{display:block!important;font-family:'Noto Sans JP',sans-serif;padding:16px;color:#1a2b1c}#nny-print-area h1{font-size:20px;font-weight:800;margin-bottom:4px;color:#1a6b2a}#nny-print-area p.date{font-size:12px;color:#5a7060;margin-bottom:20px}#nny-print-area table{width:100%;border-collapse:collapse;font-size:13px}#nny-print-area th{background:#1a6b2a;color:#fff;padding:8px 12px;text-align:left;font-weight:700}#nny-print-area td{padding:8px 12px;border-bottom:1px solid #c4dcc8}#nny-print-area tr:nth-child(even) td{background:#f2faf3}#nny-print-area th:nth-child(1),#nny-print-area td:nth-child(1){width:40px;text-align:center}#nny-print-area th:nth-child(3),#nny-print-area td:nth-child(3){width:90px}#nny-print-area th:nth-child(4),#nny-print-area td:nth-child(4){width:110px;text-align:right}#nny-print-area p.footer{font-size:11px;color:#9ab0a0;margin-top:20px;text-align:right}}";
-document.head.appendChild(style);
-var div=document.createElement("div");
-div.id="nny-print-area";
-div.style.display="none";
-div.innerHTML="<h1>NICO NICO YASAI — "+title+"</h1><p class='date'>"+dateStr+"</p><table><thead><tr><th>No.</th><th>"+(lang==="ja"?"野菜名":lang==="en"?"Item":"Tên rau")+"</th><th>"+(lang==="ja"?"在庫数":lang==="en"?"Stock":"Tồn kho")+"</th><th>"+(lang==="ja"?"価格":lang==="en"?"Price":"Giá")+"</th></tr></thead><tbody>"+rows+"</tbody></table><p class='footer'>NICO NICO YASAI</p>";
-document.body.appendChild(div);
-window.print();
-setTimeout(function(){
-var a=document.getElementById("nny-print-area");if(a)a.parentNode.removeChild(a);
-var s=document.getElementById("nny-print-style");if(s)s.parentNode.removeChild(s);
-},1000);
+var printHint=lang==="ja"?"ブラウザの「共有」→「PDFに保存」でPDFとして保存できます":lang==="en"?"Use browser Share → Save as PDF to export":'"Chia sẻ" trên trình duyệt → "Lưu PDF" để xuất file';
+var closeLabel=lang==="ja"?"✕ 閉じる":lang==="en"?"✕ Close":"✕ Đóng";
+var printLabel=lang==="ja"?"🖨 印刷 / PDFに保存":lang==="en"?"🖨 Print / Save PDF":"🖨 In / Lưu PDF";
+var old=document.getElementById("nny-list-modal");
+if(old)old.parentNode.removeChild(old);
+var modal=document.createElement("div");
+modal.id="nny-list-modal";
+modal.style.cssText="position:fixed;inset:0;z-index:99999;background:#fff;overflow-y:auto;-webkit-overflow-scrolling:touch;";
+modal.innerHTML='<div style="max-width:640px;margin:0 auto;padding:20px 16px 40px;">'
++'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px;">'
++'<button onclick="document.getElementById(\'nny-list-modal\').remove();document.getElementById(\'nny-pm-style\')&&document.getElementById(\'nny-pm-style\').remove();" style="border:none;background:#eee;border-radius:6px;padding:8px 14px;font-size:13px;cursor:pointer;font-family:inherit;touch-action:manipulation;">'+closeLabel+'</button>'
++'<button onclick="window.print();" style="border:none;background:#1a6b2a;color:#fff;border-radius:6px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;touch-action:manipulation;">'+printLabel+'</button>'
++'</div>'
++'<p style="font-size:11px;color:#5a7060;margin-bottom:16px;">'+printHint+'</p>'
++'<h2 style="font-size:18px;font-weight:800;color:#1a6b2a;margin-bottom:4px;">NICO NICO YASAI</h2>'
++'<p style="font-size:12px;color:#5a7060;margin-bottom:16px;">'+title+' — '+dateStr+'</p>'
++'<table style="width:100%;border-collapse:collapse;font-size:13px;">'
++'<thead><tr>'
++'<th style="background:#1a6b2a;color:#fff;padding:8px 10px;text-align:left;">No.</th>'
++'<th style="background:#1a6b2a;color:#fff;padding:8px 10px;text-align:left;">'+(lang==="ja"?"野菜名":lang==="en"?"Item":"Tên rau")+'</th>'
++'<th style="background:#1a6b2a;color:#fff;padding:8px 10px;text-align:left;">'+(lang==="ja"?"在庫":lang==="en"?"Stock":"Tồn kho")+'</th>'
++'<th style="background:#1a6b2a;color:#fff;padding:8px 10px;text-align:right;">'+(lang==="ja"?"価格":lang==="en"?"Price":"Giá")+'</th>'
++'</tr></thead>'
++'<tbody>'+rows.replace(/<tr>/g,'<tr style="border-bottom:1px solid #c4dcc8;">').replace(/<td>/g,'<td style="padding:8px 10px;">').replace(/<\/td><\/tr>/g,'</td></tr>')+'</tbody>'
++'</table>'
++'<p style="font-size:11px;color:#9ab0a0;margin-top:20px;text-align:right;">NICO NICO YASAI</p>'
++'</div>';
+document.body.appendChild(modal);
+var ps=document.getElementById("nny-pm-style");
+if(ps)ps.remove();
+var pstyle=document.createElement("style");
+pstyle.id="nny-pm-style";
+pstyle.textContent="@media print{body>*:not(#nny-list-modal){display:none!important}#nny-list-modal{position:static!important;overflow:visible!important}#nny-list-modal button{display:none!important}#nny-list-modal p:first-of-type{display:none!important}}";
+document.head.appendChild(pstyle);
 }
 function stars(rating,count){
 var s="";
