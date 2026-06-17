@@ -833,6 +833,7 @@ var floatCart=document.getElementById("float-cart");
 if(floatCart)floatCart.style.display=isAll?"":"none";
 }
 function vnd(n){return n.toLocaleString("vi-VN")+" ₫";}
+function vndEmail(n){return n.toLocaleString("vi-VN")+" VND";}
 function stars(rating,count){
 var s="";
 for(var i=1;i<=5;i++) s+='<span class="s'+(i<=rating?" on":"")+'">★</span>';
@@ -1238,29 +1239,29 @@ var dmap={deliver:T("delDeliver"),pickup:T("delPickup")};
 var pmap={momo:"MoMo",zalopay:"ZaloPay",vnpay:"VNPay",vietqr:L("銀行振込（VietQR）","Bank Transfer (VietQR)","Chuyen khoan ngan hang (VietQR)")};
 var shipFee=o.shippingFee||0;
 if(lang==="ja"){
-var lines=(o.items||[]).map(function(i){return " "+i.ja+" x "+i.qty+" "+i.unit+" = "+vnd(i.qty*i.price);}).join("\n");
-var shipLine=shipFee>0?"\n 送料（Grab）= "+vnd(shipFee):"";
+var lines=(o.items||[]).map(function(i){return " "+i.ja+" x "+i.qty+" "+i.unit+" = "+vndEmail(i.qty*i.price);}).join("\n");
+var shipLine=shipFee>0?"\n 送料（Grab）= "+vndEmail(shipFee):"";
 return o.name+" 様\n\nNICO NICO YASAIをご利用いただきありがとうございます。\nご注文を承りました。\n\n"+
-"---\n注文番号: "+o.no+"\n日時: "+o.ts+"\n---\n\n"+
-"ご注文内容:\n"+lines+shipLine+"\n\n合計金額: "+vnd(o.tot)+"\n受け取り方法: "+(dmap[o.delivery]||o.delivery)+"\nお支払い: "+(pmap[o.payment]||o.payment)+"\nお届け先: "+o.addr+
+"注文番号: "+o.no+"\n日時: "+o.ts+"\n\n"+
+"ご注文内容:\n"+lines+shipLine+"\n\n合計金額: "+vndEmail(o.tot)+"\n受け取り方法: "+(dmap[o.delivery]||o.delivery)+"\nお支払い: "+(pmap[o.payment]||o.payment)+"\nお届け先: "+o.addr+
 (o.note?"\n備考: "+o.note:"")+
-"\n\n---\n配達日時は原則毎週日曜日の直売会開催時にエムハノイより順次お届けいたします。\nご質問等がございましたらお手数ですが、以下NICONICOYASAI公式LINEにて、お気軽にご連絡ください。\n担当者が確認後、ご返信いたします。\nhttps://lin.ee/R9dAJtD\n\nNICO NICO YASAI\n---";
+"\n\n配達日時は原則毎週日曜日の直売会開催時にエムハノイより順次お届けいたします。\nご質問等がございましたらお手数ですが、NICONICOYASAI公式LINEにてお気軽にご連絡ください。\n担当者が確認後、ご返信いたします。\n\nNICO NICO YASAI";
 } else if(lang==="en"){
-var lines=(o.items||[]).map(function(i){return " "+(i.en||i.vi)+" x "+i.qty+" "+(i.uniten||i.unitvi)+" = "+vnd(i.qty*i.price);}).join("\n");
-var shipLine=shipFee>0?"\n Shipping fee (Grab) = "+vnd(shipFee):"";
+var lines=(o.items||[]).map(function(i){return " "+(i.en||i.vi)+" x "+i.qty+" "+(i.uniten||i.unitvi)+" = "+vndEmail(i.qty*i.price);}).join("\n");
+var shipLine=shipFee>0?"\n Shipping fee (Grab) = "+vndEmail(shipFee):"";
 return "Dear "+o.name+"\n\nThank you for your order at NICO NICO YASAI.\n\n"+
-"---\nOrder No.: "+o.no+"\nDate: "+o.ts+"\n---\n\n"+
-"Order Details:\n"+lines+shipLine+"\n\nTotal: "+vnd(o.tot)+"\nDelivery: "+(dmap[o.delivery]||o.delivery)+"\nPayment: "+(pmap[o.payment]||o.payment)+"\nAddress: "+o.addr+
+"Order No.: "+o.no+"\nDate: "+o.ts+"\n\n"+
+"Order Details:\n"+lines+shipLine+"\n\nTotal: "+vndEmail(o.tot)+"\nDelivery: "+(dmap[o.delivery]||o.delivery)+"\nPayment: "+(pmap[o.payment]||o.payment)+"\nAddress: "+o.addr+
 (o.note?"\nNote: "+o.note:"")+
-"\n\n---\nDelivery is every Sunday from em Hanoi store.\nFor any inquiries, please contact us via our official NICONICOYASAI LINE:\nWe will get back to you after confirmation.\nhttps://lin.ee/R9dAJtD\n\nNICO NICO YASAI\n---";
+"\n\nDelivery is every Sunday from em Hanoi store.\nFor any inquiries, please contact us via the official NICONICOYASAI LINE account.\nWe will get back to you after confirmation.\n\nNICO NICO YASAI";
 } else {
-var lines=(o.items||[]).map(function(i){return " "+i.vi+" x "+i.qty+" "+i.unitvi+" = "+vnd(i.qty*i.price);}).join("\n");
-var shipLine=shipFee>0?"\n Phi giao hang (Grab) = "+vnd(shipFee):"";
+var lines=(o.items||[]).map(function(i){return " "+i.vi+" x "+i.qty+" "+i.unitvi+" = "+vndEmail(i.qty*i.price);}).join("\n");
+var shipLine=shipFee>0?"\n Phi giao hang (Grab) = "+vndEmail(shipFee):"";
 return "Kinh gui "+o.name+"\n\nCam on ban da dat hang tai NICO NICO YASAI.\n\n"+
-"---\nMa don: "+o.no+"\nNgay: "+o.ts+"\n---\n\n"+
-"Chi tiet don hang:\n"+lines+shipLine+"\n\nTong: "+vnd(o.tot)+"\nHinh thuc: "+(dmap[o.delivery]||o.delivery)+"\nThanh toan: "+(pmap[o.payment]||o.payment)+"\nDia chi: "+o.addr+
+"Ma don: "+o.no+"\nNgay: "+o.ts+"\n\n"+
+"Chi tiet don hang:\n"+lines+shipLine+"\n\nTong: "+vndEmail(o.tot)+"\nHinh thuc: "+(dmap[o.delivery]||o.delivery)+"\nThanh toan: "+(pmap[o.payment]||o.payment)+"\nDia chi: "+o.addr+
 (o.note?"\nGhi chu: "+o.note:"")+
-"\n\n---\nHang se duoc giao vao Chu nhat hang tuan tu cua hang em Hanoi.\nNeu co thac mac, vui long lien he qua LINE chinh thuc cua NICONICOYASAI:\nChung toi se phan hoi sau khi xac nhan.\nhttps://lin.ee/R9dAJtD\n\nNICO NICO YASAI\n---";
+"\n\nHang se duoc giao vao Chu nhat hang tuan tu cua hang em Hanoi.\nNeu co thac mac, vui long lien he qua tai khoan LINE chinh thuc cua NICONICOYASAI.\nChung toi se phan hoi sau khi xac nhan.\n\nNICO NICO YASAI";
 }
 }
 function sendEmail(o){
@@ -1272,7 +1273,7 @@ try{emailjs.init({publicKey:EJ.pubkey});}catch(e){}
 var ov=document.getElementById("email-overlay"),tx=document.getElementById("email-txt");
 if(tx)tx.textContent=L("確認メールを送信中...","Sending confirmation email...","Đang gửi email...");
 if(ov)ov.classList.add("show");
-emailjs.send(EJ.service,EJ.template,{to_email:o.email,to_name:o.name,from_name:"NICO NICO YASAI",reply_to:"bachhasonmochi@gmail.com",subject:subject,message:body,order_no:o.no,order_date:o.ts,total:vnd(o.tot)})
+emailjs.send(EJ.service,EJ.template,{to_email:o.email,to_name:o.name,from_name:"NICO NICO YASAI",reply_to:EJ.from||"",subject:subject,message:body,order_no:o.no,order_date:o.ts,total:vndEmail(o.tot)})
 .then(function(){if(ov)ov.classList.remove("show");showToast("✅ "+(lang==="ja"?"確認メールを自動送信しました":"Đã tự động gửi email xác nhận"));},
 function(err){if(ov)ov.classList.remove("show");showToast("⚠ "+L("メール送信に失敗しました。管理画面でEmailJS設定を確認してください。","Email send failed. Check EmailJS settings in admin.","Gửi email thất bại. Kiểm tra cài đặt EmailJS."));console.error("[NNY] EmailJS error:",err);});
 } else {
@@ -3173,7 +3174,7 @@ function updateShippingDisplay(msg,loading){var el=document.getElementById("ship
 function calcShippingFee(addr,cb){if(typeof selDel==="undefined"||selDel!=="deliver"){_shippingFee=0;_shippingDist=0;if(cb)cb(0,0);return;}if(!addr||addr.trim().length<3){_shippingFee=0;_shippingDist=0;if(cb)cb(0,0);return;}_shippingLoading=true;updateShippingDisplay(L("計算中...","Calculating...","Đang tính..."),true);var dm={"ba dinh":1,"hoan kiem":2,"dong da":2,"kim ma":2,"linh lang":2,"giang vo":3,"tay ho":4,"quang an":4,"ciputra":8,"hai ba trung":4,"times city":5,"cau giay":6,"dich vong":5,"long bien":12,"vinhomes riverside":18,"bo de":10,"thach ban":12,"gia lam":14,"ocean park":20,"thanh xuan":7,"royal city":7,"nam tu liem":9,"my dinh":7,"smart city":14,"phuong khoang":10,"dai mo":10,"bac tu liem":5,"tu liem":7,"starlake":8,"hoang mai":7,"linh dam":8,"dong anh":16,"ha dong":13,"me linh":22,"soc son":32,"thuong tin":26,"thanh oai":22,"my duc":52};var al=addr.toLowerCase().replace(/[àáạảãăắặẳẵâấậẩẫ]/g,"a").replace(/[èéẹẻẽêếệểễ]/g,"e").replace(/[ìíịỉĩ]/g,"i").replace(/[òóọỏõôốộổỗơớợởỡ]/g,"o").replace(/[ùúụủũưứựửữ]/g,"u").replace(/[ỳýỵỷỹ]/g,"y").replace(/đ/g,"d");var dk=7;for(var k in dm){if(al.indexOf(k)>=0){dk=dm[k];break;}}fetch("https://nominatim.openstreetmap.org/search?q="+encodeURIComponent(addr.trim()+" Ha Noi Vietnam")+"&format=json&limit=1").then(function(r){return r.json();}).then(function(d){if(!d||!d.length)throw 0;return fetch("https://router.project-osrm.org/route/v1/driving/"+EM_HANOI_LNG+","+EM_HANOI_LAT+";"+d[0].lon+","+d[0].lat+"?overview=false");}).then(function(r){return r.json();}).then(function(d){if(!d||!d.routes||!d.routes.length)throw 0;var km=d.routes[0].distance/1000;_shippingDist=Math.round(km*10)/10;_shippingFee=calcGrabFee(km);_shippingLoading=false;updateShippingDisplay(null,false);if(cb)cb(_shippingFee,_shippingDist);}).catch(function(){_shippingDist=dk;_shippingFee=calcGrabFee(dk);_shippingLoading=false;updateShippingDisplay(null,false);if(cb)cb(_shippingFee,_shippingDist);});}
 var OWNER_FEE_RATE=0.13,_ownerPayments=[];try{var _op=localStorage.getItem("nny_owner_payments");if(_op)_ownerPayments=JSON.parse(_op);}catch(e){}
 function renderOwnerDashboard(){var ys=document.getElementById("owner-year"),ms=document.getElementById("owner-month");if(!ys||!ms)return;var now=new Date();var _curYr=now.getFullYear(),_curMo=now.getMonth()+1;var _prevYrVal=parseInt(ys.value)||_curYr,_prevMoVal=parseInt(ms.value)||_curMo;ys.innerHTML="";for(var y=_curYr-2;y<=_curYr+3;y++){var op=document.createElement("option");op.value=y;op.textContent=y+"年";if(y===_prevYrVal)op.selected=true;ys.appendChild(op);}ms.innerHTML="";for(var mo=1;mo<=12;mo++){var op2=document.createElement("option");op2.value=mo;op2.textContent=mo+"月";if(mo===_prevMoVal)op2.selected=true;ms.appendChild(op2);}var yr=parseInt(ys.value),m=parseInt(ms.value);var orders=ORDERS.filter(function(o){if(o.status==="cancelled")return false;var d=new Date(o.ts||o.no);if(isNaN(d.getTime())){var mm=(o.ts||"").match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);if(mm)d=new Date(mm[1],mm[2]-1,mm[3]);else return false;}return d.getFullYear()===yr&&d.getMonth()+1===m;});var ts=orders.reduce(function(s,o){return s+(o.tot||0);},0),fee=Math.round(ts*OWNER_FEE_RATE),fp=ts-fee;var e=document.getElementById.bind(document);if(e("owner-total-sales"))e("owner-total-sales").textContent=vnd(ts);if(e("owner-fee"))e("owner-fee").textContent=vnd(fee);if(e("owner-order-count"))e("owner-order-count").textContent=orders.length+"件";if(e("owner-farmer-pay"))e("owner-farmer-pay").textContent=vnd(fp);renderPaymentList();renderOwnerHistory();var se=localStorage.getItem("nny_farm_email");if(se){var el=e("owner-farm-email");if(el&&!el.value)el.value=se;}}
-function _buildInvoiceBody(mo,yr,ordersLen,ts,fee,fp){return "NICO NICO YASAI - HOA DON PHI DICH VU\n\nKinh gui anh/chi,\n\nDuoi day la tong ket doanh thu thang "+mo+"/"+yr+":\n\n  So don hang        : "+ordersLen+" don\n  Tong doanh thu    : "+ts.toLocaleString()+" VND\n  13% doanh thu     : "+fee.toLocaleString()+" VND\n  Trang trai nhan   : "+fp.toLocaleString()+" VND\n\n---\nYEU CAU THANH TOAN\n---\nVui long chuyen khoan 13% doanh thu thang "+mo+"/"+yr+"\n\n    "+fee.toLocaleString()+" VND\n\nve tai khoan NICO NICO YASAI trong vong 7 ngay.\n\nSau khi chuyen khoan, vui long gui anh xac nhan giao dich\nbang mot trong cac cach sau:\n\n  Messenger: Gui qua bat ky cuoc tro chuyen nao voi toi tren Messenger\n  Email: Reply email nay kem anh\n\nXin cam on su hop tac cua anh/chi!\nNICO NICO YASAI";}
+function _buildInvoiceBody(mo,yr,ordersLen,ts,fee,fp){return "NICO NICO YASAI - Hoa don phi dich vu thang "+mo+"/"+yr+"\n\nKinh gui anh/chi,\n\nDuoi day la tong ket doanh thu thang "+mo+"/"+yr+":\n\nSo don hang: "+ordersLen+"\nTong doanh thu: "+ts.toLocaleString()+" VND\nPhi dich vu 13%: "+fee.toLocaleString()+" VND\nTrang trai nhan: "+fp.toLocaleString()+" VND\n\nYEU CAU THANH TOAN:\nVui long chuyen khoan "+fee.toLocaleString()+" VND ve tai khoan NICO NICO YASAI trong vong 7 ngay.\n\nSau khi chuyen khoan, vui long gui anh xac nhan giao dich qua:\n  Messenger: gui truc tiep qua cuoc tro chuyen Messenger\n  Email: reply email nay kem anh\n\nXin cam on su hop tac cua anh/chi.\nNICO NICO YASAI";}
 function _getMonthOrders(yr,mo){return ORDERS.filter(function(o){if(o.status==="cancelled")return false;var d=new Date(o.ts||o.no);if(isNaN(d.getTime())){var mm=(o.ts||"").match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);if(mm)d=new Date(mm[1],mm[2]-1,mm[3]);else return false;}return d.getFullYear()===yr&&d.getMonth()+1===mo;});}
 function sendInvoice(autoMode){var ys=document.getElementById("owner-year"),ms=document.getElementById("owner-month"),em=document.getElementById("owner-farm-email"),st=document.getElementById("owner-invoice-status"),btn=document.getElementById("owner-send-btn");if(!ys||!ms||!em)return;var email=em.value.trim();if(!email){if(!autoMode)alert("農家のメールアドレスを入力してください");return;}localStorage.setItem("nny_farm_email",email);var yr=parseInt(ys.value),mo=parseInt(ms.value);var orders=_getMonthOrders(yr,mo);var ts=orders.reduce(function(s,o){return s+(o.tot||0);},0),fee=Math.round(ts*OWNER_FEE_RATE),fp=ts-fee;var replyAddr=EJ&&EJ.from?EJ.from:"";var body2=_buildInvoiceBody(mo,yr,orders.length,ts,fee,fp);if(typeof emailjs!=="undefined"&&EJ&&EJ.pubkey){if(btn){btn.disabled=true;btn.textContent="送信中...";}emailjs.init(EJ.pubkey);emailjs.send(EJ.service,EJ.template,{to_email:email,to_name:"Anh/Chị",from_name:"NICO NICO YASAI",reply_to:replyAddr,subject:"NICO NICO YASAI - Hóa đơn tháng "+mo+"/"+yr,message:body2}).then(function(){if(btn){btn.disabled=false;btn.textContent="📧 請求書をメール送付";}saveInvoiceHistory(yr,mo,ts,fee,email);if(st){st.style.display="block";st.textContent=autoMode?"🤖 月末自動送信完了！農家へ請求メールを送りました。":"✅ 送信成功！農家へ請求メールを送りました。";setTimeout(function(){st.style.display="none";},5000);}}).catch(function(e){if(btn){btn.disabled=false;btn.textContent="📧 請求書をメール送付";}if(!autoMode)alert("送信失敗: "+JSON.stringify(e));});}else{if(!autoMode)alert("EmailJSが設定されていません。");}}
 function autoSendInvoiceIfNeeded(){var now=new Date();var day=now.getDate(),yr=now.getFullYear(),mo=now.getMonth()+1;if(day<25)return;var savedEmail=localStorage.getItem("nny_farm_email");if(!savedEmail)return;var h2=[];try{var s=localStorage.getItem("nny_invoice_history");if(s)h2=JSON.parse(s);}catch(e){}var alreadySent=h2.some(function(r){return r.yr===yr&&r.mo===mo;});if(alreadySent)return;var ys=document.getElementById("owner-year"),ms=document.getElementById("owner-month");if(ys)ys.value=yr;if(ms)ms.value=mo;var em=document.getElementById("owner-farm-email");if(em)em.value=savedEmail;renderOwnerDashboard();setTimeout(function(){sendInvoice(true);},500);}
