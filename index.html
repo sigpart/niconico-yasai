@@ -879,12 +879,24 @@ var html="<!DOCTYPE html><html><head><meta charset='utf-8'><title>"+title+"</tit
 "</tr></thead><tbody>"+rows+"</tbody></table>"+
 "<p class='footer'>NICO NICO YASAI</p>"+
 "</body></html>";
-var w=window.open("","_blank");
-if(!w)return;
-w.document.write(html);
-w.document.close();
-w.focus();
-setTimeout(function(){w.print();},400);
+var pa=document.getElementById("nny-print-area");
+if(pa)pa.parentNode.removeChild(pa);
+var ps=document.getElementById("nny-print-style");
+if(ps)ps.parentNode.removeChild(ps);
+var style=document.createElement("style");
+style.id="nny-print-style";
+style.textContent="@media print{body>*:not(#nny-print-area){display:none!important}#nny-print-area{display:block!important;font-family:'Noto Sans JP',sans-serif;padding:16px;color:#1a2b1c}#nny-print-area h1{font-size:20px;font-weight:800;margin-bottom:4px;color:#1a6b2a}#nny-print-area p.date{font-size:12px;color:#5a7060;margin-bottom:20px}#nny-print-area table{width:100%;border-collapse:collapse;font-size:13px}#nny-print-area th{background:#1a6b2a;color:#fff;padding:8px 12px;text-align:left;font-weight:700}#nny-print-area td{padding:8px 12px;border-bottom:1px solid #c4dcc8}#nny-print-area tr:nth-child(even) td{background:#f2faf3}#nny-print-area th:nth-child(1),#nny-print-area td:nth-child(1){width:40px;text-align:center}#nny-print-area th:nth-child(3),#nny-print-area td:nth-child(3){width:90px}#nny-print-area th:nth-child(4),#nny-print-area td:nth-child(4){width:110px;text-align:right}#nny-print-area p.footer{font-size:11px;color:#9ab0a0;margin-top:20px;text-align:right}}";
+document.head.appendChild(style);
+var div=document.createElement("div");
+div.id="nny-print-area";
+div.style.display="none";
+div.innerHTML="<h1>NICO NICO YASAI — "+title+"</h1><p class='date'>"+dateStr+"</p><table><thead><tr><th>No.</th><th>"+(lang==="ja"?"野菜名":lang==="en"?"Item":"Tên rau")+"</th><th>"+(lang==="ja"?"在庫数":lang==="en"?"Stock":"Tồn kho")+"</th><th>"+(lang==="ja"?"価格":lang==="en"?"Price":"Giá")+"</th></tr></thead><tbody>"+rows+"</tbody></table><p class='footer'>NICO NICO YASAI</p>";
+document.body.appendChild(div);
+window.print();
+setTimeout(function(){
+var a=document.getElementById("nny-print-area");if(a)a.parentNode.removeChild(a);
+var s=document.getElementById("nny-print-style");if(s)s.parentNode.removeChild(s);
+},1000);
 }
 function stars(rating,count){
 var s="";
