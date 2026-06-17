@@ -855,40 +855,42 @@ rowNum++;
 return "<tr><td>"+rowNum+"</td><td>"+nm+"</td><td>"+(p.stock||0)+" "+unit+"</td><td>"+vnd(p.price)+"</td></tr>";
 }).join("");
 var title=lang==="ja"?"今週の野菜リスト":lang==="en"?"This Week's Vegetable List":"Danh sách rau tuần này";
-var printHint=lang==="ja"?"ブラウザの「共有」→「PDFに保存」でPDFとして保存できます":lang==="en"?"Use browser Share → Save as PDF to export":'"Chia sẻ" trên trình duyệt → "Lưu PDF" để xuất file';
-var closeLabel=lang==="ja"?"✕ 閉じる":lang==="en"?"✕ Close":"✕ Đóng";
-var printLabel=lang==="ja"?"🖨 印刷 / PDFに保存":lang==="en"?"🖨 Print / Save PDF":"🖨 In / Lưu PDF";
-var old=document.getElementById("nny-list-modal");
-if(old)old.parentNode.removeChild(old);
-var modal=document.createElement("div");
-modal.id="nny-list-modal";
-modal.style.cssText="position:fixed;inset:0;z-index:99999;background:#fff;overflow-y:auto;-webkit-overflow-scrolling:touch;";
-modal.innerHTML='<div style="max-width:640px;margin:0 auto;padding:20px 16px 40px;">'
-+'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px;">'
-+'<button onclick="document.getElementById(\'nny-list-modal\').remove();document.getElementById(\'nny-pm-style\')&&document.getElementById(\'nny-pm-style\').remove();" style="border:none;background:#eee;border-radius:6px;padding:8px 14px;font-size:13px;cursor:pointer;font-family:inherit;touch-action:manipulation;">'+closeLabel+'</button>'
-+'<button onclick="window.print();" style="border:none;background:#1a6b2a;color:#fff;border-radius:6px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;touch-action:manipulation;">'+printLabel+'</button>'
-+'</div>'
-+'<p style="font-size:11px;color:#5a7060;margin-bottom:16px;">'+printHint+'</p>'
-+'<h2 style="font-size:18px;font-weight:800;color:#1a6b2a;margin-bottom:4px;">NICO NICO YASAI</h2>'
-+'<p style="font-size:12px;color:#5a7060;margin-bottom:16px;">'+title+' — '+dateStr+'</p>'
-+'<table style="width:100%;border-collapse:collapse;font-size:13px;">'
-+'<thead><tr>'
-+'<th style="background:#1a6b2a;color:#fff;padding:8px 10px;text-align:left;">No.</th>'
-+'<th style="background:#1a6b2a;color:#fff;padding:8px 10px;text-align:left;">'+(lang==="ja"?"野菜名":lang==="en"?"Item":"Tên rau")+'</th>'
-+'<th style="background:#1a6b2a;color:#fff;padding:8px 10px;text-align:left;">'+(lang==="ja"?"在庫":lang==="en"?"Stock":"Tồn kho")+'</th>'
-+'<th style="background:#1a6b2a;color:#fff;padding:8px 10px;text-align:right;">'+(lang==="ja"?"価格":lang==="en"?"Price":"Giá")+'</th>'
-+'</tr></thead>'
-+'<tbody>'+rows.replace(/<tr>/g,'<tr style="border-bottom:1px solid #c4dcc8;">').replace(/<td>/g,'<td style="padding:8px 10px;">').replace(/<\/td><\/tr>/g,'</td></tr>')+'</tbody>'
-+'</table>'
-+'<p style="font-size:11px;color:#9ab0a0;margin-top:20px;text-align:right;">NICO NICO YASAI</p>'
-+'</div>';
-document.body.appendChild(modal);
-var ps=document.getElementById("nny-pm-style");
-if(ps)ps.remove();
-var pstyle=document.createElement("style");
-pstyle.id="nny-pm-style";
-pstyle.textContent="@media print{body>*:not(#nny-list-modal){display:none!important}#nny-list-modal{position:static!important;overflow:visible!important}#nny-list-modal button{display:none!important}#nny-list-modal p:first-of-type{display:none!important}}";
-document.head.appendChild(pstyle);
+var thItem=lang==="ja"?"野菜名":lang==="en"?"Item":"Tên rau";
+var thStock=lang==="ja"?"在庫":lang==="en"?"Stock":"Tồn kho";
+var thPrice=lang==="ja"?"価格":lang==="en"?"Price":"Giá";
+var printHint=lang==="ja"?"このページを「共有」→「印刷」→「PDFに保存」で保存できます":lang==="en"?"Share → Print → Save as PDF to export":"Chia sẻ → In → Lưu PDF";
+var html="<!DOCTYPE html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>"+title+"</title><style>"
++"*{box-sizing:border-box;margin:0;padding:0}"
++"body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans JP',sans-serif;padding:24px 16px 48px;color:#1a2b1c;background:#fff;max-width:640px;margin:0 auto}"
++"h1{font-size:18px;font-weight:800;color:#1a6b2a;margin-bottom:4px}"
++".sub{font-size:12px;color:#5a7060;margin-bottom:20px}"
++"table{width:100%;border-collapse:collapse;font-size:13px}"
++"th{background:#1a6b2a;color:#fff;padding:8px 10px;text-align:left;font-weight:700}"
++"th:last-child{text-align:right}"
++"td{padding:8px 10px;border-bottom:1px solid #c4dcc8}"
++"td:last-child{text-align:right}"
++"tr:nth-child(even) td{background:#f2faf3}"
++".footer{font-size:11px;color:#9ab0a0;margin-top:20px;text-align:right}"
++".hint{font-size:11px;color:#5a7060;margin-bottom:20px;padding:10px;background:#f2faf3;border-radius:6px}"
++"@media print{.hint{display:none}}"
++"</style></head><body>"
++"<h1>NICO NICO YASAI</h1>"
++"<p class='sub'>"+title+" — "+dateStr+"</p>"
++"<p class='hint'>"+printHint+"</p>"
++"<table><thead><tr><th>No.</th><th>"+thItem+"</th><th>"+thStock+"</th><th>"+thPrice+"</th></tr></thead>"
++"<tbody>"+rows+"</tbody></table>"
++"<p class='footer'>NICO NICO YASAI</p>"
++"</body></html>";
+var blob=new Blob([html],{type:"text/html;charset=utf-8"});
+var url=URL.createObjectURL(blob);
+var a=document.createElement("a");
+a.href=url;
+a.target="_blank";
+a.rel="noopener";
+document.body.appendChild(a);
+a.click();
+document.body.removeChild(a);
+setTimeout(function(){URL.revokeObjectURL(url);},10000);
 }
 function stars(rating,count){
 var s="";
