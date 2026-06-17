@@ -838,16 +838,21 @@ function saveProdListPDF(){
 var list=PRODUCTS.filter(function(p){return p.pub!==false;});
 var now=new Date();
 var dateStr=now.getFullYear()+"/"+(now.getMonth()+1)+"/"+now.getDate();
-var rows=list.map(function(p,i){
+var rowNum=0;
+var rows=list.map(function(p){
 var nm=lang==="ja"?p.ja:lang==="en"?(p.en||p.ja):p.vi;
 var unit=lang==="ja"?p.unit:lang==="en"?(p.uniten||p.unit):p.unitvi;
-var priceCell;
 if(p.variants&&p.variants.length>0){
-priceCell=p.variants.map(function(v){var pk="price"+v.replace("g","");return v+": "+vnd(p[pk]||p.price);}).join(" / ");
-}else{
-priceCell=vnd(p.price);
+return p.variants.map(function(v){
+rowNum++;
+var pk="price"+v.replace("g","");
+var sk="stock"+v.replace("g","");
+var st=p[sk]!==undefined?p[sk]:(p.stock||0);
+return "<tr><td>"+rowNum+"</td><td>"+nm+" ("+v+")</td><td>"+st+" "+unit+"</td><td>"+vnd(p[pk]||p.price)+"</td></tr>";
+}).join("");
 }
-return "<tr><td>"+(i+1)+"</td><td>"+nm+"</td><td>"+(p.stock||0)+" "+unit+"</td><td>"+priceCell+"</td></tr>";
+rowNum++;
+return "<tr><td>"+rowNum+"</td><td>"+nm+"</td><td>"+(p.stock||0)+" "+unit+"</td><td>"+vnd(p.price)+"</td></tr>";
 }).join("");
 var title=lang==="ja"?"今週の野菜リスト":lang==="en"?"This Week's Vegetable List":"Danh sách rau tuần này";
 var html="<!DOCTYPE html><html><head><meta charset='utf-8'><title>"+title+"</title><style>"+
