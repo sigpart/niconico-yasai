@@ -3339,7 +3339,6 @@ renderProducts();
 }).catch(function(){});
 fbDb.collection("orders").get().then(function(snap){
 var a=[];snap.forEach(function(doc){a.push(doc.data());});
-if(!a.length)return;
 var lo=ORDERS;
 var merged=a.map(function(o){
 var l=lo.find(function(x){return x.no===o.no;});
@@ -3348,13 +3347,18 @@ if(l&&l.screenshotUrl)o.screenshotUrl=l.screenshotUrl;
 return o;
 });
 lo.forEach(function(x){if(!merged.find(function(o){return o.no===x.no;}))merged.push(x);});
-if(JSON.stringify(merged)!==JSON.stringify(ORDERS)){
+var changed=merged.some(function(o){
+var cur=ORDERS.find(function(x){return x.no===o.no;});
+return !cur||cur.status!==o.status||cur.tot!==o.tot;
+})||merged.length!==ORDERS.length;
+if(changed){
 ORDERS=merged;
+try{localStorage.setItem("nny_orders",JSON.stringify(ORDERS));}catch(e){}
 var as=document.getElementById("admin-screen");
 if(as&&as.classList.contains("on")&&typeof renderAdminOrders2==="function")renderAdminOrders2();
 }
 }).catch(function(){});
-},30000);
+},15000);
 }
 function initApp(){
 if(typeof normalizeReviews==="function")normalizeReviews();
