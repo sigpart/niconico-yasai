@@ -3276,7 +3276,7 @@ snap.forEach(function(doc){
 var d=doc.data();
 if(!d||!d.id)return;
 var p=PRODUCTS.find(function(x){return Number(x.id)===Number(d.id);});
-if(!p)return;
+if(p){
 if(d.stock!==undefined&&d.stock>=0&&p.stock!==d.stock){p.stock=d.stock;changed=true;}
 if(d.price!==undefined&&d.price>0&&p.price!==d.price){p.price=d.price;changed=true;}
 if(d.price250!==undefined&&d.price250>0&&p.price250!==d.price250){p.price250=d.price250;changed=true;}
