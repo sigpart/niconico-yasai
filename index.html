@@ -3335,6 +3335,8 @@ if(as&&as.classList.contains("on")&&typeof renderAdminOrders2==="function")rende
 }
 function initApp(){
 if(typeof normalizeReviews==="function")normalizeReviews();
+// 起動時に全商品をpub:trueにリセット（Firebase同期で上書きされる）
+PRODUCTS.forEach(function(p){if(p.pub===undefined||p.pub===false)p.pub=true;});
 _needFbProductSync=true;
 applyI18n();
 renderHistory();
