@@ -2076,7 +2076,7 @@ if(_g){_g.classList.remove("open");_g.style.display="none";}
 var _us=document.getElementById("user-screen");
 if(_us){_us.style.display="none";}
 var _as=document.getElementById("admin-screen");
-if(_as){_as.classList.remove("on");_as.style.display="none";}
+if(_as){_as.classList.remove("on");_as.style.display="";}
 var _os=document.getElementById("owner-screen");
 if(_os){
 _os.style.display="flex";
@@ -2115,18 +2115,19 @@ function openAdmin(){
 var us=document.getElementById("user-screen");
 var as=document.getElementById("admin-screen");
 if(us)us.style.display="none";
-if(as)as.classList.add("on");
+if(as){as.classList.add("on");as.style.display="block";}
 loadEJConfigUI();loadBankConfigUI();loadFBConfigUI();
 applyAdminI18n();
+// まず即座にレンダリング（Firebaseを待たない）
+renderAdminAll();
+if(typeof renderAnalytics==="function")renderAnalytics();
 if(fbEnabled){
 loadFromFirebase(function(ok){
+// Firebase読み込み完了後に再レンダリング
 renderAdminAll();
 if(typeof renderAnalytics==="function")renderAnalytics();
 if(ok)showToast(adminLang==="vi"?"☁️ Đã tải dữ liệu từ cloud":"☁️ クラウドからデータを読み込みました");
 });
-} else {
-renderAdminAll();
-if(typeof renderAnalytics==="function")renderAnalytics();
 }
 }
 function exitAdmin(){
