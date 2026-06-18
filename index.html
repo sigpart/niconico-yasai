@@ -3169,6 +3169,10 @@ if(p&&d.badge!==undefined)p.badge=d.badge;
 if(p&&d.img)p.img=d.img;
 if(p&&d.stock!==undefined&&d.stock>=0)p.stock=d.stock;
 if(p&&d.price!==undefined&&d.price>0)p.price=d.price;
+if(p&&d.price250!==undefined&&d.price250>0)p.price250=d.price250;
+if(p&&d.price500!==undefined&&d.price500>0)p.price500=d.price500;
+if(p&&d.stock250!==undefined&&d.stock250>=0)p.stock250=d.stock250;
+if(p&&d.stock500!==undefined&&d.stock500>=0)p.stock500=d.stock500;
 });
 renderProducts();
 var batch=fbDb.batch();
@@ -3176,13 +3180,13 @@ var snapIds=[];
 snap.forEach(function(doc){if(doc.data()&&doc.data().id)snapIds.push(Number(doc.data().id));});
 PRODUCTS.forEach(function(p){
 if(snapIds.indexOf(Number(p.id))<0){
-batch.set(fbDb.collection("products").doc(String(p.id)),{id:p.id,stock:p.stock,price:p.price,badge:p.badge||""});
+batch.set(fbDb.collection("products").doc(String(p.id)),{id:p.id,stock:p.stock,price:p.price,price250:p.price250||0,price500:p.price500||0,stock250:p.stock250||0,stock500:p.stock500||0,badge:p.badge||""});
 }
 });
 PRODUCTS.forEach(function(p){
 if(p.badge===""||p.badge===undefined){
 batch.set(fbDb.collection("products").doc(String(p.id)),
-{id:p.id,stock:p.stock,price:p.price,badge:""},
+{id:p.id,stock:p.stock,price:p.price,price250:p.price250||0,price500:p.price500||0,stock250:p.stock250||0,stock500:p.stock500||0,badge:""},
 {merge:true});
 }
 });
@@ -3253,6 +3257,10 @@ var p=PRODUCTS.find(function(x){return Number(x.id)===Number(d.id);});
 if(!p)return;
 if(d.stock!==undefined&&d.stock>=0&&p.stock!==d.stock){p.stock=d.stock;changed=true;}
 if(d.price!==undefined&&d.price>0&&p.price!==d.price){p.price=d.price;changed=true;}
+if(d.price250!==undefined&&d.price250>0&&p.price250!==d.price250){p.price250=d.price250;changed=true;}
+if(d.price500!==undefined&&d.price500>0&&p.price500!==d.price500){p.price500=d.price500;changed=true;}
+if(d.stock250!==undefined&&d.stock250>=0&&p.stock250!==d.stock250){p.stock250=d.stock250;changed=true;}
+if(d.stock500!==undefined&&d.stock500>=0&&p.stock500!==d.stock500){p.stock500=d.stock500;changed=true;}
 if(d.badge!==undefined&&p.badge!==d.badge){p.badge=d.badge;changed=true;}
 // imgはポーリングから除外（初回loadFromFirebaseで取得）
 });
