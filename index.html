@@ -1842,7 +1842,14 @@ fbDb.collection("reviews").doc("all").get().then(function(doc){
 if(doc.exists&&doc.data().data){
 var fbRv=doc.data().data;
 Object.keys(fbRv).forEach(function(pid){
-if(!REVIEWS[pid]||REVIEWS[pid].length===0)REVIEWS[pid]=fbRv[pid];
+var fbArr=Array.isArray(fbRv[pid])?fbRv[pid]:Object.values(fbRv[pid]||{});
+var localArr=Array.isArray(REVIEWS[pid])?REVIEWS[pid]:[];
+// ローカルにあってFirebaseにないレビューをマージ
+var merged=fbArr.slice();
+localArr.forEach(function(lr){
+if(!merged.find(function(fr){return fr.id===lr.id;}))merged.push(lr);
+});
+REVIEWS[pid]=merged;
 });
 if(typeof normalizeReviews==="function")normalizeReviews();
 try{localStorage.setItem("nny_reviews",JSON.stringify(REVIEWS));}catch(e){}
@@ -3327,9 +3334,12 @@ fbDb.collection("reviews").doc("all").get().then(function(doc){
 if(!doc.exists||!doc.data()||!doc.data().data)return;
 var fbRv=doc.data().data;var changed=false;
 Object.keys(fbRv).forEach(function(pid){
-var arr=Array.isArray(fbRv[pid])?fbRv[pid]:Object.values(fbRv[pid]);
+var fbArr=Array.isArray(fbRv[pid])?fbRv[pid]:Object.values(fbRv[pid]||{});
+var localArr=Array.isArray(REVIEWS[pid])?REVIEWS[pid]:[];
+var merged=fbArr.slice();
+localArr.forEach(function(lr){if(!merged.find(function(fr){return fr.id===lr.id;}))merged.push(lr);});
 var cur=JSON.stringify(REVIEWS[pid]||[]);
-if(JSON.stringify(arr)!==cur){REVIEWS[pid]=arr;changed=true;}
+if(JSON.stringify(merged)!==cur){REVIEWS[pid]=merged;changed=true;}
 });
 if(changed){
 if(typeof normalizeReviews==="function")normalizeReviews();
