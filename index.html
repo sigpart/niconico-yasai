@@ -2817,13 +2817,16 @@ if(admLbl)admLbl.textContent=lang==="ja"?"管理者ログイン":lang==="en"?"Ad
 // 3言語ヘルパー
 function fbSaveProduct(p){
 if(!fbEnabled||!fbDb)return;
-if(p.img&&p.img.length>200000){
-resizeImage(p.img,400,400,function(resized){
-var data=Object.assign({},p,{img:resized});
+// pubはproduct_visibilityに別途保存（商品データに混入させない）
+var vis={};vis["id_"+p.id]=(p.pub===false)?false:true;
+fbDb.collection("settings").doc("product_visibility").set(vis,{merge:true}).catch(function(e){console.error(e);});
+var data=Object.assign({},p);delete data.pub;
+if(data.img&&data.img.length>200000){
+resizeImage(data.img,400,400,function(resized){
+data.img=resized;
 fbDb.collection("products").doc(String(p.id)).set(data).catch(function(e){console.error(e);});
 });
 } else {
-var data=Object.assign({},p);
 fbDb.collection("products").doc(String(p.id)).set(data).catch(function(e){console.error(e);});
 }
 }
@@ -3160,6 +3163,9 @@ var _needFbProductSync=false;
 function _autoSyncProducts(){
 if(!_needFbProductSync||!fbDb)return;
 _needFbProductSync=false;
+// pubは別documentで管理 → 商品データとは独立して読み込む
+fbDb.collection("settings").doc("product_visibility").get().then(function(visDoc){
+var visMap=visDoc.exists?visDoc.data():{};
 fbDb.collection("products").get().then(function(snap){
 snap.forEach(function(doc){
 var d=doc.data();
@@ -3174,18 +3180,17 @@ if(d.price250!==undefined&&d.price250>0)p.price250=d.price250;
 if(d.price500!==undefined&&d.price500>0)p.price500=d.price500;
 if(d.stock250!==undefined&&d.stock250>=0)p.stock250=d.stock250;
 if(d.stock500!==undefined&&d.stock500>=0)p.stock500=d.stock500;
-// pub: Firebaseに明示的に保存されている場合のみ反映。未設定の場合はtrue
-p.pub=(d.pub===false)?false:true;
 if(d.ja&&d.ja.trim())p.ja=d.ja;
 if(d.vi&&d.vi.trim())p.vi=d.vi;
 if(d.en&&d.en.trim())p.en=d.en;
 if(d.unit&&d.unit.trim())p.unit=d.unit;
 if(d.unitvi&&d.unitvi.trim())p.unitvi=d.unitvi;
 if(d.uniten&&d.uniten.trim())p.uniten=d.uniten;
+// pubはproduct_visibilityから取得（なければtrue）
+p.pub=(visMap["id_"+p.id]===false)?false:true;
 } else if(d.id&&d.ja&&d.ja.trim()){
-// Firebaseにある新規商品を追加（pubが明示的にfalseでない限り表示）
 var newP=Object.assign({},d);
-newP.pub=(d.pub===false)?false:true;
+newP.pub=(visMap["id_"+d.id]===false)?false:true;
 PRODUCTS.push(newP);
 }
 });
@@ -3195,21 +3200,23 @@ var snapIds=[];
 snap.forEach(function(doc){if(doc.data()&&doc.data().id)snapIds.push(Number(doc.data().id));});
 PRODUCTS.forEach(function(p){
 if(snapIds.indexOf(Number(p.id))<0){
-batch.set(fbDb.collection("products").doc(String(p.id)),{id:p.id,stock:p.stock,price:p.price,price250:p.price250||0,price500:p.price500||0,stock250:p.stock250||0,stock500:p.stock500||0,badge:p.badge||"",pub:p.pub!==false});
+batch.set(fbDb.collection("products").doc(String(p.id)),{id:p.id,stock:p.stock,price:p.price,price250:p.price250||0,price500:p.price500||0,stock250:p.stock250||0,stock500:p.stock500||0,badge:p.badge||""});
 }
 });
 PRODUCTS.forEach(function(p){
 if(p.badge===""||p.badge===undefined){
 batch.set(fbDb.collection("products").doc(String(p.id)),
-{id:p.id,stock:p.stock,price:p.price,price250:p.price250||0,price500:p.price500||0,stock250:p.stock250||0,stock500:p.stock500||0,badge:"",pub:p.pub!==false},
+{id:p.id,stock:p.stock,price:p.price,price250:p.price250||0,price500:p.price500||0,stock250:p.stock250||0,stock500:p.stock500||0,badge:""},
 {merge:true});
 }
 });
 return batch.commit();
 }).then(function(){
 console.log("[NNY] Firebase products auto-synced: "+PRODUCTS.length+"品");
-}).catch(function(e){
-console.warn("[NNY] Firebase products sync failed:",e);
+}).catch(function(e){console.warn("[NNY] Firebase products sync failed:",e);});
+}).catch(function(){
+// visibilityドキュメントがない場合は通常の商品syncのみ実行
+_needFbProductSync=true;_autoSyncProducts();
 });
 }
 function saveProductEdit(id){
@@ -3277,15 +3284,21 @@ if(d.price500!==undefined&&d.price500>0&&p.price500!==d.price500){p.price500=d.p
 if(d.stock250!==undefined&&d.stock250>=0&&p.stock250!==d.stock250){p.stock250=d.stock250;changed=true;}
 if(d.stock500!==undefined&&d.stock500>=0&&p.stock500!==d.stock500){p.stock500=d.stock500;changed=true;}
 if(d.badge!==undefined&&p.badge!==d.badge){p.badge=d.badge;changed=true;}
-var newPub=(d.pub===false)?false:true;
-if(p.pub!==newPub){p.pub=newPub;changed=true;}
 // imgはポーリングから除外（初回loadFromFirebaseで取得）
 } else if(d&&d.id&&d.ja&&d.ja.trim()){
-// ポーリングで新規商品を検知
-var np=Object.assign({},d);np.pub=(d.pub===false)?false:true;
+var np=Object.assign({},d);np.pub=true;
 PRODUCTS.push(np);changed=true;
+}
+});
+// pubはproduct_visibilityから取得
+fbDb.collection("settings").doc("product_visibility").get().then(function(visDoc){
+var visMap=visDoc.exists?visDoc.data():{};
+PRODUCTS.forEach(function(p){
+var newPub=(visMap["id_"+p.id]===false)?false:true;
+if(p.pub!==newPub){p.pub=newPub;changed=true;}
 });
 if(changed)renderProducts();
+}).catch(function(){if(changed)renderProducts();});
 }).catch(function(){});
 fbDb.collection("reviews").doc("all").get().then(function(doc){
 if(!doc.exists||!doc.data()||!doc.data().data)return;
