@@ -3174,16 +3174,6 @@ if(d.price250!==undefined&&d.price250>0)p.price250=d.price250;
 if(d.price500!==undefined&&d.price500>0)p.price500=d.price500;
 if(d.stock250!==undefined&&d.stock250>=0)p.stock250=d.stock250;
 if(d.stock500!==undefined&&d.stock500>=0)p.stock500=d.stock500;
-if(d.pub!==undefined)p.pub=d.pub;
-if(d.ja&&d.ja.trim())p.ja=d.ja;
-if(d.vi&&d.vi.trim())p.vi=d.vi;
-if(d.en&&d.en.trim())p.en=d.en;
-if(d.unit&&d.unit.trim())p.unit=d.unit;
-if(d.unitvi&&d.unitvi.trim())p.unitvi=d.unitvi;
-if(d.uniten&&d.uniten.trim())p.uniten=d.uniten;
-} else if(d.ja){
-// 新規追加商品をFirebaseから復元
-PRODUCTS.push(Object.assign({pub:true},d));
 }
 });
 renderProducts();
@@ -3274,11 +3264,7 @@ if(d.price500!==undefined&&d.price500>0&&p.price500!==d.price500){p.price500=d.p
 if(d.stock250!==undefined&&d.stock250>=0&&p.stock250!==d.stock250){p.stock250=d.stock250;changed=true;}
 if(d.stock500!==undefined&&d.stock500>=0&&p.stock500!==d.stock500){p.stock500=d.stock500;changed=true;}
 if(d.badge!==undefined&&p.badge!==d.badge){p.badge=d.badge;changed=true;}
-if(d.pub!==undefined&&p.pub!==d.pub){p.pub=d.pub;changed=true;}
 // imgはポーリングから除外（初回loadFromFirebaseで取得）
-} else if(d&&d.id&&d.ja){
-// ポーリングで新規商品を検知
-PRODUCTS.push(Object.assign({pub:true},d));changed=true;
 });
 if(changed)renderProducts();
 }).catch(function(){});
