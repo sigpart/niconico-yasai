@@ -660,7 +660,14 @@ fbDb.collection("reviews").doc("all").set({data:REVIEWS,ts:new Date().toISOStrin
 }
 }
 function saveNotifyList(){try{localStorage.setItem("nny_notify",JSON.stringify(NOTIFY_LIST));}catch(e){}}
-function saveOrderHistory(){try{localStorage.setItem("nny_hist",JSON.stringify(ORDER_HISTORY));}catch(e){}}
+function saveOrderHistory(){
+try{localStorage.setItem("nny_hist",JSON.stringify(ORDER_HISTORY));}catch(e){}
+if(typeof fbEnabled!=="undefined"&&fbEnabled&&fbDb){
+// screenshotは除いて保存（サイズ節約）
+var slim=ORDER_HISTORY.map(function(o){return Object.assign({},o,{screenshot:null});});
+fbDb.collection("settings").doc("order_history").set({data:slim,ts:new Date().toISOString()}).catch(function(){});
+}
+}
 function saveQRImgs(){try{localStorage.setItem("nny_qr",JSON.stringify(QR_IMGS));}catch(e){try{var small={};Object.keys(QR_IMGS).forEach(function(k){if(QR_IMGS[k])small[k]=QR_IMGS[k].slice(0,512);});localStorage.setItem("nny_qr","{}");localStorage.setItem("nny_qr",JSON.stringify(QR_IMGS));}catch(e2){console.warn("[NNY] QR save failed (localStorage full):",e2);}}}
 var I = {
 ja:{hdrCart:"カート",shopTitle:"🥦 今週のお野菜",cartTtl:"🛒 カートの中身",cartBack:"← 買い物を続ける",sumQty:"商品点数",sumTot:"合計",toInfo:"購入に進む",infoTtl:"📋 注文情報",infoBack:"← カートに戻る",fcCust:"🙋 お客様情報",fcDel:"🛵 受け取り方法",fcPay:"支払い方法",fcNote:"📝 備考",flName:"お名前",flPhone:"電話番号",flZalo:"Zalo ID",flAddr:"住所",flEmail:"メールアドレス",req:"必須",delDeliver:"配達",delPickup:"直接受取",delShip:"宅配便",payCash:"現金",toConfirm:"注文内容を確認する",confirmTtl:"✔ 注文確認",confirmBack:"← 情報を修正する",ccLblItems:"注文商品",ccLblTot:"合計",ccLblCust:"お客様情報",ccLblDel:"受け取り方法",ccLblPay:"支払い方法",ccLblNote:"備考",placeLbl:"注文を確定する",rptTtl:"領収証 兼 注文書",rmlNo:"注文番号",rmlDate:"日時",rmlName:"お名前",rmlPhone:"電話番号",rmlAddr:"お届け先",rmlEmail:"メール",rmlDel:"受け取り",rmlPay:"支払い",rptItemsTtl:"ご注文内容",rthItem:"商品",rthQty:"数量",rthPrice:"単価",rthSub:"小計",rgtLbl:"合計金額",rntLbl:"備考：",rctShop:"買い物を続ける",rctHist:"📋 注文履歴",rptFarm:"ご注文ありがとうございます。配達は日曜日にエムハノイより順次お届けいたします。<br>ご質問等がございましたらお手数ですが、以下NICONICOYASAI公式LINEにてお気軽にご連絡ください。<br><a href='https://lin.ee/R9dAJtD' target='_blank' style='color:var(--g1);font-weight:700;'>https://lin.ee/R9dAJtD</a><br>NICO NICO YASAI ※ニコニコ野菜バンホー農場",pg1:"カート",pg2:"情報入力",pg3:"確認",pg4:"完了",heroEyebrow:"🌿 農薬不使用・化学肥料不使用",heroH1:"生産者と消費者の<br>顔と顔の見える関係づくり",heroSub:"ベトナムの大地で丁寧に育てた新鮮野菜を直接お届けします",spAll:"今週のお野菜",spSpring:"春",spSummer:"夏",spAutumn:"秋",spWinter:"冬",spYearround:"通年",shopTitleYearround:"🌿 通年野菜",badgeNew:"NEW",badgeRec:"⭐ おすすめ",badgeSeason:"🌿 旬",badgeNone:"なし",shopTitleSpring:"🌸 春に採れる野菜",shopTitleSummer:"☀️ 夏に採れる野菜",shopTitleAutumn:"🍂 秋に採れる野菜",shopTitleWinter:"❄️ 冬に採れる野菜",drawerTtl:"🌿 NICO NICO YASAI 管理",dtOrders:"📋 注文",dtDB:"🗄 データ",dtStats:"📊 売上",dtProducts:"🥦 商品",dtNotify:"🔔 入荷通知",dtSite:"⚙️ 設定",ocToggleDone:"✅ 完了にする",ocViewReceipt:"🖨 領収証",pubToggleOn:"🟢 公開中",pubToggleOff:"🔴 非公開",adminLangNote:"管理画面の言語：",ejWizTitle:"📧 メール自動送信の設定",ejStep1:"ステップ1: emailjs.com で無料登録",ejStep2:"ステップ2: 以下に入力",ejTestBtn:"🧪 テスト送信",ejSaveBtn:"💾 設定を保存",ejTestSuccess:"✅ 送信成功！メールが動作しています。",ejTestFail:"❌ 送信失敗。Service ID/Template ID/Public Keyを確認してください。",noOrders:"まだ注文はありません 📭",stockLabel:"在庫数",priceLabel:"価格",saveProduct:"💾 保存",deleteProduct:"🗑 削除",addProductBtn:"➕ 商品を追加",publishAll:"✅ 全て公開",hideAll:"🔴 全て非公開",seasonOnly:"🌸 季節だけ公開",exportData:"⬇ CSV ダウンロード",copyData:"📋 データをコピー",clearData:"🗑 データクリア",sheetsUrlLabel:"Google Sheets リンク:",sheetsSaveBtn:"リンクを保存",notifyEmpty:"入荷通知の登録はありません",adminQuickStats:"本日のサマリー",stlOrders:"総注文数",stlRev:"総売上",stlAvg:"平均注文",stlPub:"公開中商品",peNewLbl:"商品を追加",fabLbl:"管理・編集",abarBtnLbl:"管理",noOrders:"注文はまだありません",stNew:"新規",stDone:"完了",swarnLbl:"在庫少",soutLbl:"在庫切れ",swTitle:"⚠️ 在庫警告",pubLbl:"公開中",unpubLbl:"非公開",cartEmpty:"カートに商品がありません",addBtn:"カートへ",stockOut:"在庫なし",stockLow:"残り",navShop:"野菜を買う",navHist:"注文履歴",histBack:"← トップへ戻る",savedLbl:"前回の情報を自動入力",rctShop:"買い物を続ける",rctHist:"📋 注文履歴",rvEdit:"編集",histTtl:"📋 注文履歴",histBack:"← トップへ戻る",histEmpty:"注文履歴がありません",rvModalTitle:"レビュー",wrTitle:"✍ レビューを書く",rvSubmit:"投稿する",ntfModalTitle:"🔔 入荷通知",ntfDesc:"在庫が補充されたらメールでお知らせします。",ntfSubmit:"🔔 通知を受け取る",ntfSuccess:"✅ 登録しました！入荷時にご連絡します。",savedLbl:"前回の情報を自動入力",guideTtl1:"ご注文方法",guideBody1:"お野菜をカートに追加し、ご注文ください。ご注文後、Gmailにてご連絡いたします。",guideTtl2:"配送について",guideTtl3:"お支払いについて",guideBody3:"現金でのお取引は行っておりません。お支払いは<b>銀行QR（銀行振込）のみ</b>となります。",heroBadge:"🌿 農薬不使用・化学肥料不使用",heroH1:"生産者と消費者の<br>顔と顔の見える関係づくり",heroSub:"ベトナムの大地で丁寧に育てた新鮮野菜を直接お届けします",farmLbl:"※ニコニコ野菜バンホー農場",rptFarm:"ご注文ありがとうございます。配達は日曜日にエムハノイより順次お届けいたします。<br>ご質問等がございましたらお手数ですが、以下NICONICOYASAI公式LINEにてお気軽にご連絡ください。<br><a href='https://lin.ee/R9dAJtD' target='_blank' style='color:var(--g1);font-weight:700;'>https://lin.ee/R9dAJtD</a><br>NICO NICO YASAI ※ニコニコ野菜バンホー農場",rvNamePh:"お名前（任意）",rvTextPh:"野菜の感想をお聞かせください...",payVietqr:"🏦 銀行QRコード",fcProfil:"👤 プロフィール（任意）",privacyNote:"※ご入力いただいた情報はプライバシーを保護した上で、サービス改善・品揃えの最適化のためにのみ活用します。",flAge:"年齢層",flGender:"性別",flFamily:"家族構成",flSource:"どこで知りましたか？",flNote:"配達時間の希望など",prog1:"カート",spAll:"今週のお野菜",spSpring:"春",spSummer:"夏",spAutumn:"秋",spWinter:"冬",prog2:"情報入力",prog3:"確認",prog4:"完了",selOptional:"-- 選択（任意）--",ageOpt1:"20代",ageOpt2:"30代",ageOpt3:"40代",ageOpt4:"50代以上",genderF:"女性",genderM:"男性",genderO:"その他",familyS:"1人",familyM:"2〜3人",familyL:"4人以上",sourceZalo:"Zalo",sourceFB:"Facebook",sourceRef:"知人の紹介",sourceMkt:"市場・店頭",sourceOth:"その他"},
@@ -1618,7 +1625,7 @@ body+='<div class="qr-step"><span class="qr-step-num">2</span><span>'+(L("送金
 body+='<div class="qr-step"><span class="qr-step-num">3</span><span>'+(L("ボタンを押して注文確定","Press button to confirm order","Nhấn nút để xác nhận"))+'</span></div>';
 body+='</div>';
 body+='<div id="ss-upload-area-wrap"><div class="ss-upload-area" id="ss-drop-area" ondrop="handleSSDrop(event)" ondragover="handleSSDragOver(event)" ondragleave="handleSSDragLeave()">';
-body+='<input type="file" accept="image/jpeg,image/png,image/gif,image/webp" onchange="handleSSUpload(event)" capture="environment">';
+body+='<input type="file" accept="image/jpeg,image/png,image/gif,image/webp" onchange="handleSSUpload(event)">';
 body+='<div class="ss-upload-ico">📷</div>';
 body+='<div class="ss-upload-txt">'+(L("送金スクリーンショットをアップロード","Upload payment screenshot","Tải lên ảnh chụp màn hình chuyển khoản"))+'</div>';
 body+='<div class="ss-upload-sub">'+(L("タップして選択","Tap to select","Nhấn để chọn ảnh"))+'</div>';
@@ -1825,17 +1832,16 @@ if(cfg.bank){try{var bk=JSON.parse(cfg.bank);BANK_CFG=Object.assign(BANK_CFG,bk)
 }).catch(function(){});
 var d={o:false,p:false,n:false};
 function chk(){if(d.o&&d.p&&d.n&&cb)cb(true);}
-fbDb.collection("orders").get().then(function(s){var a=[];s.forEach(function(doc){a.push(doc.data());});if(a.length){
+fbDb.collection("orders").get().then(function(s){var a=[];s.forEach(function(doc){a.push(doc.data());});{
 var localOrders=ORDERS;
+// FirebaseをORDERSの唯一の正として使う（Firebase削除＝削除）
 ORDERS=a.map(function(fbOrder){
 var local=localOrders.find(function(lo){return lo.no===fbOrder.no;});
 if(local&&local.screenshot&&!fbOrder.screenshotUrl)fbOrder.screenshot=local.screenshot;
 if(local&&local.screenshotUrl)fbOrder.screenshotUrl=local.screenshotUrl;
 return fbOrder;
 });
-localOrders.forEach(function(lo){
-if(!ORDERS.find(function(o){return o.no===lo.no;}))ORDERS.push(lo);
-});
+try{localStorage.setItem("nny_orders",JSON.stringify(ORDERS));}catch(e){}
 }
 d.o=true;chk();
 fbDb.collection("reviews").doc("all").get().then(function(doc){
@@ -1854,7 +1860,20 @@ REVIEWS[pid]=merged;
 if(typeof normalizeReviews==="function")normalizeReviews();
 try{localStorage.setItem("nny_reviews",JSON.stringify(REVIEWS));}catch(e){}
 }
-}).catch(function(){});}).catch(function(){d.o=true;chk();});
+}).catch(function(){});
+// 購入履歴をFirebaseからマージ
+fbDb.collection("settings").doc("order_history").get().then(function(doc){
+if(doc.exists&&doc.data()&&doc.data().data){
+var fbHist=doc.data().data;
+fbHist.forEach(function(fo){
+if(!ORDER_HISTORY.find(function(lo){return lo.no===fo.no;}))ORDER_HISTORY.unshift(fo);
+});
+ORDER_HISTORY.sort(function(a,b){return new Date(b.ts||0)-new Date(a.ts||0);});
+try{localStorage.setItem("nny_hist",JSON.stringify(ORDER_HISTORY));}catch(e){}
+if(typeof renderHistory==="function")renderHistory();
+}
+}).catch(function(){});
+}).catch(function(){d.o=true;chk();});
 d.p=true;chk();
 fbDb.collection("settings").doc("notify_list").get().then(function(doc){if(doc.exists&&doc.data().list)NOTIFY_LIST=doc.data().list;d.n=true;chk();}).catch(function(){d.n=true;chk();});
 }
@@ -3349,6 +3368,7 @@ renderProducts();
 }).catch(function(){});
 fbDb.collection("orders").get().then(function(snap){
 var a=[];snap.forEach(function(doc){a.push(doc.data());});
+// Firebaseが正、ローカルのscreenshotデータだけ引き継ぐ（Firebase削除は削除として扱う）
 var lo=ORDERS;
 var merged=a.map(function(o){
 var l=lo.find(function(x){return x.no===o.no;});
@@ -3356,7 +3376,6 @@ if(l&&l.screenshot&&!o.screenshotUrl)o.screenshot=l.screenshot;
 if(l&&l.screenshotUrl)o.screenshotUrl=l.screenshotUrl;
 return o;
 });
-lo.forEach(function(x){if(!merged.find(function(o){return o.no===x.no;}))merged.push(x);});
 var changed=merged.some(function(o){
 var cur=ORDERS.find(function(x){return x.no===o.no;});
 return !cur||cur.status!==o.status||cur.tot!==o.tot;
