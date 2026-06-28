@@ -1334,19 +1334,35 @@ return "Kinh gui "+o.name+"\n\nCam on ban da dat hang tai NICO NICO YASAI.\n\n"+
 }
 }
 function sendEmail(o){
-if(!o.email)return;
-var subject=(lang==="ja"?"NICO NICO YASAI - ご注文確認 ":lang==="en"?"NICO NICO YASAI - Order Confirmation ":"NICO NICO YASAI - Xác nhận đơn hàng ")+o.no;
-var body=buildEmailBody(o);
-if(EJ.service&&EJ.template&&EJ.pubkey){
+if(!EJ.service||!EJ.template||!EJ.pubkey){
+showToast("⚠ "+L("EmailJSが未設定のため自動送信できませんでした。管理画面→設定で設定してください。","EmailJS not configured. Please set up in Admin → Settings.","EmailJS chưa được cấu hình. Vui lòng cài đặt trong Admin → Cài đặt."));
+return;
+}
 try{emailjs.init({publicKey:EJ.pubkey});}catch(e){}
 var ov=document.getElementById("email-overlay"),tx=document.getElementById("email-txt");
+// 顧客へ確認メール
+if(o.email){
+var subject=(lang==="ja"?"NICO NICO YASAI - ご注文確認 ":lang==="en"?"NICO NICO YASAI - Order Confirmation ":"NICO NICO YASAI - Xác nhận đơn hàng ")+o.no;
+var body=buildEmailBody(o);
 if(tx)tx.textContent=L("確認メールを送信中...","Sending confirmation email...","Đang gửi email...");
 if(ov)ov.classList.add("show");
 emailjs.send(EJ.service,EJ.template,{to_email:o.email,to_name:o.name,from_name:"NICO NICO YASAI",reply_to:EJ.from||"",subject:subject,message:body,order_no:o.no,order_date:o.ts,total:vndEmail(o.tot)})
-.then(function(){if(ov)ov.classList.remove("show");showToast("✅ "+(lang==="ja"?"確認メールを自動送信しました":"Đã tự động gửi email xác nhận"));},
-function(err){if(ov)ov.classList.remove("show");showToast("⚠ "+L("メール送信に失敗しました。管理画面でEmailJS設定を確認してください。","Email send failed. Check EmailJS settings in admin.","Gửi email thất bại. Kiểm tra cài đặt EmailJS."));console.error("[NNY] EmailJS error:",err);});
-} else {
-showToast("⚠ "+L("EmailJSが未設定のため自動送信できませんでした。管理画面→設定で設定してください。","EmailJS not configured. Please set up in Admin → Settings.","EmailJS chưa được cấu hình. Vui lòng cài đặt trong Admin → Cài đặt."));
+.then(function(){
+if(ov)ov.classList.remove("show");
+showToast("✅ "+(lang==="ja"?"確認メールを自動送信しました":"Đã tự động gửi email xác nhận"));
+},function(err){
+if(ov)ov.classList.remove("show");
+showToast("⚠ "+L("メール送信に失敗しました。","Email send failed.","Gửi email thất bại."));
+console.error("[NNY] EmailJS error:",err);
+});
+}
+// 農家（管理者）へ注文通知メール（BCCではなく直接送信）
+if(EJ.from){
+var adminSubject="【新規注文】"+o.no+" / "+o.name+" 様";
+var items=(o.items||[]).map(function(i){return i.e+" "+i.ja+" ×"+i.qty+" = "+vndEmail(i.qty*i.price);}).join("\n");
+var adminBody="新規注文が入りました。\n\n注文番号: "+o.no+"\n日時: "+o.ts+"\nお名前: "+o.name+"\n電話: "+o.phone+"\nメール: "+o.email+"\n住所: "+o.addr+"\n\n注文内容:\n"+items+"\n\n合計: "+vndEmail(o.tot)+"\n受け取り: "+o.delivery+"\n支払い: "+o.payment+(o.note?"\n備考: "+o.note:"")+"\n\n管理画面: https://hanoi-order.niconicoyasai.jp";
+emailjs.send(EJ.service,EJ.template,{to_email:EJ.from,to_name:"NICO NICO YASAI 農家",from_name:"注文システム",reply_to:o.email||EJ.from,subject:adminSubject,message:adminBody,order_no:o.no,order_date:o.ts,total:vndEmail(o.tot)})
+.catch(function(err){console.error("[NNY] Admin notify error:",err);});
 }
 }
 function fallbackMail(email,subject,body){var a=document.createElement("a");a.href="mailto:"+email+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);a.target="_blank";document.body.appendChild(a);a.click();document.body.removeChild(a);}
