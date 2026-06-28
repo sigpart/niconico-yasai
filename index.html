@@ -902,6 +902,17 @@ var rv=REVIEWS[pid]||[];if(!rv.length)return 0;
 return Math.round(rv.reduce(function(s,r){return s+r.rating;},0)/rv.length);
 }
 function renderProducts(){
+// Firebase同期前はバナーで案内
+var syncBanner=document.getElementById("fb-sync-banner");
+if(!syncBanner){
+syncBanner=document.createElement("div");
+syncBanner.id="fb-sync-banner";
+syncBanner.style.cssText="display:none;text-align:center;padding:8px;font-size:11px;color:var(--muted);background:var(--gp);border-radius:var(--r);margin-bottom:10px;";
+syncBanner.textContent="🔄 最新情報を読み込み中...";
+var pgrid=document.getElementById("pgrid");
+if(pgrid&&pgrid.parentNode)pgrid.parentNode.insertBefore(syncBanner,pgrid);
+}
+if(syncBanner)syncBanner.style.display=_fbSynced?"none":"block";
 var grid=document.getElementById("pgrid");
 var list=PRODUCTS.filter(function(p){
 if(season==="all") return p.pub!==false;
@@ -1717,7 +1728,7 @@ var f=document.getElementById("sq-flash-"+id);if(!f)return;
 f.classList.add("show");setTimeout(function(){f.classList.remove("show");},1200);
 }
 var FB_CFG={apiKey:"AIzaSyCE15q3KAPiXCUrzEmsVEL92HtE95eOBUk",authDomain:"nico-nico-yasai-hanoi-order.firebaseapp.com",projectId:"nico-nico-yasai-hanoi-order",storageBucket:"nico-nico-yasai-hanoi-order.firebasestorage.app",messagingSenderId:"733369514912",appId:"1:733369514912:web:cfd55f2632e32c1fba82c5"};
-var fbDb=null,fbEnabled=false;
+var fbDb=null,fbEnabled=false,_fbSynced=false;
 (function(){
 try{
 var r=localStorage.getItem("nny_fb");
@@ -1730,20 +1741,23 @@ var _fbInitTry=0;
 function doFirebaseInit(){
 _fbInitTry++;
 if(typeof firebase==='undefined'){
-if(_fbInitTry<30){setTimeout(doFirebaseInit,500);}
+if(_fbInitTry<60){setTimeout(doFirebaseInit,100);}
 else{console.error('[NNY Firebase] SDK読み込みタイムアウト');}
 return;
 }
 var ok=initFirebase();
 if(ok){
-loadFromFirebase(function(){renderProducts();setTimeout(_autoSyncProducts,1000);setTimeout(startFbPolling,2000);});
-} else if(_fbInitTry<30){
-setTimeout(doFirebaseInit,500);
-}
-}
-window.addEventListener('load',function(){
+loadFromFirebase(function(){_fbSynced=true;renderProducts();setTimeout(_autoSyncProducts,500);setTimeout(startFbPolling,2000);});
+} else if(_fbInitTry<60){
 setTimeout(doFirebaseInit,100);
-});
+}
+}
+// DOMContentLoadedで即起動（window.loadより大幅に早い）
+if(document.readyState==='loading'){
+document.addEventListener('DOMContentLoaded',function(){doFirebaseInit();});
+}else{
+doFirebaseInit();
+}
 })();
 function initFirebase(){
 try{
