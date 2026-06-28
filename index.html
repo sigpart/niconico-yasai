@@ -1747,7 +1747,7 @@ return;
 }
 var ok=initFirebase();
 if(ok){
-loadFromFirebase(function(){_fbSynced=true;renderProducts();setTimeout(_autoSyncProducts,500);setTimeout(startFbPolling,2000);});
+loadFromFirebase(function(){_fbSynced=true;_flushOrderQueue();renderProducts();setTimeout(_autoSyncProducts,500);setTimeout(startFbPolling,2000);});
 } else if(_fbInitTry<60){
 setTimeout(doFirebaseInit,100);
 }
@@ -1891,7 +1891,20 @@ if(typeof renderHistory==="function")renderHistory();
 d.p=true;chk();
 fbDb.collection("settings").doc("notify_list").get().then(function(doc){if(doc.exists&&doc.data().list)NOTIFY_LIST=doc.data().list;d.n=true;chk();}).catch(function(){d.n=true;chk();});
 }
-function fbSaveOrder(o){if(!fbEnabled||!fbDb)return;fbDb.collection("orders").doc(o.no.replace(/[^a-zA-Z0-9]/g,"-")).set(o).catch(function(e){console.error(e);});}
+var _pendingOrderQueue=[];
+function fbSaveOrder(o){
+if(!fbEnabled||!fbDb){
+// Firebase未接続の場合はキューに積んで接続後に送信
+_pendingOrderQueue.push(Object.assign({},o));
+return;
+}
+fbDb.collection("orders").doc(o.no.replace(/[^a-zA-Z0-9]/g,"-")).set(o).catch(function(e){console.error(e);});
+}
+function _flushOrderQueue(){
+if(!fbEnabled||!fbDb||!_pendingOrderQueue.length)return;
+var q=_pendingOrderQueue.splice(0);
+q.forEach(function(o){fbDb.collection("orders").doc(o.no.replace(/[^a-zA-Z0-9]/g,"-")).set(o).catch(function(e){console.error(e);});});
+}
 function fbSaveNotifyList(){if(!fbEnabled||!fbDb)return;fbDb.collection("settings").doc("notify_list").set({list:NOTIFY_LIST}).catch(function(e){console.error(e);});}
 var analyticsPeriod="month";
 function setPeriod(p,btn){analyticsPeriod=p;document.querySelectorAll(".period-tab").forEach(function(el){el.classList.remove("on");});if(btn)btn.classList.add("on");renderAnalytics();}
