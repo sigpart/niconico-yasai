@@ -454,7 +454,8 @@
 <div class="set-field"><label class="set-lbl">Service ID</label><input class="set-inp" id="ej-service" placeholder="service_xxxxxxx"></div>
 <div class="set-field"><label class="set-lbl">Template ID</label><input class="set-inp" id="ej-template" placeholder="template_xxxxxxx"></div>
 <div class="set-field"><label class="set-lbl">Public Key</label><input class="set-inp" id="ej-pubkey" placeholder="xxxxxxxxxxxxxxxxxxxxxxx"></div>
-<div class="set-field"><label class="set-lbl">Email gửi (From)</label><input class="set-inp" id="ej-from" placeholder="niconicoyasai@gmail.com"></div>
+<div class="set-field"><label class="set-lbl">Email gửi (From / 農家メール)</label><input class="set-inp" id="ej-from" placeholder="niconicoyasai@gmail.com"></div>
+<div class="set-field"><label class="set-lbl">管理者通知メール (Admin Notify)</label><input class="set-inp" id="ej-admin" type="email" placeholder="admin@example.com（注文通知の送り先）"></div>
 <button class="set-btn" onclick="saveEJConfig()" id="ej-save-btn">💾 Lưu cài đặt</button>
 <div style="display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap;">
 <input class="set-inp" id="ej-test-to" type="email" placeholder="Email thử nghiệm..." style="flex:1;min-width:140px;">
@@ -638,7 +639,7 @@ var currentReviewProductId = null;
 var currentNotifyProductId = null;
 var currentRating = 0;
 var QR_IMGS = {momo:null,zalopay:null,vnpay:null};
-var EJ = {service:"",template:"",pubkey:"",from:"sigpart123@gmail.com"};
+var EJ = {service:"",template:"",pubkey:"",from:"sigpart123@gmail.com",admin:""};
 (function(){
 try {
 var raw = localStorage.getItem("nny_ej");
@@ -1356,12 +1357,13 @@ showToast("⚠ "+L("メール送信に失敗しました。","Email send failed.
 console.error("[NNY] EmailJS error:",err);
 });
 }
-// 農家（管理者）へ注文通知メール（BCCではなく直接送信）
-if(EJ.from){
+// 管理者へ注文通知メール（BCCではなく直接送信）
+var adminDest=EJ.admin||"";
+if(adminDest){
 var adminSubject="【新規注文】"+o.no+" / "+o.name+" 様";
 var items=(o.items||[]).map(function(i){return i.e+" "+i.ja+" ×"+i.qty+" = "+vndEmail(i.qty*i.price);}).join("\n");
 var adminBody="新規注文が入りました。\n\n注文番号: "+o.no+"\n日時: "+o.ts+"\nお名前: "+o.name+"\n電話: "+o.phone+"\nメール: "+o.email+"\n住所: "+o.addr+"\n\n注文内容:\n"+items+"\n\n合計: "+vndEmail(o.tot)+"\n受け取り: "+o.delivery+"\n支払い: "+o.payment+(o.note?"\n備考: "+o.note:"")+"\n\n管理画面: https://hanoi-order.niconicoyasai.jp";
-emailjs.send(EJ.service,EJ.template,{to_email:EJ.from,to_name:"NICO NICO YASAI 農家",from_name:"注文システム",reply_to:o.email||EJ.from,subject:adminSubject,message:adminBody,order_no:o.no,order_date:o.ts,total:vndEmail(o.tot)})
+emailjs.send(EJ.service,EJ.template,{to_email:adminDest,to_name:"管理者",from_name:"NICO NICO YASAI 注文システム",reply_to:o.email||EJ.from,subject:adminSubject,message:adminBody,order_no:o.no,order_date:o.ts,total:vndEmail(o.tot)})
 .catch(function(err){console.error("[NNY] Admin notify error:",err);});
 }
 }
@@ -1539,6 +1541,7 @@ EJ.service=document.getElementById("ej-service").value.trim();
 EJ.template=document.getElementById("ej-template").value.trim();
 EJ.pubkey=document.getElementById("ej-pubkey").value.trim();
 EJ.from=document.getElementById("ej-from").value.trim();
+EJ.admin=(document.getElementById("ej-admin")||{}).value||"";EJ.admin=EJ.admin.trim();
 try{
 localStorage.setItem("nny_ej",JSON.stringify(EJ));
 if(EJ.pubkey)emailjs.init({publicKey:EJ.pubkey});
@@ -1574,7 +1577,7 @@ var stFl=document.getElementById("ej-status");
 if(stFl){stFl.style.display="block";stFl.style.background="var(--rp)";stFl.style.color="var(--red)";stFl.textContent=T("ejTestFail");}
 });
 }
-function loadEJConfigUI(){if(EJ.service){var e=document.getElementById("ej-service");if(e)e.value=EJ.service;}if(EJ.template){var e=document.getElementById("ej-template");if(e)e.value=EJ.template;}if(EJ.pubkey){var e=document.getElementById("ej-pubkey");if(e)e.value=EJ.pubkey;}if(EJ.from){var e=document.getElementById("ej-from");if(e)e.value=EJ.from;}}
+function loadEJConfigUI(){if(EJ.service){var e=document.getElementById("ej-service");if(e)e.value=EJ.service;}if(EJ.template){var e=document.getElementById("ej-template");if(e)e.value=EJ.template;}if(EJ.pubkey){var e=document.getElementById("ej-pubkey");if(e)e.value=EJ.pubkey;}if(EJ.from){var e=document.getElementById("ej-from");if(e)e.value=EJ.from;}if(EJ.admin){var e=document.getElementById("ej-admin");if(e)e.value=EJ.admin;}}
 function applySite(){var badge=document.getElementById("site-badge").value;var h1ja=document.getElementById("site-h1-ja").value.replace(/\n/g,"<br>");var h1vi=document.getElementById("site-h1-vi").value.replace(/\n/g,"<br>");var sja=document.getElementById("site-sub-ja").value;var svi=document.getElementById("site-sub-vi").value;I.ja.heroEyebrow=badge;I.vi.heroEyebrow=badge;I.ja.heroH1=h1ja;I.vi.heroH1=h1vi;I.ja.heroSub=sja;I.vi.heroSub=svi;applyI18n();closeAdmin();}
 var BANK_CFG={code:"970422",bankName:"MB Bank",account:"",owner:"",descTemplate:"NICONICO {no}"};
 (function(){try{var b=localStorage.getItem("nny_bank");if(b)BANK_CFG=JSON.parse(b);}catch(e){}})();
@@ -1856,7 +1859,7 @@ if(!fbEnabled||!fbDb){if(cb)cb(false);return;}
 fbDb.collection("settings").doc("app_config").get().then(function(doc){
 if(doc.exists){
 var cfg=doc.data();
-if(cfg.ej){try{var ej=JSON.parse(cfg.ej);EJ.service=ej.service||EJ.service;EJ.template=ej.template||EJ.template;EJ.pubkey=ej.pubkey||EJ.pubkey;EJ.from=ej.from||EJ.from;if(EJ.pubkey)emailjs.init({publicKey:EJ.pubkey});localStorage.setItem("nny_ej",cfg.ej);}catch(e){}}
+if(cfg.ej){try{var ej=JSON.parse(cfg.ej);EJ.service=ej.service||EJ.service;EJ.template=ej.template||EJ.template;EJ.pubkey=ej.pubkey||EJ.pubkey;EJ.from=ej.from||EJ.from;EJ.admin=ej.admin||EJ.admin||"";if(EJ.pubkey)emailjs.init({publicKey:EJ.pubkey});localStorage.setItem("nny_ej",cfg.ej);}catch(e){}}
 if(cfg.bank){try{var bk=JSON.parse(cfg.bank);BANK_CFG=Object.assign(BANK_CFG,bk);localStorage.setItem("nny_bank",cfg.bank);}catch(e){}}
 }
 }).catch(function(){});
