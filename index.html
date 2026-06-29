@@ -812,7 +812,7 @@ loadSaved(); showSavedBadge(); showView("info");
 function goConfirm(){
 if(selDel==="deliver"&&_shippingLoading){alert(L("送料を計算中です","Calculating shipping fee. Please wait.","Đang tính phí giao hàng."));return;}
 var _av2=document.getElementById("inp-addr")?document.getElementById("inp-addr").value.trim():"";if(selDel==="deliver"&&_av2&&_shippingFee===0&&!_shippingLoading){var _tcb=document.querySelector('[onclick="goConfirm()"]');if(_tcb){_tcb.disabled=true;_tcb.textContent=L("計算中...","Calculating...","Đang tính...");}calcShippingFee(_av2,function(){if(_tcb){_tcb.disabled=false;_tcb.textContent=L("✔ 注文内容を確認する","✔ Review Order","✔ Xem lại đơn hàng");}goConfirm();});return;}
-var fields=["inp-name","inp-phone","inp-addr","inp-email"];
+var fields=selDel==="pickup"?["inp-name","inp-phone","inp-email"]:["inp-name","inp-phone","inp-addr","inp-email"];
 var ok=true;
 fields.forEach(function(id){
 var el=document.getElementById(id); el.classList.remove("err");
@@ -1275,7 +1275,26 @@ saveNotifyList();
 document.getElementById("ntf-modal-body").innerHTML='<div class="notify-success">'+T("ntfSuccess")+'</div>';
 setTimeout(closeNotify,2000);
 }
-function pickDel(el,v){document.querySelectorAll(".opt-card:not(.disabled)").forEach(function(e){e.classList.remove("on");});el.classList.add("on");selDel=v;saveCust();var _ae=document.getElementById("inp-addr");if(_ae&&_ae.value.trim()){calcShippingFee(_ae.value,function(){updateShippingDisplay(null,false);});}else{_shippingFee=0;_shippingDist=0;updateShippingDisplay(null,false);}}
+function pickDel(el,v){
+document.querySelectorAll(".opt-card:not(.disabled)").forEach(function(e){e.classList.remove("on");});
+el.classList.add("on");selDel=v;saveCust();
+// 直接受取の場合は住所欄を非表示・任意に
+var addrRow=document.getElementById("inp-addr");
+var addrWrap=addrRow?addrRow.closest(".frow"):null;
+var addrLabel=document.getElementById("fl-addr");
+if(v==="pickup"){
+if(addrWrap)addrWrap.style.display="none";
+if(addrRow){addrRow.removeAttribute("required");addrRow.value="";}
+_shippingFee=0;_shippingDist=0;updateShippingDisplay(null,false);
+}else{
+if(addrWrap)addrWrap.style.display="";
+if(addrRow)addrRow.setAttribute("required","");
+if(addrLabel)addrLabel.innerHTML=L("住所 <span class='req'>必須</span>","Address <span class='req'>*</span>","Địa chỉ <span class='req'>*</span>");
+var _ae=document.getElementById("inp-addr");
+if(_ae&&_ae.value.trim()){calcShippingFee(_ae.value,function(){updateShippingDisplay(null,false);});}
+else{_shippingFee=0;_shippingDist=0;updateShippingDisplay(null,false);}
+}
+}
 function pickPay(el,v){document.querySelectorAll(".pay-opt").forEach(function(e){e.classList.remove("on");});el.classList.add("on");selPay=v;saveCust();}
 var QR_META={momo:{logo:"💜",ja:"MoMo で支払う",vi:"Thanh toán qua MoMo"},zalopay:{logo:"💙",ja:"ZaloPay で支払う",vi:"Thanh toán qua ZaloPay"},vnpay:{logo:"❤️",ja:"VNPay で支払う",vi:"Thanh toán qua VNPay"}};
 function showQR(method){
