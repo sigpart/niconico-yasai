@@ -1186,6 +1186,13 @@ if(done===PRODUCTS.length)showToast(adminLang==="vi"?"☁️ Đồng bộ thành
 }
 function loadFromFirebase(cb){
 if(!fbEnabled||!fbDb){if(cb)cb(false);return;}
+// app_config（deliveryOrigin等）をFirebaseから読み込む
+fbDb.collection("settings").doc("app_config").get().then(function(doc){
+if(doc.exists){
+var cfg=doc.data();
+if(cfg.deliveryOrigin){try{var dor=JSON.parse(cfg.deliveryOrigin);DELIVERY_ORIGIN=Object.assign(DELIVERY_ORIGIN,dor);localStorage.setItem("nny_delivery_origin",cfg.deliveryOrigin);if(typeof loadDeliveryOriginUI==="function")loadDeliveryOriginUI();}catch(e){}}
+}
+}).catch(function(){});
 var d={o:false,p:false,n:false};
 function chk(){if(d.o&&d.p&&d.n&&cb)cb(true);}
 fbDb.collection("orders").get().then(function(s){var a=[];s.forEach(function(doc){a.push(doc.data());});if(a.length){
@@ -1479,7 +1486,7 @@ var us=document.getElementById("user-screen");
 var as=document.getElementById("admin-screen");
 if(us)us.style.display="none";
 if(as)as.classList.add("on");
-loadEJConfigUI();loadBankConfigUI();loadFBConfigUI();
+loadEJConfigUI();loadBankConfigUI();loadFBConfigUI();if(typeof loadDeliveryOriginUI==="function")loadDeliveryOriginUI();
 applyAdminI18n();
 if(fbEnabled){
 loadFromFirebase(function(ok){
@@ -2595,9 +2602,11 @@ function closeVariantModal(){}
 function openOwnerScreen(){var os=document.getElementById("owner-screen");if(!os)return;document.querySelectorAll(".admin-screen,#admin-screen,[id=admin-screen]").forEach(function(el){el.style.cssText="display:none!important";el.classList.remove("on");});var us=document.getElementById("user-screen");if(us)us.style.cssText="display:none!important";os.style.cssText="display:flex!important;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:#f0f4f0;overflow-y:auto;";os.classList.add("on");if(typeof fbEnabled!=="undefined"&&fbEnabled&&typeof fbDb!=="undefined"&&fbDb){fbDb.collection("orders").get().then(function(snap){var a=[];snap.forEach(function(doc){a.push(doc.data());});if(a.length)ORDERS=a;renderOwnerDashboard();}).catch(function(){renderOwnerDashboard();});}else{renderOwnerDashboard();}}
 function closeOwnerScreen(){var os=document.getElementById("owner-screen");if(os){os.style.cssText="display:none;";}var us=document.getElementById("user-screen");if(us){us.style.cssText="";us.style.display="block";}renderProducts();}
 var EM_HANOI_LNG=105.8417,EM_HANOI_LAT=21.0335,_shippingFee=0,_shippingDist=0,_shippingLoading=false;
+var DELIVERY_ORIGIN={active:"farm",farm:{name:"Bản Hang Trùng 2",addr:"Bản Hang Trùng 2, Xã Vân Hồ, Sơn La, Vietnam",lat:20.855,lng:104.585}};
+(function(){try{var _d=localStorage.getItem("nny_delivery_origin");if(_d)DELIVERY_ORIGIN=JSON.parse(_d);}catch(e){}})();
 function calcGrabFee(km){if(km<=2)return 15000;return Math.ceil((15000+Math.ceil(km-2)*5000)/1000)*1000;}
 function updateShippingDisplay(msg,loading){var el=document.getElementById("shipping-fee-row"),valEl=document.getElementById("shipping-fee-val");if(!el||!valEl)return;if(typeof selDel==="undefined"||selDel!=="deliver"){el.style.display="none";return;}el.style.display="flex";if(loading||msg){valEl.textContent=msg||L("計算中...","Calculating...","Đang tính...");return;}valEl.textContent=_shippingFee>0?vnd(_shippingFee+10000):L("住所を入力してください","Enter address","Nhập địa chỉ");}
-function calcShippingFee(addr,cb){if(typeof selDel==="undefined"||selDel!=="deliver"){_shippingFee=0;_shippingDist=0;if(cb)cb(0,0);return;}if(!addr||addr.trim().length<3){_shippingFee=0;_shippingDist=0;if(cb)cb(0,0);return;}_shippingLoading=true;updateShippingDisplay(L("計算中...","Calculating...","Đang tính..."),true);var dm={"ba dinh":1,"hoan kiem":2,"dong da":2,"kim ma":2,"linh lang":2,"giang vo":3,"tay ho":4,"quang an":4,"ciputra":8,"hai ba trung":4,"times city":5,"cau giay":6,"dich vong":5,"long bien":12,"vinhomes riverside":18,"bo de":10,"thach ban":12,"gia lam":14,"ocean park":20,"thanh xuan":7,"royal city":7,"nam tu liem":9,"my dinh":7,"smart city":14,"phuong khoang":10,"dai mo":10,"bac tu liem":5,"tu liem":7,"starlake":8,"hoang mai":7,"linh dam":8,"dong anh":16,"ha dong":13,"me linh":22,"soc son":32,"thuong tin":26,"thanh oai":22,"my duc":52};var al=addr.toLowerCase().replace(/[àáạảãăắặẳẵâấậẩẫ]/g,"a").replace(/[èéẹẻẽêếệểễ]/g,"e").replace(/[ìíịỉĩ]/g,"i").replace(/[òóọỏõôốộổỗơớợởỡ]/g,"o").replace(/[ùúụủũưứựửữ]/g,"u").replace(/[ỳýỵỷỹ]/g,"y").replace(/đ/g,"d");var dk=7;for(var k in dm){if(al.indexOf(k)>=0){dk=dm[k];break;}}fetch("https://nominatim.openstreetmap.org/search?q="+encodeURIComponent(addr.trim()+" Ha Noi Vietnam")+"&format=json&limit=1").then(function(r){return r.json();}).then(function(d){if(!d||!d.length)throw 0;return fetch("https://router.project-osrm.org/route/v1/driving/"+EM_HANOI_LNG+","+EM_HANOI_LAT+";"+d[0].lon+","+d[0].lat+"?overview=false");}).then(function(r){return r.json();}).then(function(d){if(!d||!d.routes||!d.routes.length)throw 0;var km=d.routes[0].distance/1000;_shippingDist=Math.round(km*10)/10;_shippingFee=calcGrabFee(km);_shippingLoading=false;updateShippingDisplay(null,false);if(cb)cb(_shippingFee,_shippingDist);}).catch(function(){_shippingDist=dk;_shippingFee=calcGrabFee(dk);_shippingLoading=false;updateShippingDisplay(null,false);if(cb)cb(_shippingFee,_shippingDist);});}
+function calcShippingFee(addr,cb){if(typeof selDel==="undefined"||selDel!=="deliver"){_shippingFee=0;_shippingDist=0;if(cb)cb(0,0);return;}if(!addr||addr.trim().length<3){_shippingFee=0;_shippingDist=0;if(cb)cb(0,0);return;}_shippingLoading=true;updateShippingDisplay(L("計算中...","Calculating...","Đang tính..."),true);var dm={"ba dinh":1,"hoan kiem":2,"dong da":2,"kim ma":2,"linh lang":2,"giang vo":3,"tay ho":4,"quang an":4,"ciputra":8,"hai ba trung":4,"times city":5,"cau giay":6,"dich vong":5,"long bien":12,"vinhomes riverside":18,"bo de":10,"thach ban":12,"gia lam":14,"ocean park":20,"thanh xuan":7,"royal city":7,"nam tu liem":9,"my dinh":7,"smart city":14,"phuong khoang":10,"dai mo":10,"bac tu liem":5,"tu liem":7,"starlake":8,"hoang mai":7,"linh dam":8,"dong anh":16,"ha dong":13,"me linh":22,"soc son":32,"thuong tin":26,"thanh oai":22,"my duc":52};var al=addr.toLowerCase().replace(/[àáạảãăắặẳẵâấậẩẫ]/g,"a").replace(/[èéẹẻẽêếệểễ]/g,"e").replace(/[ìíịỉĩ]/g,"i").replace(/[òóọỏõôốộổỗơớợởỡ]/g,"o").replace(/[ùúụủũưứựửữ]/g,"u").replace(/[ỳýỵỷỹ]/g,"y").replace(/đ/g,"d");var dk=7;for(var k in dm){if(al.indexOf(k)>=0){dk=dm[k];break;}}fetch("https://nominatim.openstreetmap.org/search?q="+encodeURIComponent(addr.trim()+" Ha Noi Vietnam")+"&format=json&limit=1").then(function(r){return r.json();}).then(function(d){if(!d||!d.length)throw 0;var _orig=(DELIVERY_ORIGIN.active==="farm"&&DELIVERY_ORIGIN.farm.lat&&DELIVERY_ORIGIN.farm.lng)?{lat:DELIVERY_ORIGIN.farm.lat,lng:DELIVERY_ORIGIN.farm.lng}:{lat:EM_HANOI_LAT,lng:EM_HANOI_LNG};return fetch("https://router.project-osrm.org/route/v1/driving/"+_orig.lng+","+_orig.lat+";"+d[0].lon+","+d[0].lat+"?overview=false");}).then(function(r){return r.json();}).then(function(d){if(!d||!d.routes||!d.routes.length)throw 0;var km=d.routes[0].distance/1000;_shippingDist=Math.round(km*10)/10;_shippingFee=calcGrabFee(km);_shippingLoading=false;updateShippingDisplay(null,false);if(cb)cb(_shippingFee,_shippingDist);}).catch(function(){_shippingDist=dk;_shippingFee=calcGrabFee(dk);_shippingLoading=false;updateShippingDisplay(null,false);if(cb)cb(_shippingFee,_shippingDist);});}
 var OWNER_FEE_RATE=0.13,_ownerPayments=[];try{var _op=localStorage.getItem("nny_owner_payments");if(_op)_ownerPayments=JSON.parse(_op);}catch(e){}
 function renderOwnerDashboard(){var ys=document.getElementById("owner-year"),ms=document.getElementById("owner-month");if(!ys||!ms)return;var now=new Date();var _curYr=now.getFullYear(),_curMo=now.getMonth()+1;var _prevYrVal=parseInt(ys.value)||_curYr,_prevMoVal=parseInt(ms.value)||_curMo;ys.innerHTML="";for(var y=_curYr-2;y<=_curYr+3;y++){var op=document.createElement("option");op.value=y;op.textContent=y+"年";if(y===_prevYrVal)op.selected=true;ys.appendChild(op);}ms.innerHTML="";for(var mo=1;mo<=12;mo++){var op2=document.createElement("option");op2.value=mo;op2.textContent=mo+"月";if(mo===_prevMoVal)op2.selected=true;ms.appendChild(op2);}var yr=parseInt(ys.value),m=parseInt(ms.value);var orders=ORDERS.filter(function(o){if(o.status==="cancelled")return false;var d=new Date(o.ts||o.no);if(isNaN(d.getTime())){var mm=(o.ts||"").match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);if(mm)d=new Date(mm[1],mm[2]-1,mm[3]);else return false;}return d.getFullYear()===yr&&d.getMonth()+1===m;});var ts=orders.reduce(function(s,o){return s+(o.tot||0);},0),fee=Math.round(ts*OWNER_FEE_RATE),fp=ts-fee;var e=document.getElementById.bind(document);if(e("owner-total-sales"))e("owner-total-sales").textContent=vnd(ts);if(e("owner-fee"))e("owner-fee").textContent=vnd(fee);if(e("owner-order-count"))e("owner-order-count").textContent=orders.length+"件";if(e("owner-farmer-pay"))e("owner-farmer-pay").textContent=vnd(fp);renderPaymentList();renderOwnerHistory();var se=localStorage.getItem("nny_farm_email");if(se){var el=e("owner-farm-email");if(el&&!el.value)el.value=se;}}
 function _buildInvoiceBody(mo,yr,ordersLen,ts,fee,fp){return "━━━━━━━━━━━━━━━━━━━━━━\nNICO NICO YASAI — HÓA ĐƠN PHÍ DỊCH VỤ\n━━━━━━━━━━━━━━━━━━━━━━\n\nKính gửi trang trại Bản Hồ,\n\nDưới đây là tổng kết doanh thu tháng "+mo+"/"+yr+":\n\n  📦 Số đơn hàng        : "+ordersLen+" đơn\n  💰 Tổng doanh thu    : "+ts.toLocaleString()+"₫\n  📊 13% doanh thu     : "+fee.toLocaleString()+"₫\n  🌿 Trang trại nhận   : "+fp.toLocaleString()+"₫\n\n━━━━━━━━━━━━━━━━━━━━━━\n⚠️  YÊU CẦU THANH TOÁN\n━━━━━━━━━━━━━━━━━━━━━━\nVui lòng chuyển khoản 13% doanh thu tháng "+mo+"/"+yr+"\n\n    "+fee.toLocaleString()+"₫\n\nvề tài khoản NICO NICO YASAI trong vòng 7 ngày.\n\nSau khi chuyển khoản, vui lòng gửi ảnh xác nhận giao dịch\nbằng một trong các cách sau:\n\n  📱 Messenger: Gửi qua bất kỳ cuộc trò chuyện nào với tôi trên Messenger\n  📧 Email: Reply email này kèm ảnh\n\nXin cảm ơn sự hợp tác của bạn!\nNICO NICO YASAI — Bản Hồ Farm";}
@@ -2610,6 +2619,65 @@ function uploadPaymentSS(input){if(!input.files||!input.files[0])return;var read
 function renderPaymentList(){var el=document.getElementById("owner-payment-list");if(!el)return;var ys=document.getElementById("owner-year"),ms=document.getElementById("owner-month");var payments=_ownerPayments.filter(function(p){if(!ys||!ms)return true;return p.yr===parseInt(ys.value)&&p.mo===parseInt(ms.value);});if(!payments.length){el.innerHTML='<div style="color:#aaa;font-size:12px;text-align:center;padding:12px;">この月の支払い記録なし</div>';return;}el.innerHTML=payments.map(function(p,i){return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f0f0;"><img src="'+p.data+'" style="width:60px;height:45px;object-fit:cover;border-radius:6px;cursor:pointer;" onclick="window.open(this.src)"><div style="flex:1;font-size:12px;font-weight:700;">'+p.yr+'年'+p.mo+'月</div><button onclick="confirmPaymentOwner('+i+')" style="font-size:11px;padding:5px 10px;border:1px solid #ccc;border-radius:6px;background:'+(p.status==="confirmed"?"#e8f5e2":"#fff")+';cursor:pointer;">'+(p.status==="confirmed"?"✅ 確認済":"確認する")+'</button></div>';}).join('');}
 function confirmPaymentOwner(idx){var ys=document.getElementById("owner-year"),ms=document.getElementById("owner-month");var payments=_ownerPayments.filter(function(p){if(!ys||!ms)return true;return p.yr===parseInt(ys.value)&&p.mo===parseInt(ms.value);});if(payments[idx]){payments[idx].status="confirmed";try{localStorage.setItem("nny_owner_payments",JSON.stringify(_ownerPayments));}catch(e){}}renderPaymentList();}
 
+function setDeliveryOriginMode(mode){
+DELIVERY_ORIGIN.active=mode;
+var btnEm=document.getElementById("dorigin-btn-emhanoi");
+var btnFarm=document.getElementById("dorigin-btn-farm");
+var farmFields=document.getElementById("dorigin-farm-fields");
+var emInfo=document.getElementById("dorigin-emhanoi-info");
+if(mode==="farm"){
+if(btnEm){btnEm.style.background="#fff";btnEm.style.color="var(--g2)";btnEm.style.borderColor="var(--g3)";}
+if(btnFarm){btnFarm.style.background="var(--g1)";btnFarm.style.color="#fff";btnFarm.style.borderColor="var(--g1)";}
+if(farmFields)farmFields.style.display="";
+if(emInfo)emInfo.style.display="none";
+}else{
+if(btnEm){btnEm.style.background="var(--g1)";btnEm.style.color="#fff";btnEm.style.borderColor="var(--g1)";}
+if(btnFarm){btnFarm.style.background="#fff";btnFarm.style.color="var(--g2)";btnFarm.style.borderColor="var(--g3)";}
+if(farmFields)farmFields.style.display="none";
+if(emInfo)emInfo.style.display="";
+}
+}
+function saveDeliveryOrigin(){
+var mode=DELIVERY_ORIGIN.active;
+if(mode==="farm"){
+var name=((document.getElementById("dorigin-farm-name")||{}).value||"").trim();
+var addr=((document.getElementById("dorigin-farm-addr")||{}).value||"").trim();
+if(!addr){alert("農場の住所を入力してください");return;}
+var coords=document.getElementById("dorigin-farm-coords");
+var btn=document.getElementById("dorigin-save-btn");
+if(coords)coords.textContent="📍 ジオコーディング中...";
+if(btn)btn.disabled=true;
+fetch("https://nominatim.openstreetmap.org/search?q="+encodeURIComponent(addr)+"&format=json&limit=1").then(function(r){return r.json();}).then(function(d){
+if(!d||!d.length)throw new Error("not found");
+var lat=parseFloat(d[0].lat),lng=parseFloat(d[0].lon);
+DELIVERY_ORIGIN.farm={name:name,addr:addr,lat:lat,lng:lng};
+if(coords)coords.textContent="✅ "+lat.toFixed(5)+", "+lng.toFixed(5);
+_persistDeliveryOrigin();
+}).catch(function(){
+if(coords)coords.textContent="⚠ 住所が見つかりません。デフォルト座標で保存します。";
+DELIVERY_ORIGIN.farm={name:name,addr:addr,lat:DELIVERY_ORIGIN.farm.lat||0,lng:DELIVERY_ORIGIN.farm.lng||0};
+_persistDeliveryOrigin();
+}).finally(function(){if(btn)btn.disabled=false;});
+}else{
+_persistDeliveryOrigin();
+}
+}
+function _persistDeliveryOrigin(){
+try{localStorage.setItem("nny_delivery_origin",JSON.stringify(DELIVERY_ORIGIN));}catch(e){}
+if(typeof fbEnabled!=="undefined"&&fbEnabled&&fbDb){
+fbDb.collection("settings").doc("app_config").set({deliveryOrigin:JSON.stringify(DELIVERY_ORIGIN)},{merge:true}).catch(function(e){console.error(e);});
+}
+showToast("✅ 配送元を保存しました");
+}
+function loadDeliveryOriginUI(){
+setDeliveryOriginMode(DELIVERY_ORIGIN.active||"farm");
+var fn=document.getElementById("dorigin-farm-name");
+var fa=document.getElementById("dorigin-farm-addr");
+var fc=document.getElementById("dorigin-farm-coords");
+if(fn)fn.value=DELIVERY_ORIGIN.farm.name||"";
+if(fa)fa.value=DELIVERY_ORIGIN.farm.addr||"";
+if(fc&&DELIVERY_ORIGIN.farm.lat&&DELIVERY_ORIGIN.farm.lng)fc.textContent="📍 "+DELIVERY_ORIGIN.farm.lat.toFixed(5)+", "+DELIVERY_ORIGIN.farm.lng.toFixed(5);
+}
 var _fbPollTimer=null;
 function startFbPolling(){
 if(!fbEnabled||!fbDb)return;
@@ -2660,7 +2728,12 @@ var as=document.getElementById("admin-screen");
 if(as&&as.classList.contains("on")&&typeof renderAdminOrders2==="function")renderAdminOrders2();
 }
 }).catch(function(){});
-},30000);
+fbDb.collection("settings").doc("app_config").get().then(function(doc){
+if(!doc.exists)return;
+var cfg=doc.data();
+if(cfg.deliveryOrigin){try{var dor=JSON.parse(cfg.deliveryOrigin);var prev=JSON.stringify(DELIVERY_ORIGIN);DELIVERY_ORIGIN=Object.assign(DELIVERY_ORIGIN,dor);localStorage.setItem("nny_delivery_origin",cfg.deliveryOrigin);if(JSON.stringify(DELIVERY_ORIGIN)!==prev&&typeof loadDeliveryOriginUI==="function")loadDeliveryOriginUI();}catch(e){}}
+}).catch(function(){});
+},15000);
 }
 function initApp(){
 if(typeof normalizeReviews==="function")normalizeReviews();
