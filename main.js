@@ -660,16 +660,25 @@ document.getElementById("qr-overlay").classList.add("open");
 }
 function closeQR(){document.getElementById("qr-overlay").classList.remove("open");}
 function confirmQR(){
-if(!window.pendingOrder || !window.pendingOrder.screenshot) {
-const ph = document.getElementById('qr-ph');
-if(!ph || !ph.files || !ph.files.length) {
-alert('送金スクリーンショットをアップロードしてから確定してください。\nVui lòng tải ảnh xác nhận chuyển khoản trước khi xác nhận.');
+if(!pendingScreenshot&&!(window.pendingOrder&&window.pendingOrder.screenshot)){
+alert(lang==="ja"?'送金スクリーンショットをアップロードしてから確定してください。':'Vui lòng tải ảnh xác nhận chuyển khoản trước khi xác nhận.');
 return;
 }
-}closeQR();finalizeOrder();}
+closeQR();finalizeOrder();}
 function handleQRImg(ev){
-var f=ev.target.files[0];if(!f||!currentQRMethod)return;
-var r=new FileReader();r.onload=function(e){QR_IMGS[currentQRMethod]=e.target.result;saveQRImgs();var photo=document.getElementById("qr-photo"),ph=document.getElementById("qr-ph");photo.src=e.target.result;photo.style.display="block";ph.style.display="none";};r.readAsDataURL(f);
+var f=ev.target.files[0];if(!f)return;
+var r=new FileReader();r.onload=function(e){
+var data=e.target.result;
+if(currentQRMethod&&(currentQRMethod==="momo"||currentQRMethod==="zalopay"||currentQRMethod==="vnpay")){
+QR_IMGS[currentQRMethod]=data;saveQRImgs();
+var photo=document.getElementById("qr-photo"),ph=document.getElementById("qr-ph");
+if(photo){photo.src=data;photo.style.display="block";}
+if(ph)ph.style.display="none";
+}
+// スクショをpendingOrderに保存
+if(window.pendingOrder)window.pendingOrder.screenshot=data;
+pendingScreenshot=data;
+};r.readAsDataURL(f);
 }
 function closeSSModal(){
 var el=document.getElementById("ss-modal-overlay");
@@ -792,7 +801,7 @@ var _rev=[].concat(ORDERS).reverse();
 _rev.forEach(function(o,i){
 var items=o.items.map(function(i){return i.e+"×"+i.qty;}).join(" ");
 html+='<div class="oc"><div class="oc-head"><span class="oc-no">'+o.no+'</span><span class="st-tag '+(o.status==="new"?"st-new":"st-done")+'">'+(o.status==="new"?T("stNew"):T("stDone"))+'</span></div>';
-html+='<div class="oc-meta"><span>👤 '+o.name+'</span><span>📞 '+o.phone+'</span><span>🕐 '+o.ts+'</span></div>';
+html+='<div class="oc-meta"><span>👤 '+esc(o.name)+'</span><span>📞 '+esc(o.phone)+'</span><span>🕐 '+esc(o.ts)+'</span></div>';
 html+='<div style="font-size:11px;color:var(--ghost);margin-top:3px">'+items+'</div>';
 html+='<div class="oc-tot">'+vnd(o.tot)+'</div>';
 html+='<div class="oc-btns"><button class="oc-btn oc-btn-done" onclick="toggleOStatusByIdx('+i+')">'+T("ocToggleDone")+'</button><button class="oc-btn oc-btn-receipt" onclick="adminShowReceiptByIdx('+i+')">'+T("ocViewReceipt")+'</button></div>';
@@ -1408,7 +1417,7 @@ return "<div style='text-align:center;padding:16px 0 12px;'><div style='font-siz
 +"</table>"
 +"<table style='width:100%;border-collapse:collapse;font-size:11.5px;'><thead><tr style='background:#1a6b2a;color:#fff;'><th style='padding:7px 8px;text-align:left;'>"+(L("商品","Item","Sản phẩm"))+"</th><th style='padding:7px 8px;text-align:center;'>"+(L("数量","Qty","SL"))+"</th><th style='padding:7px 8px;text-align:right;'>"+(L("単価","Unit Price","Đơn giá"))+"</th><th style='padding:7px 8px;text-align:right;'>"+(L("小計","Subtotal","T.tiền"))+"</th></tr></thead><tbody>"+rows+"</tbody>"
 +"<tfoot><tr style='border-top:2px solid #1a6b2a;'><td colspan='3' style='padding:10px 8px;font-weight:800;font-size:13px;text-align:right;'>"+(L("合計","Total","Tổng"))+"</td><td style='padding:10px 8px;font-weight:900;font-size:17px;color:#1a6b2a;text-align:right;'>"+vnd(o.tot)+"</td></tr></tfoot></table>"
-+(o.note?"<div style='margin-top:12px;padding:10px 12px;background:#f5faf5;border-radius:6px;font-size:11.5px;'><b>"+(L("備考：","Notes: ","Ghi chú: "))+"</b>"+o.note+"</div>":"");
++(o.note?"<div style='margin-top:12px;padding:10px 12px;background:#f5faf5;border-radius:6px;font-size:11.5px;'><b>"+(L("備考：","Notes: ","Ghi chú: "))+"</b>"+esc(o.note)+"</div>":"");
 }
 // ADMIN — 変数
 var ADMIN_PIN = "1234";
@@ -2472,8 +2481,8 @@ rv.forEach(function(r,i){
 total++;
 html+='<div style="display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--border);">';
 html+='<div style="flex:1;">';
-html+='<div style="font-size:11px;margin-bottom:2px;">'+stars(r.rating)+' <b>'+(r.name||"匿名")+'</b> <span style="color:var(--muted);font-size:10px;">'+r.date+'</span></div>';
-html+='<div style="font-size:12px;color:var(--g2);">'+r.text+'</div>';
+html+='<div style="font-size:11px;margin-bottom:2px;">'+stars(r.rating)+' <b>'+esc(r.name||"匿名")+'</b> <span style="color:var(--muted);font-size:10px;">'+esc(r.date)+'</span></div>';
+html+='<div style="font-size:12px;color:var(--g2);">'+esc(r.text)+'</div>';
 html+='</div>';
 html+='<button onclick="deleteReview('+p.id+','+i+')" style="flex-shrink:0;background:#e74c3c;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;">🗑 '+(adminLang==="vi"?"Xóa":"削除")+'</button>';
 html+='</div>';
