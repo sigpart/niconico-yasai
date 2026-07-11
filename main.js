@@ -268,6 +268,7 @@ var floatCart=document.getElementById("float-cart");
 if(floatCart)floatCart.style.display=isAll?"":"none";
 }
 function vnd(n){return n.toLocaleString("vi-VN")+" ₫";}
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
 function stars(rating,count){
 var s="";
 for(var i=1;i<=5;i++) s+='<span class="s'+(i<=rating?" on":"")+'">★</span>';
@@ -311,8 +312,8 @@ rvPreview='<div class="pcard-reviews">';
 recent.forEach(function(r){
 rvPreview+='<div class="pcard-rv-item">'
 +'<span class="pcard-rv-stars">'+stars(r.rating)+'</span>'
-+'<span class="pcard-rv-name">'+(r.name||L("匿名","Anonymous","Ẩn danh"))+'</span>'
-+'<div class="pcard-rv-text">'+(r.text||'')+'</div>'
++'<span class="pcard-rv-name">'+esc(r.name||L("匿名","Anonymous","Ẩn danh"))+'</span>'
++'<div class="pcard-rv-text">'+esc(r.text||'')+'</div>'
 +'</div>';
 });
 if(rv.length>2)rvPreview+='<div class="pcard-rv-more" onclick="showAllReviews('+p.id+')">'+L("すべてのレビューを見る（"+rv.length+"件）","See all reviews ("+rv.length+")","Xem tất cả đánh giá ("+rv.length+")")+'</div>';
@@ -412,7 +413,7 @@ var _sr=document.getElementById("cc-ship-row");if(_sr){if(_sf>0){_sr.style.displ
 var _gr=document.getElementById("cc-grand-row");if(_gr){if(_sf>0){_gr.style.display="";var _gv=document.getElementById("cc-grand-val");if(_gv)_gv.textContent=vnd(_gt);}else _gr.style.display="none";}
 var n=document.getElementById("inp-name").value, ph=document.getElementById("inp-phone").value,
 z=document.getElementById("inp-zalo").value, a=document.getElementById("inp-addr").value, em=document.getElementById("inp-email").value;
-document.getElementById("cc-cust").innerHTML=n+"<br>"+ph+(z?" · Zalo:"+z:"")+"<br>"+a+(em?"<br>📧 "+em:"");
+document.getElementById("cc-cust").innerHTML=esc(n)+"<br>"+esc(ph)+(z?" · Zalo:"+esc(z):"")+"<br>"+esc(a)+(em?"<br>📧 "+esc(em):"");
 var dmap={deliver:T("delDeliver"),pickup:T("delPickup")};
 document.getElementById("cc-del").textContent=dmap[selDel]||selDel;
 var pmap={momo:"💜 MoMo",zalopay:"💙 ZaloPay",vnpay:"❤️ VNPay"};
@@ -430,7 +431,7 @@ document.getElementById("pay-lock-txt").textContent=(lang==="ja"?"🏦 銀行振
 }
 }
 function placeOrder(){
-var no="#NNY-"+String(Math.floor(Math.random()*9000)+1000);
+var _ts=Date.now(),_rnd=Math.floor(Math.random()*900)+100;var no="#NNY-"+(_ts.toString(36).toUpperCase().slice(-4))+_rnd;
 var ts=new Date().toLocaleString("ja-JP"), tot=cartTotal()+(selDel==="deliver"?_shippingFee+10000:0);
 var name=document.getElementById("inp-name").value, phone=document.getElementById("inp-phone").value,
 zalo=document.getElementById("inp-zalo").value, addr=document.getElementById("inp-addr").value,
@@ -576,11 +577,11 @@ html+='<span style="position:absolute;top:10px;right:0;font-size:9px;color:var(-
 }
 html+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;padding-right:'+(r.edited?"36px":"0")+';">';
 html+='<span>'+stars(r.rating)+'</span>';
-html+='<span style="font-size:11px;font-weight:700;">'+(r.name||L("匿名","Anonymous","Ẩn danh"))+'</span>';
-html+='<span style="font-size:10px;color:var(--muted);">'+r.date+'</span>';
+html+='<span style="font-size:11px;font-weight:700;">'+esc(r.name||L("匿名","Anonymous","Ẩn danh"))+'</span>';
+html+='<span style="font-size:10px;color:var(--muted);">'+esc(r.date)+'</span>';
 if(!r.sid||r.sid===_mySessionId){html+='<button onclick="editReviewByUser('+pid+','+realIdx+')" style="margin-left:auto;font-size:10px;padding:2px 8px;background:var(--gp);color:var(--g1);border:1px solid var(--g3);border-radius:4px;cursor:pointer;">✏️ '+L('編集','Edit','Sửa')+'</button>';}
 html+='</div>';
-html+='<div style="font-size:12px;line-height:1.5;color:var(--forest);">'+r.text+'</div>';
+html+='<div style="font-size:12px;line-height:1.5;color:var(--forest);">'+esc(r.text)+'</div>';
 html+='</div>';
 });
 rvList.innerHTML=html;
@@ -669,6 +670,10 @@ return;
 function handleQRImg(ev){
 var f=ev.target.files[0];if(!f||!currentQRMethod)return;
 var r=new FileReader();r.onload=function(e){QR_IMGS[currentQRMethod]=e.target.result;saveQRImgs();var photo=document.getElementById("qr-photo"),ph=document.getElementById("qr-ph");photo.src=e.target.result;photo.style.display="block";ph.style.display="none";};r.readAsDataURL(f);
+}
+function closeSSModal(){
+var el=document.getElementById("ss-modal-overlay");
+if(el)el.style.display="none";
 }
 function buildEmailBody(o){
 var dmap={deliver:T("delDeliver"),pickup:T("delPickup")};
@@ -1407,9 +1412,11 @@ return "<div style='text-align:center;padding:16px 0 12px;'><div style='font-siz
 }
 // ADMIN — 変数
 var ADMIN_PIN = "1234";
+var OWNER_PIN = "140506";
 var adminLang = "vi";
 (function(){
 try{var p=localStorage.getItem("nny_pin");if(p)ADMIN_PIN=p;}catch(e){}
+try{var op=localStorage.getItem("nny_owner_pin");if(op)OWNER_PIN=op;}catch(e){}
 try{var l=localStorage.getItem("nny_admin_lang");if(l)adminLang=l;}catch(e){}
 })();
 // PIN 認証
@@ -1440,7 +1447,7 @@ return false;
 var inp=document.getElementById("pin-input");
 if(!inp)return;
 var val=inp.value.trim();
-if(val==="140506"){
+if(val===OWNER_PIN){
 var _g=document.getElementById("pin-gate");
 if(_g){_g.classList.remove("open");_g.style.display="none";}
 var _us=document.getElementById("user-screen");
@@ -1680,8 +1687,8 @@ html+='<span style="margin-left:auto;font-size:12px;color:var(--muted);">'+(isOp
 html+='</div>';
 html+='<div id="'+bodyId+'" style="display:'+(isOpen?"block":"none")+';">';
 html+='<div class="ao-body">';
-html+='<div class="ao-meta">👤 '+o.name+' · 📞 '+o.phone+(o.email?' · '+o.email:"")+'</div>';
-html+='<div class="ao-meta">🏠 '+(o.addr||"")+'</div>';
+html+='<div class="ao-meta">👤 '+esc(o.name)+' · 📞 '+esc(o.phone)+(o.email?' · '+esc(o.email):"")+'</div>';
+html+='<div class="ao-meta">🏠 '+esc(o.addr||"")+'</div>';
 html+='<div class="ao-items">'+items+'</div>';
 if(o.payment==="vietqr"){
 html+='<div style="display:flex;align-items:center;gap:8px;margin-top:6px;padding-top:6px;border-top:1px solid var(--gp);">';
@@ -2269,11 +2276,11 @@ html+='<span style="position:absolute;top:10px;right:0;font-size:9px;color:var(-
 }
 html+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;padding-right:'+(r.edited?"36px":"0")+';">';
 html+='<span>'+stars(r.rating)+'</span>';
-html+='<span style="font-size:11px;font-weight:700;">'+(r.name||L("匿名","Anonymous","Ẩn danh"))+'</span>';
-html+='<span style="font-size:10px;color:var(--muted);">'+r.date+'</span>';
+html+='<span style="font-size:11px;font-weight:700;">'+esc(r.name||L("匿名","Anonymous","Ẩn danh"))+'</span>';
+html+='<span style="font-size:10px;color:var(--muted);">'+esc(r.date)+'</span>';
 if(!r.sid||r.sid===_mySessionId){html+='<button onclick="editReviewByUser('+pid+','+realIdx+')" style="margin-left:auto;font-size:10px;padding:2px 8px;background:var(--gp);color:var(--g1);border:1px solid var(--g3);border-radius:4px;cursor:pointer;">✏️ '+L('編集','Edit','Sửa')+'</button>';}
 html+='</div>';
-html+='<div style="font-size:12px;line-height:1.5;color:var(--forest);">'+r.text+'</div>';
+html+='<div style="font-size:12px;line-height:1.5;color:var(--forest);">'+esc(r.text)+'</div>';
 html+='</div>';
 });
 rvList.innerHTML=html;
