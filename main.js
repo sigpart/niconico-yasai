@@ -2628,7 +2628,7 @@ function closeVariantModal(){}
 function openOwnerScreen(){var os=document.getElementById("owner-screen");if(!os)return;document.querySelectorAll(".admin-screen,#admin-screen,[id=admin-screen]").forEach(function(el){el.style.cssText="display:none!important";el.classList.remove("on");});var us=document.getElementById("user-screen");if(us)us.style.cssText="display:none!important";os.style.cssText="display:flex!important;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:#f0f4f0;overflow-y:auto;";os.classList.add("on");if(typeof fbEnabled!=="undefined"&&fbEnabled&&typeof fbDb!=="undefined"&&fbDb){fbDb.collection("orders").get().then(function(snap){var a=[];snap.forEach(function(doc){a.push(doc.data());});if(a.length)ORDERS=a;renderOwnerDashboard();}).catch(function(){renderOwnerDashboard();});}else{renderOwnerDashboard();}}
 function closeOwnerScreen(){var os=document.getElementById("owner-screen");if(os){os.style.cssText="display:none;";}var us=document.getElementById("user-screen");if(us){us.style.cssText="";us.style.display="block";}renderProducts();}
 var EM_HANOI_LNG=105.8417,EM_HANOI_LAT=21.0335,_shippingFee=0,_shippingDist=0,_shippingLoading=false;
-var DELIVERY_ORIGIN={active:"farm",farm:{name:"Bản Hang Trùng 2",addr:"Bản Hang Trùng 2, Xã Vân Hồ, Sơn La, Vietnam",lat:20.855,lng:104.585,fixedFee:50000}};
+var DELIVERY_ORIGIN={active:"farm",farm:{name:"Bản Hang Trùng 2",addr:"Bản Hang Trùng 2, Xã Vân Hồ, Sơn La, Vietnam",lat:20.855,lng:104.585,fixedFee:100000}};
 (function(){try{var _d=localStorage.getItem("nny_delivery_origin");if(_d)DELIVERY_ORIGIN=JSON.parse(_d);}catch(e){}})();
 function calcGrabFee(km){if(km<=2)return 15000;return Math.ceil((15000+Math.ceil(km-2)*5000)/1000)*1000;}
 function updateShippingDisplay(msg,loading){var el=document.getElementById("shipping-fee-row"),valEl=document.getElementById("shipping-fee-val");if(!el||!valEl)return;if(typeof selDel==="undefined"||selDel!=="deliver"){el.style.display="none";return;}el.style.display="flex";if(loading||msg){valEl.textContent=msg||L("計算中...","Calculating...","Đang tính...");return;}var _fm=typeof DELIVERY_ORIGIN!=="undefined"&&DELIVERY_ORIGIN.active==="farm";valEl.textContent=_shippingFee>0?vnd(_shippingFee+(_fm?0:10000)):L("住所を入力してください","Enter address","Nhập địa chỉ");}
@@ -2637,7 +2637,7 @@ if(typeof selDel==="undefined"||selDel!=="deliver"){_shippingFee=0;_shippingDist
 if(!addr||addr.trim().length<3){_shippingFee=0;_shippingDist=0;if(cb)cb(0,0);return;}
 // 農場モードは固定送料（長距離のためGrab計算不適用）
 if(DELIVERY_ORIGIN.active==="farm"){
-_shippingFee=DELIVERY_ORIGIN.farm.fixedFee||50000;
+_shippingFee=DELIVERY_ORIGIN.farm.fixedFee||100000;
 _shippingDist=0;
 _shippingLoading=false;
 updateShippingDisplay(null,false);
@@ -2686,7 +2686,7 @@ if(mode==="farm"){
 var name=((document.getElementById("dorigin-farm-name")||{}).value||"").trim();
 var addr=((document.getElementById("dorigin-farm-addr")||{}).value||"").trim();
 var feeInp=document.getElementById("dorigin-farm-fee");
-var fixedFee=feeInp?Math.max(0,parseInt(feeInp.value)||50000):50000;
+var fixedFee=feeInp?Math.max(0,parseInt(feeInp.value)||100000):100000;
 if(!addr){alert("農場の住所を入力してください");return;}
 var coords=document.getElementById("dorigin-farm-coords");
 var btn=document.getElementById("dorigin-save-btn");
@@ -2722,7 +2722,7 @@ var fc=document.getElementById("dorigin-farm-coords");
 if(fn)fn.value=DELIVERY_ORIGIN.farm.name||"";
 if(fa)fa.value=DELIVERY_ORIGIN.farm.addr||"";
 var ff=document.getElementById("dorigin-farm-fee");
-if(ff)ff.value=DELIVERY_ORIGIN.farm.fixedFee||50000;
+if(ff)ff.value=DELIVERY_ORIGIN.farm.fixedFee||100000;
 if(fc&&DELIVERY_ORIGIN.farm.lat&&DELIVERY_ORIGIN.farm.lng)fc.textContent="📍 "+DELIVERY_ORIGIN.farm.lat.toFixed(5)+", "+DELIVERY_ORIGIN.farm.lng.toFixed(5);
 }
 var _fbPollTimer=null;
