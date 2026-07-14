@@ -218,7 +218,7 @@ var inCheckout=(v==="cart"||v==="info"||v==="confirm");
 if(pb) pb.classList.toggle("show",inCheckout);
 updateProg(v);
 window.scrollTo({top:0,behavior:"smooth"});
-document.getElementById("nav-shop").classList.toggle("active",v==="shop"||v==="cart"||v==="info"||v==="confirm"||v==="receipt");
+var ns=document.getElementById("nav-shop");if(ns)ns.classList.toggle("active",v==="shop"||v==="cart"||v==="info"||v==="confirm"||v==="receipt");
 document.getElementById("nav-hist").classList.toggle("active",v==="history");
 }
 function updateProg(v){
