@@ -773,7 +773,7 @@ if(typeof renderAdminProducts2==="function")renderAdminProducts2();
 if(typeof loadEJConfigUI==="function")loadEJConfigUI();
 if(typeof loadFirebaseConfigUI==="function")loadFirebaseConfigUI();
 if(fbEnabled&&typeof loadFromFirebase==="function"){
-loadFromFirebase(function(){renderProducts();setTimeout(_autoSyncProducts,1000);setTimeout(startFbPolling,2000);});
+loadFromFirebase(function(){renderProducts();setTimeout(_autoSyncProducts,1000);startFbPolling();});
 }
 }
 function closeAdmin(){var sc=document.getElementById("admin-screen");if(sc){sc.classList.remove("on");sc.style.display="none";}}
@@ -1116,7 +1116,7 @@ return;
 }
 var ok=initFirebase();
 if(ok){
-loadFromFirebase(function(){renderProducts();setTimeout(_autoSyncProducts,1000);setTimeout(startFbPolling,2000);});
+loadFromFirebase(function(){renderProducts();setTimeout(_autoSyncProducts,1000);startFbPolling();});
 } else if(_fbInitTry<30){
 setTimeout(doFirebaseInit,500);
 }
@@ -1202,12 +1202,25 @@ if(done===PRODUCTS.length)showToast(adminLang==="vi"?"☁️ Đồng bộ thành
 }
 function loadFromFirebase(cb){
 if(!fbEnabled||!fbDb){if(cb)cb(false);return;}
-// app_config（deliveryOrigin等）をFirebaseから読み込む
+// app_config（EJ・銀行・deliveryOrigin等）をFirebaseから読み込む
 fbDb.collection("settings").doc("app_config").get().then(function(doc){
 if(doc.exists){
 var cfg=doc.data();
+if(cfg.ej){try{var ej=JSON.parse(cfg.ej);EJ.service=ej.service||EJ.service;EJ.template=ej.template||EJ.template;EJ.pubkey=ej.pubkey||EJ.pubkey;EJ.from=ej.from||EJ.from;EJ.admin=ej.admin||EJ.admin||"";if(EJ.pubkey)emailjs.init({publicKey:EJ.pubkey});localStorage.setItem("nny_ej",cfg.ej);if(typeof loadEJConfigUI==="function")loadEJConfigUI();}catch(e){}}
+if(cfg.bank){try{var bk=JSON.parse(cfg.bank);BANK_CFG=Object.assign(BANK_CFG,bk);localStorage.setItem("nny_bank",cfg.bank);if(typeof loadBankConfigUI==="function")loadBankConfigUI();}catch(e){}}
 if(cfg.deliveryOrigin){try{var dor=JSON.parse(cfg.deliveryOrigin);DELIVERY_ORIGIN=Object.assign(DELIVERY_ORIGIN,dor);localStorage.setItem("nny_delivery_origin",cfg.deliveryOrigin);if(typeof loadDeliveryOriginUI==="function")loadDeliveryOriginUI();}catch(e){}}
 }
+}).catch(function(){});
+// 商品のpub状態をFirebaseから即時取得して反映
+fbDb.collection("products").get().then(function(snap){
+var changed=false;
+snap.forEach(function(doc){
+var d=doc.data();
+if(!d||!d.id)return;
+var p=PRODUCTS.find(function(x){return Number(x.id)===Number(d.id);});
+if(p&&d.pub!==undefined&&p.pub!==d.pub){p.pub=d.pub;changed=true;}
+});
+if(changed)renderProducts();
 }).catch(function(){});
 var d={o:false,p:false,n:false};
 function chk(){if(d.o&&d.p&&d.n&&cb)cb(true);}
@@ -2781,7 +2794,7 @@ if(!doc.exists)return;
 var cfg=doc.data();
 if(cfg.deliveryOrigin){try{var dor=JSON.parse(cfg.deliveryOrigin);var prev=JSON.stringify(DELIVERY_ORIGIN);DELIVERY_ORIGIN=Object.assign(DELIVERY_ORIGIN,dor);localStorage.setItem("nny_delivery_origin",cfg.deliveryOrigin);if(JSON.stringify(DELIVERY_ORIGIN)!==prev&&typeof loadDeliveryOriginUI==="function")loadDeliveryOriginUI();}catch(e){}}
 }).catch(function(){});
-},15000);
+},10000);
 }
 function initApp(){
 if(typeof normalizeReviews==="function")normalizeReviews();
