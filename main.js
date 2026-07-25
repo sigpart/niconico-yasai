@@ -1512,7 +1512,8 @@ setTimeout(function(){
 }
 } else if(val===ADMIN_PIN){
 closePinGate();
-setTimeout(function(){openAdmin();},30);
+sessionStorage.setItem('nny_admin_session','1');
+window.location.href='/admin/';
 } else {
 inp.value="";
 inp.style.borderColor="var(--red)";
@@ -1545,6 +1546,11 @@ if(typeof renderAnalytics==="function")renderAnalytics();
 }
 }
 function exitAdmin(){
+if(window.__ADMIN_AUTO_OPEN){
+sessionStorage.removeItem('nny_admin_session');
+window.location.href='/';
+return;
+}
 var _rm=document.getElementById("review-modal");
 if(_rm){_rm.classList.remove("open");_rm.style.display="";}
 var _wr=document.querySelector(".write-review");
@@ -2819,6 +2825,12 @@ renderHistory();
 loadSheetUrl();
 updateLangBtn();
 setSeason("all");
+if(window.__ADMIN_AUTO_OPEN){
+var us=document.getElementById("user-screen");if(us)us.style.display="none";
+if(fbEnabled&&typeof loadFromFirebase==="function"){
+loadFromFirebase(function(){renderProducts();openAdmin();});
+}else{openAdmin();}
+}
 }
 // 初期化
 if(document.readyState==="loading"){
