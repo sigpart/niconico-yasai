@@ -1274,7 +1274,7 @@ function setEl(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
 setEl("kpi-rev",vnd(tot));setEl("kpi-orders",orders.length);setEl("kpi-avg",vnd(avg));setEl("kpi-items",items);
 var sub=document.getElementById("chart-rev-sub");
 if(sub)sub.textContent=analyticsPeriod==="month"?new Date().toLocaleDateString("ja-JP",{year:"numeric",month:"long"}):analyticsPeriod==="3months"?(adminLang==="vi"?"3 tháng gần nhất":"直近3ヶ月"):(adminLang==="vi"?"Toàn bộ":"全期間");
-renderLineChart(orders);renderProductBar(orders);renderPayDonut(orders);renderAgeDonut(orders);renderHowKnowBar(orders);renderRepeatStats(orders);
+renderLineChart(orders);renderMonthlyBar(ORDERS);renderProductBar(orders);renderPayDonut(orders);renderAgeDonut(orders);renderHowKnowBar(orders);renderRepeatStats(orders);
 }
 function renderLineChart(orders){
 var svg=document.getElementById("line-svg");if(!svg)return;
@@ -1344,6 +1344,20 @@ function renderHowKnowBar(orders){
 var m={zalo:0,facebook:0,friend:0,market:0,other:0,"":0};orders.forEach(function(o){var k=o.howknow||"";if(!m.hasOwnProperty(k))k="";m[k]++;});
 var lb={zalo:"Zalo",facebook:"Facebook",friend:adminLang==="vi"?"Bạn bè":"知人",market:adminLang==="vi"?"Chợ":"市場",other:adminLang==="vi"?"Khác":"他","":adminLang==="vi"?"Không rõ":"不明"};
 renderBarChart("bar-howknow",Object.keys(m).filter(function(k){return m[k]>0;}).map(function(k){return{label:lb[k],val:m[k],display:m[k]+(adminLang==="vi"?" người":" 人")};}).sort(function(a,b){return b.val-a.val;}));
+}
+function renderMonthlyBar(orders){
+var m={};
+orders.forEach(function(o){
+var d=new Date(o.ts);
+if(isNaN(d.getTime())){var mt=(o.ts||"").match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);if(mt)d=new Date(mt[1],mt[2]-1,mt[3]);}
+if(isNaN(d.getTime()))return;
+var key=d.getFullYear()+"/"+(("0")+(d.getMonth()+1)).slice(-2);
+m[key]=(m[key]||0)+o.tot;
+});
+var sorted=Object.keys(m).sort();
+var el=document.getElementById("bar-monthly");if(!el)return;
+if(!sorted.length){el.innerHTML='<div class="no-data-msg"><div class="no-data-ico">📅</div>'+(adminLang==="vi"?"Chưa có dữ liệu":"データなし")+'</div>';return;}
+renderBarChart("bar-monthly",sorted.map(function(k){return{label:k,val:m[k],display:vndS(m[k])};}));
 }
 function renderRepeatStats(orders){
 var el=document.getElementById("repeat-stats");if(!el)return;
@@ -1591,6 +1605,7 @@ s("kpi-orders-lbl",isVi?"Đơn hàng":"注文数");
 s("kpi-avg-lbl",isVi?"Đơn TB":"平均単価");
 s("kpi-items-lbl",isVi?"SP bán ra":"販売数量");
 s("chart-rev-title",isVi?"Doanh thu theo ngày":"日別売上推移");
+s("chart-monthly-title",isVi?"Doanh thu theo tháng":"月別売上");
 s("chart-prod-title",isVi?"Sản phẩm bán chạy":"商品別ランキング");
 s("chart-pay-title",isVi?"Phương thức thanh toán":"支払い方法");
 s("chart-age-title",isVi?"Độ tuổi khách hàng":"顧客年齢層");
@@ -1663,7 +1678,7 @@ renderAdminReviews();
 function renderAdminStats(){
 var total=ORDERS.length;
 var pending=ORDERS.filter(function(o){return o.status!=="done";}).length;
-var rev=ORDERS.filter(function(o){return o.status==="done";}).reduce(function(s,o){return s+o.tot;},0);
+var rev=ORDERS.reduce(function(s,o){return s+o.tot;},0);
 var pub=PRODUCTS.filter(function(p){return p.pub;}).length;
 function setEl(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
 setEl("aq-total",total);
