@@ -111,7 +111,7 @@
 <button class="sp-btn" onclick="setSeason('winter')" id="sp-winter">冬</button>
 <button class="sp-btn" onclick="setSeason('yearround')" id="sp-yearround">通年</button>
 </div>
-<div class="sec-head"><div class="sec-title" id="shop-title">🥦 今週のお野菜</div><span class="sec-count" id="shop-count"></span></div>
+<div class="sec-head"><div class="sec-title" id="shop-title">🥦 今週のお野菜</div><span class="sec-count" id="shop-count"></span><button onclick="downloadProductList()" style="margin-left:auto;padding:6px 12px;background:#2d6a2d;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">📥 <span id="dl-list-lbl">リスト保存</span></button></div>
 <div class="pgrid" id="pgrid"><div id="js-loading-msg" style="grid-column:1/-1;text-align:center;padding:40px 20px;color:#888;font-size:15px;">🔄 読み込み中... (v20260616)</div></div>
 </div>
 <div class="view" id="view-cart">
@@ -289,6 +289,12 @@
 </div>
 </div>
 <div class="admin-body">
+<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px 0;">
+<select id="aq-year" onchange="renderAdminStats()" style="padding:6px 10px;border:1.5px solid var(--g3);border-radius:8px;font-size:12px;font-family:inherit;background:#fff;"></select>
+<select id="aq-month" onchange="renderAdminStats()" style="padding:6px 10px;border:1.5px solid var(--g3);border-radius:8px;font-size:12px;font-family:inherit;background:#fff;"></select>
+<label style="font-size:12px;color:#555;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="aq-filter-all" onchange="renderAdminStats()" style="accent-color:var(--g1);"> <span id="aq-filter-all-lbl">全期間</span></label>
+<span id="aq-period-lbl" style="font-size:11px;color:var(--muted);margin-left:4px;"></span>
+</div>
 <div class="admin-quick-stats" id="adm-stats-row">
 <div class="aq-card"><div class="aq-val" id="aq-total">0</div><div class="aq-lbl" id="aq-total-lbl">Tổng đơn hàng</div></div>
 <div class="aq-card warn"><div class="aq-val" id="aq-pending">0</div><div class="aq-lbl" id="aq-pending-lbl">Chờ xử lý</div></div>
@@ -603,7 +609,7 @@ giữa người sản xuất và người tiêu dùng</textarea></div>
   window.__ADMIN_AUTO_OPEN = true;
 })();
 </script>
-<script src="../main.js?v=3"></script>
+<script src="../main.js?v=4"></script>
 
 <div id="qr-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;flex-direction:column;align-items:center;justify-content:center;">
 <div style="background:#fff;border-radius:16px;padding:24px;max-width:360px;width:90%;text-align:center;">

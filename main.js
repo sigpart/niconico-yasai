@@ -231,6 +231,22 @@ if(i===cur)el.classList.add("on"); else if(i<cur)el.classList.add("done");
 }
 function goShop(){showView("shop");}
 function goCart(){renderCartView();showView("cart");}
+function downloadProductList(){
+var prods=PRODUCTS.filter(function(p){return p.pub;});
+var rows=prods.map(function(p){
+var name=lang==="vi"?p.vi:lang==="en"?p.en:p.ja;
+var unit=lang==="vi"?p.unitvi:lang==="en"?p.uniten:p.unit;
+var price=p.variants&&p.variants.length?p.variants.map(function(v){return v+(v==="250g"?": "+vnd(p.price250):v==="500g"?": "+vnd(p.price500):": "+vnd(p.price));}).join(" / "):vnd(p.price)+"/"+unit;
+return '<tr><td style="padding:8px 12px;font-size:16px;">'+p.e+'</td><td style="padding:8px 12px;font-weight:600;">'+name+'</td><td style="padding:8px 12px;color:#2d6a2d;font-weight:700;">'+price+'</td><td style="padding:8px 12px;color:#555;">在庫: '+p.stock+'</td></tr>';
+}).join("");
+var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>NICO NICO YASAI — 野菜リスト</title>'
++'<style>body{font-family:sans-serif;max-width:700px;margin:0 auto;padding:20px;}h1{color:#1a3d1a;font-size:20px;margin-bottom:4px;}p{color:#888;font-size:13px;margin-bottom:16px;}table{width:100%;border-collapse:collapse;}tr:nth-child(even){background:#f6faf6;}td{border-bottom:1px solid #e0e8e0;vertical-align:middle;}@media print{body{padding:0;}button{display:none;}}</style>'
++'</head><body><h1>🥦 NICO NICO YASAI — 野菜リスト</h1><p>'+new Date().toLocaleDateString("ja-JP",{year:"numeric",month:"long",day:"numeric"})+'</p>'
++'<button onclick="window.print()" style="margin-bottom:16px;padding:8px 16px;background:#2d6a2d;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;">🖨 印刷 / PDF保存</button>'
++'<table><thead><tr style="background:#1a3d1a;color:#fff;"><th style="padding:8px 12px;text-align:left;">　</th><th style="padding:8px 12px;text-align:left;">商品名</th><th style="padding:8px 12px;text-align:left;">価格</th><th style="padding:8px 12px;text-align:left;">在庫</th></tr></thead><tbody>'+rows+'</tbody></table>'
++'</body></html>';
+var w=window.open("","_blank");if(w){w.document.write(html);w.document.close();}
+}
 function goHistory(){renderHistory();showView("history");}
 function goInfo(){
 if(!Object.keys(cart).length){alert(L("カートに商品を追加してください","Please add items to cart","Vui lòng thêm sản phẩm"));return;}
@@ -1618,6 +1634,8 @@ s("chart-pay-title",isVi?"Phương thức thanh toán":"支払い方法");
 s("chart-age-title",isVi?"Độ tuổi khách hàng":"顧客年齢層");
 s("chart-howknow-title",isVi?"Biết qua kênh nào":"流入経路");
 s("chart-repeat-title",isVi?"Khách hàng quay lại":"リピート率");
+s("aq-filter-all-lbl",isVi?"Tất cả thời gian":"全期間");
+s("dl-list-lbl",isVi?"Lưu danh sách":"リスト保存");
 s("ej-save-btn",isVi?"💾 Lưu cài đặt":"💾 設定を保存");
 s("ej-test-btn",isVi?"🧪 Gửi thử":"🧪 テスト送信");
 s("fb-sync-btn",isVi?"☁️ Đồng bộ ngay":"☁️ 今すぐ同期");
@@ -1682,8 +1700,30 @@ renderAdminNotify2();
 renderAdminReviews();
 }
 // 統計
+function initAdminStatsFilter(){
+var ySel=document.getElementById("aq-year");var mSel=document.getElementById("aq-month");
+if(!ySel||!mSel)return;
+if(ySel.options.length>1)return;
+var now=new Date();
+var years=[];
+ORDERS.forEach(function(o){var d=new Date(o.ts);if(!isNaN(d.getTime()))years.push(d.getFullYear());});
+var minY=years.length?Math.min.apply(null,years):now.getFullYear();
+for(var y=now.getFullYear();y>=minY;y--){var op=document.createElement("option");op.value=y;op.textContent=y+"年";ySel.appendChild(op);}
+ySel.value=now.getFullYear();
+for(var mo=1;mo<=12;mo++){var op2=document.createElement("option");op2.value=mo;op2.textContent=mo+"月";mSel.appendChild(op2);}
+mSel.value=now.getMonth()+1;
+}
 function renderAdminStats(){
-var active=ORDERS.filter(function(o){return o.status!=="cancelled";});
+initAdminStatsFilter();
+var ySel=document.getElementById("aq-year");var mSel=document.getElementById("aq-month");
+var filterAll=document.getElementById("aq-filter-all");
+var useMonth=filterAll&&!filterAll.checked&&ySel&&mSel;
+var yr=ySel?parseInt(ySel.value):0;var mo=mSel?parseInt(mSel.value):0;
+var active=ORDERS.filter(function(o){
+if(o.status==="cancelled")return false;
+if(useMonth){var d=new Date(o.ts);if(isNaN(d.getTime())){var mt=(o.ts||"").match(/(\d{4})\/(\d{1,2})/);if(mt)d=new Date(mt[1],mt[2]-1,1);}if(isNaN(d.getTime()))return false;if(d.getFullYear()!==yr||d.getMonth()+1!==mo)return false;}
+return true;
+});
 var total=active.length;
 var pending=active.filter(function(o){return o.status!=="done";}).length;
 var rev=active.reduce(function(s,o){return s+o.tot;},0);
@@ -1693,6 +1733,8 @@ setEl("aq-total",total);
 setEl("aq-pending",pending);
 setEl("aq-rev",vnd(rev));
 setEl("aq-pub",pub);
+var periodLbl=document.getElementById("aq-period-lbl");
+if(periodLbl)periodLbl.textContent=useMonth?(yr+"年"+mo+"月"):"全期間";
 }
 // 注文一覧
 function renderAdminOrders2(){
