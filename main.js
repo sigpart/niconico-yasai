@@ -1257,6 +1257,7 @@ function setPeriod(p,btn){analyticsPeriod=p;document.querySelectorAll(".period-t
 function filterByPeriod(orders){
 var now=new Date();
 return orders.filter(function(o){
+if(o.status==="cancelled")return false;
 var d=new Date(o.ts);if(isNaN(d.getTime())){var m=(o.ts||"").match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);if(m)d=new Date(m[1],m[2]-1,m[3]);}
 if(isNaN(d.getTime()))return true;
 if(analyticsPeriod==="month")return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth();
@@ -1274,7 +1275,7 @@ function setEl(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
 setEl("kpi-rev",vnd(tot));setEl("kpi-orders",orders.length);setEl("kpi-avg",vnd(avg));setEl("kpi-items",items);
 var sub=document.getElementById("chart-rev-sub");
 if(sub)sub.textContent=analyticsPeriod==="month"?new Date().toLocaleDateString("ja-JP",{year:"numeric",month:"long"}):analyticsPeriod==="3months"?(adminLang==="vi"?"3 tháng gần nhất":"直近3ヶ月"):(adminLang==="vi"?"Toàn bộ":"全期間");
-renderLineChart(orders);renderMonthlyBar(ORDERS);renderProductBar(orders);renderPayDonut(orders);renderAgeDonut(orders);renderHowKnowBar(orders);renderRepeatStats(orders);
+renderLineChart(orders);renderMonthlyBar(ORDERS.filter(function(o){return o.status!=="cancelled";}));renderProductBar(orders);renderPayDonut(orders);renderAgeDonut(orders);renderHowKnowBar(orders);renderRepeatStats(orders);
 }
 function renderLineChart(orders){
 var svg=document.getElementById("line-svg");if(!svg)return;
@@ -1682,9 +1683,10 @@ renderAdminReviews();
 }
 // 統計
 function renderAdminStats(){
-var total=ORDERS.length;
-var pending=ORDERS.filter(function(o){return o.status!=="done";}).length;
-var rev=ORDERS.reduce(function(s,o){return s+o.tot;},0);
+var active=ORDERS.filter(function(o){return o.status!=="cancelled";});
+var total=active.length;
+var pending=active.filter(function(o){return o.status!=="done";}).length;
+var rev=active.reduce(function(s,o){return s+o.tot;},0);
 var pub=PRODUCTS.filter(function(p){return p.pub;}).length;
 function setEl(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
 setEl("aq-total",total);
@@ -1703,23 +1705,31 @@ elD.innerHTML="";
 return;
 }
 var sorted=[].concat(ORDERS).sort(function(a,b){return a.ts<b.ts?1:-1;});
-var pending=sorted.filter(function(o){return o.status!=="done";});
+var pending=sorted.filter(function(o){return o.status!=="done"&&o.status!=="cancelled";});
 var done=sorted.filter(function(o){return o.status==="done";});
+var cancelled=sorted.filter(function(o){return o.status==="cancelled";});
 var cntP=document.getElementById("ord-tab-cnt-pending");
 var cntD=document.getElementById("ord-tab-cnt-done");
+var cntC=document.getElementById("ord-tab-cnt-cancelled");
 if(cntP)cntP.textContent=pending.length;
 if(cntD)cntD.textContent=done.length;
+if(cntC)cntC.textContent=cancelled.length;
 var lblP=document.getElementById("ord-tab-lbl-pending");
 var lblD=document.getElementById("ord-tab-lbl-done");
+var lblC=document.getElementById("ord-tab-lbl-cancelled");
 if(lblP)lblP.textContent=adminLang==="vi"?"⏳ Chờ thanh toán":"⏳ 入金待ち";
 if(lblD)lblD.textContent=adminLang==="vi"?"✅ Hoàn thành":"✅ 完了";
+if(lblC)lblC.textContent=adminLang==="vi"?"❌ Đã hủy":"❌ キャンセル";
 function renderCard(o){
 var realIdx=ORDERS.indexOf(o);
-var statusCls=o.status==="done"?"st-done":o.status==="pending_payment"?"st-pending":"st-new";
-var statusTxt=o.status==="done"?(adminLang==="vi"?"✅ Hoàn thành":"✅ 完了"):o.status==="pending_payment"?(adminLang==="vi"?"⏳ Chờ thanh toán":"⏳ 入金待ち"):(adminLang==="vi"?"🆕 Mới":"🆕 新規");
-var tglBtn=o.status==="pending_payment"
+var statusCls=o.status==="done"?"st-done":o.status==="pending_payment"?"st-pending":o.status==="cancelled"?"st-out":"st-new";
+var statusTxt=o.status==="done"?(adminLang==="vi"?"✅ Hoàn thành":"✅ 完了"):o.status==="pending_payment"?(adminLang==="vi"?"⏳ Chờ thanh toán":"⏳ 入金待ち"):o.status==="cancelled"?(adminLang==="vi"?"❌ Đã hủy":"❌ キャンセル"):(adminLang==="vi"?"🆕 Mới":"🆕 新規");
+var tglBtn=o.status==="cancelled"
+?'<button class="ao-btn" onclick="restoreOrder('+realIdx+')" style="color:#c0392b;border-color:#c0392b;">'+(adminLang==="vi"?"↩ Khôi phục":"↩ キャンセル取り消し")+'</button>'
+:o.status==="pending_payment"
 ?'<button class="ao-btn primary" onclick="toggleOrderStatus('+realIdx+')" style="background:#f0c040;color:#7a5c00;border-color:#f0c040;">'+(adminLang==="vi"?"✅ Xác nhận đã nhận tiền":"✅ 入金確認する")+'</button>'
 :'<button class="ao-btn'+(o.status==="done"?"":" primary")+'" onclick="toggleOrderStatus('+realIdx+')">'+(o.status==="done"?(adminLang==="vi"?"↩ Hoàn tác":"↩ 戻す"):(adminLang==="vi"?"✅ Hoàn thành":"✅ 完了にする"))+'</button>';
+var cancelBtn=o.status!=="cancelled"?'<button class="ao-btn" onclick="cancelOrder('+realIdx+')" style="color:#c0392b;border-color:#c0392b;">❌ '+(adminLang==="vi"?"Hủy đơn":"キャンセル")+'</button>':'';
 var items=(o.items||[]).map(function(it){return it.e+" "+(adminLang==="vi"?it.vi:it.ja)+"×"+it.qty;}).join("、");
 var isOpen=o.status!=="done";
 var bodyId="ao-body-"+realIdx;
@@ -1761,28 +1771,36 @@ html+='</div>';
 html+='</div>';
 }
 html+='<div class="ao-tot">'+vnd(o.tot)+'</div>';
-html+='<div class="ao-btns">'+tglBtn;
+html+='<div class="ao-btns">'+tglBtn+cancelBtn;
 html+='<button class="ao-btn" onclick="adminViewReceipt('+realIdx+')">'+(adminLang==="vi"?"📄 Hóa đơn":"📄 領収証")+'</button>';
 html+='</div></div></div></div>';
 return html;
 }
-var htmlP="", htmlD="";
+var htmlP="",htmlD="",htmlC="";
 if(pending.length){pending.forEach(function(o){htmlP+=renderCard(o);});}
 else{htmlP='<div style="text-align:center;padding:24px;color:var(--ghost);font-size:13px;">'+(adminLang==="vi"?"Không có đơn chờ":"入金待ちの注文はありません")+'</div>';}
 if(done.length){done.forEach(function(o){htmlD+=renderCard(o);});}
 else{htmlD='<div style="text-align:center;padding:24px;color:var(--ghost);font-size:13px;">'+(adminLang==="vi"?"Chưa có đơn hoàn thành":"完了した注文はありません")+'</div>';}
+if(cancelled.length){cancelled.forEach(function(o){htmlC+=renderCard(o);});}
+else{htmlC='<div style="text-align:center;padding:24px;color:var(--ghost);font-size:13px;">'+(adminLang==="vi"?"Không có đơn đã hủy":"キャンセルされた注文はありません")+'</div>';}
 elP.innerHTML=htmlP;
 elD.innerHTML=htmlD;
+var elC=document.getElementById("adm-orders-list-cancelled");
+if(elC)elC.innerHTML=htmlC;
 }
 function switchOrderTab(tab){
 var lP=document.getElementById("adm-orders-list-pending");
 var lD=document.getElementById("adm-orders-list-done");
+var lC=document.getElementById("adm-orders-list-cancelled");
 var bP=document.getElementById("ord-tab-btn-pending");
 var bD=document.getElementById("ord-tab-btn-done");
+var bC=document.getElementById("ord-tab-btn-cancelled");
 if(lP)lP.style.display=tab==="pending"?"block":"none";
 if(lD)lD.style.display=tab==="done"?"block":"none";
+if(lC)lC.style.display=tab==="cancelled"?"block":"none";
 if(bP){bP.style.background=tab==="pending"?"var(--g1)":"#f5f5f5";bP.style.color=tab==="pending"?"#fff":"var(--g2)";}
 if(bD){bD.style.background=tab==="done"?"var(--g1)":"#f5f5f5";bD.style.color=tab==="done"?"#fff":"var(--g2)";}
+if(bC){bC.style.background=tab==="cancelled"?"#c0392b":"#f5f5f5";bC.style.color=tab==="cancelled"?"#fff":"#c0392b";}
 }
 function toggleOrderCard(bodyId){
 var el=document.getElementById(bodyId);
@@ -2398,9 +2416,31 @@ if(typeof fbSaveOrder==="function"){
 var orderNoSS=Object.assign({},ORDERS[idx],{screenshot:null});
 fbSaveOrder(orderNoSS);
 }
+if(typeof sendToSheets==="function")sendToSheets(ORDERS[idx]);
 if(typeof renderAdminOrders2==="function")renderAdminOrders2();
 if(typeof renderAdminStats==="function")renderAdminStats();
+if(typeof renderAnalytics==="function")renderAnalytics();
 showToast(adminLang==="vi"?"✅ Đã cập nhật":"✅ 更新しました");
+}
+function cancelOrder(idx){
+var o=ORDERS[idx];if(!o)return;
+var msg=adminLang==="vi"
+?"Hủy đơn hàng "+o.no+" của "+o.name+"? Đơn hàng sẽ bị xóa khỏi doanh thu."
+:o.name+"様の注文 "+o.no+" をキャンセルしますか？売上から除外されます。";
+nnyConfirm(msg,function(){
+ORDERS[idx].status="cancelled";
+_saveAndRefreshOrder(idx);
+showToast(adminLang==="vi"?"❌ Đã hủy đơn hàng":"❌ キャンセルしました");
+});
+}
+function restoreOrder(idx){
+var o=ORDERS[idx];if(!o)return;
+var msg=adminLang==="vi"?"Khôi phục đơn hàng "+o.no+"?":"注文 "+o.no+" のキャンセルを取り消しますか？";
+nnyConfirm(msg,function(){
+ORDERS[idx].status="new";
+_saveAndRefreshOrder(idx);
+showToast(adminLang==="vi"?"↩ Đã khôi phục":"↩ キャンセルを取り消しました");
+});
 }
 function uploadScreenshot(orderNo, base64data, cb){
 if(!fbDb||!base64data){
