@@ -2827,9 +2827,7 @@ updateLangBtn();
 setSeason("all");
 if(window.__ADMIN_AUTO_OPEN){
 var us=document.getElementById("user-screen");if(us)us.style.display="none";
-if(fbEnabled&&typeof loadFromFirebase==="function"){
-loadFromFirebase(function(){renderProducts();openAdmin();});
-}else{openAdmin();}
+setTimeout(function(){openAdmin();},100);
 }
 }
 // 初期化
