@@ -1503,30 +1503,9 @@ var inp=document.getElementById("pin-input");
 if(!inp)return;
 var val=inp.value.trim();
 if(val===OWNER_PIN){
-var _g=document.getElementById("pin-gate");
-if(_g){_g.classList.remove("open");_g.style.display="none";}
-var _us=document.getElementById("user-screen");
-if(_us){_us.style.display="none";}
-var _as=document.getElementById("admin-screen");
-if(_as){_as.classList.remove("on");_as.style.display="none";}
-var _os=document.getElementById("owner-screen");
-if(_os){
-_os.style.display="flex";
-_os.style.flexDirection="column";
-_os.style.zIndex="99999";
-_os.classList.add("on");
-setTimeout(function(){
-  if(typeof renderOwnerDashboard!=="function")return;
-  if(typeof fbEnabled!=="undefined"&&fbEnabled&&typeof fbDb!=="undefined"&&fbDb){
-    fbDb.collection("orders").get().then(function(snap){
-      var a=[];snap.forEach(function(doc){a.push(doc.data());});
-      if(a.length)ORDERS=a;
-      renderOwnerDashboard();
-      autoSendInvoiceIfNeeded();
-    }).catch(function(){renderOwnerDashboard();autoSendInvoiceIfNeeded();});
-  }else{renderOwnerDashboard();autoSendInvoiceIfNeeded();}
-},100);
-}
+closePinGate();
+sessionStorage.setItem('nny_owner_session','1');
+window.location.href='/owner/';
 } else if(val===ADMIN_PIN){
 closePinGate();
 sessionStorage.setItem('nny_admin_session','1');
@@ -1561,6 +1540,10 @@ if(ok)showToast(adminLang==="vi"?"☁️ Đã tải dữ liệu từ cloud":"☁
 renderAdminAll();
 if(typeof renderAnalytics==="function")renderAnalytics();
 }
+}
+function goOwnerPage(){
+sessionStorage.setItem('nny_owner_session','1');
+window.location.href='/owner/';
 }
 function exitAdmin(){
 if(window.__ADMIN_AUTO_OPEN){
@@ -1636,6 +1619,7 @@ s("chart-howknow-title",isVi?"Biết qua kênh nào":"流入経路");
 s("chart-repeat-title",isVi?"Khách hàng quay lại":"リピート率");
 s("aq-filter-all-lbl",isVi?"Tất cả thời gian":"全期間");
 s("dl-list-lbl",isVi?"Lưu danh sách":"リスト保存");
+s("adm-owner-btn-lbl",isVi?"Chủ hệ thống":"オーナー");
 s("ej-save-btn",isVi?"💾 Lưu cài đặt":"💾 設定を保存");
 s("ej-test-btn",isVi?"🧪 Gửi thử":"🧪 テスト送信");
 s("fb-sync-btn",isVi?"☁️ Đồng bộ ngay":"☁️ 今すぐ同期");
@@ -2742,7 +2726,16 @@ function addVariantToCart(id,v,price){var p=PRODUCTS.find(function(x){return Num
 function chgVariantQty(ck,d){cart[ck]=(cart[ck]||0)+d;if(cart[ck]<=0){delete cart[ck];delete CART_META[ck];}updateCartBtn();renderProducts();if(curView==="cart")renderCartView();}
 function closeVariantModal(){}
 function openOwnerScreen(){var os=document.getElementById("owner-screen");if(!os)return;document.querySelectorAll(".admin-screen,#admin-screen,[id=admin-screen]").forEach(function(el){el.style.cssText="display:none!important";el.classList.remove("on");});var us=document.getElementById("user-screen");if(us)us.style.cssText="display:none!important";os.style.cssText="display:flex!important;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:#f0f4f0;overflow-y:auto;";os.classList.add("on");if(typeof fbEnabled!=="undefined"&&fbEnabled&&typeof fbDb!=="undefined"&&fbDb){fbDb.collection("orders").get().then(function(snap){var a=[];snap.forEach(function(doc){a.push(doc.data());});if(a.length)ORDERS=a;renderOwnerDashboard();}).catch(function(){renderOwnerDashboard();});}else{renderOwnerDashboard();}}
-function closeOwnerScreen(){var os=document.getElementById("owner-screen");if(os){os.style.cssText="display:none;";}var us=document.getElementById("user-screen");if(us){us.style.cssText="";us.style.display="block";}renderProducts();}
+function closeOwnerScreen(){
+if(window.__OWNER_AUTO_OPEN){
+sessionStorage.removeItem('nny_owner_session');
+window.location.href='/';
+return;
+}
+var os=document.getElementById("owner-screen");if(os){os.style.cssText="display:none;";}
+var us=document.getElementById("user-screen");if(us){us.style.cssText="";us.style.display="block";}
+renderProducts();
+}
 var EM_HANOI_LNG=105.8417,EM_HANOI_LAT=21.0335,_shippingFee=0,_shippingDist=0,_shippingLoading=false;
 var DELIVERY_ORIGIN={active:"farm",farm:{name:"Bản Hang Trùng 2",addr:"Bản Hang Trùng 2, Xã Vân Hồ, Sơn La, Vietnam",lat:20.855,lng:104.585,fixedFee:100000}};
 (function(){try{var _d=localStorage.getItem("nny_delivery_origin");if(_d)DELIVERY_ORIGIN=JSON.parse(_d);}catch(e){}})();
@@ -2910,6 +2903,21 @@ setSeason("all");
 if(window.__ADMIN_AUTO_OPEN){
 var us=document.getElementById("user-screen");if(us)us.style.display="none";
 setTimeout(function(){openAdmin();},100);
+}
+if(window.__OWNER_AUTO_OPEN){
+var us2=document.getElementById("user-screen");if(us2)us2.style.display="none";
+var os=document.getElementById("owner-screen");
+if(os){os.style.display="flex";os.style.flexDirection="column";os.style.zIndex="99999";os.classList.add("on");}
+setTimeout(function(){
+if(typeof renderOwnerDashboard!=="function")return;
+if(typeof fbEnabled!=="undefined"&&fbEnabled&&typeof fbDb!=="undefined"&&fbDb){
+fbDb.collection("orders").get().then(function(snap){
+var a=[];snap.forEach(function(doc){a.push(doc.data());});
+if(a.length)ORDERS=a;
+renderOwnerDashboard();autoSendInvoiceIfNeeded();
+}).catch(function(){renderOwnerDashboard();autoSendInvoiceIfNeeded();});
+}else{renderOwnerDashboard();autoSendInvoiceIfNeeded();}
+},100);
 }
 }
 // 初期化

@@ -285,7 +285,7 @@
 <button class="adm-lb" onclick="setAdminLang('ja')" id="adm-btn-ja">日本語</button>
 <button class="adm-lb on" onclick="setAdminLang('vi')" id="adm-btn-vi">Tiếng Việt</button>
 </div>
-<button class="admin-exit-btn" onclick="exitAdmin()" id="adm-exit-btn" id="adm-exit-btn">← <span id="adm-exit-lbl">Thoát</span></button>
+<button onclick="goOwnerPage()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:700;cursor:pointer;margin-right:6px;">🏢 <span id="adm-owner-btn-lbl">オーナー</span></button><button class="admin-exit-btn" onclick="exitAdmin()" id="adm-exit-btn">← <span id="adm-exit-lbl">Thoát</span></button>
 </div>
 </div>
 <div class="admin-body">
@@ -605,7 +605,7 @@ giữa người sản xuất và người tiêu dùng</textarea></div>
 </div>
 <div class="email-toast" id="email-toast"></div>
 
-<script src="main.js?v=4"></script>
+<script src="main.js?v=5"></script>
 
 <div id="qr-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;flex-direction:column;align-items:center;justify-content:center;">
 <div style="background:#fff;border-radius:16px;padding:24px;max-width:360px;width:90%;text-align:center;">
