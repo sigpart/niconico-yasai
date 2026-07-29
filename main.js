@@ -1541,10 +1541,6 @@ renderAdminAll();
 if(typeof renderAnalytics==="function")renderAnalytics();
 }
 }
-function goOwnerPage(){
-sessionStorage.setItem('nny_owner_session','1');
-window.location.href='/owner/';
-}
 function exitAdmin(){
 if(window.__ADMIN_AUTO_OPEN){
 sessionStorage.removeItem('nny_admin_session');
@@ -1619,7 +1615,6 @@ s("chart-howknow-title",isVi?"Biết qua kênh nào":"流入経路");
 s("chart-repeat-title",isVi?"Khách hàng quay lại":"リピート率");
 s("aq-filter-all-lbl",isVi?"Tất cả thời gian":"全期間");
 s("dl-list-lbl",isVi?"Lưu danh sách":"リスト保存");
-s("adm-owner-btn-lbl",isVi?"Chủ hệ thống":"オーナー");
 s("ej-save-btn",isVi?"💾 Lưu cài đặt":"💾 設定を保存");
 s("ej-test-btn",isVi?"🧪 Gửi thử":"🧪 テスト送信");
 s("fb-sync-btn",isVi?"☁️ Đồng bộ ngay":"☁️ 今すぐ同期");
