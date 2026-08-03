@@ -1682,15 +1682,22 @@ renderAdminReviews();
 function initAdminStatsFilter(){
 var ySel=document.getElementById("aq-year");var mSel=document.getElementById("aq-month");
 if(!ySel||!mSel)return;
-if(ySel.options.length>1)return;
 var now=new Date();
+var curY=ySel.value?parseInt(ySel.value):now.getFullYear();
+var curM=mSel.value?parseInt(mSel.value):now.getMonth()+1;
+// 年セレクターを毎回再構築（Firebase読込後に過去年が追加されるケースに対応）
 var years=[];
 ORDERS.forEach(function(o){var d=new Date(o.ts);if(!isNaN(d.getTime()))years.push(d.getFullYear());});
 var minY=years.length?Math.min.apply(null,years):now.getFullYear();
-for(var y=now.getFullYear();y>=minY;y--){var op=document.createElement("option");op.value=y;op.textContent=y+"年";ySel.appendChild(op);}
-ySel.value=now.getFullYear();
-for(var mo=1;mo<=12;mo++){var op2=document.createElement("option");op2.value=mo;op2.textContent=mo+"月";mSel.appendChild(op2);}
-mSel.value=now.getMonth()+1;
+ySel.innerHTML="";
+for(var y=now.getFullYear();y>=minY;y--){var op=document.createElement("option");op.value=String(y);op.textContent=y+"年";ySel.appendChild(op);}
+ySel.value=String(curY);
+if(!ySel.value)ySel.value=String(now.getFullYear());
+// 月セレクターは初回のみ構築
+if(mSel.options.length===0){
+for(var mo=1;mo<=12;mo++){var op2=document.createElement("option");op2.value=String(mo);op2.textContent=mo+"月";mSel.appendChild(op2);}
+}
+mSel.value=String(curM);
 }
 function renderAdminStats(){
 initAdminStatsFilter();
