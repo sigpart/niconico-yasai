@@ -1295,10 +1295,18 @@ renderLineChart(orders);renderMonthlyBar(ORDERS.filter(function(o){return o.stat
 }
 function renderLineChart(orders){
 var svg=document.getElementById("line-svg");if(!svg)return;
-var nd=analyticsPeriod==="3months"?90:analyticsPeriod==="month"?new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate():60;
-var start=new Date();start.setDate(start.getDate()-nd+1);start.setHours(0,0,0,0);
-var dm={};for(var i=0;i<nd;i++){var d=new Date(start);d.setDate(start.getDate()+i);dm[d.getMonth()+"/"+d.getDate()]=0;}
-orders.forEach(function(o){var d=new Date(o.ts);if(isNaN(d.getTime())){var m=(o.ts||"").match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);if(m)d=new Date(m[1],m[2]-1,m[3]);}var k=d.getMonth()+"/"+d.getDate();if(dm.hasOwnProperty(k))dm[k]+=o.tot;});
+var now=new Date();
+var nd,start;
+if(analyticsPeriod==="month"){
+start=new Date(now.getFullYear(),now.getMonth(),1);
+nd=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+}else if(analyticsPeriod==="3months"){
+nd=90;start=new Date();start.setDate(start.getDate()-nd+1);start.setHours(0,0,0,0);
+}else{
+nd=60;start=new Date();start.setDate(start.getDate()-nd+1);start.setHours(0,0,0,0);
+}
+var dm={};for(var i=0;i<nd;i++){var d=new Date(start);d.setDate(start.getDate()+i);var lbl=(d.getMonth()+1)+"/"+d.getDate();dm[lbl]=0;}
+orders.forEach(function(o){var d=new Date(o.ts);if(isNaN(d.getTime())){var m=(o.ts||"").match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);if(m)d=new Date(m[1],m[2]-1,m[3]);}var k=(d.getMonth()+1)+"/"+d.getDate();if(dm.hasOwnProperty(k))dm[k]+=o.tot;});
 var vals=Object.values(dm),keys=Object.keys(dm),mx=Math.max.apply(null,vals)||1;
 var W=600,H=150,PL=40,PR=10,PT=10,PB=30,iW=W-PL-PR,iH=H-PT-PB,n=vals.length;
 var pts=vals.map(function(v,i){return(PL+i/(n-1||1)*iW).toFixed(1)+","+(PT+iH*(1-v/mx)).toFixed(1);});
