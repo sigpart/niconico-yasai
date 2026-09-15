@@ -17,19 +17,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy via FTPS
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Deploy via SFTP
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
           server: ${{ secrets.SAKURA_FTP_HOST }}
           username: ${{ secrets.SAKURA_FTP_USER }}
           password: ${{ secrets.SAKURA_FTP_PASS }}
-          protocol: ftps
-          port: 21
-          local-dir: ./
-          server-dir: /home/niconicoyasai/www/hanoi-order.niconicoyasai.jp/
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-            .github/**
-            *.md
+          port: 22
+          local_path: './*'
+          remote_path: '/home/niconicoyasai/www/hanoi-order.niconicoyasai.jp'
+          sftp_only: true
+          args: '-o StrictHostKeyChecking=no'
