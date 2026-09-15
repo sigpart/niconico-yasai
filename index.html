@@ -140,17 +140,21 @@
 <div class="frow"><label class="flabel" id="fl-zalo">Zalo ID</label><input class="finput" id="inp-zalo" placeholder="Zalo番号"></div>
 </div>
 <div class="fgrid2">
-<div class="frow"><label class="flabel" id="fl-addr">住所 <span class="req">必須</span></label><input class="finput" id="inp-addr" placeholder="ハノイ市 / Hà Nội..." onblur="calcShippingFee(this.value,function(){updateShippingDisplay(null,false);})" onchange="calcShippingFee(this.value,function(){updateShippingDisplay(null,false);})"></div>
+<div class="frow"><label class="flabel" id="fl-addr">住所 <span class="req">必須</span></label><input class="finput" id="inp-addr" placeholder="ハノイ市 / Hà Nội..." onblur="calcShippingFee(this.value,function(){updateShippingDisplay(null,false);})" onchange="calcShippingFee(this.value,function(){updateShippingDisplay(null,false);})"><div id="addr-hint" style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5;">※部屋番号等わかる範囲でご記入ください</div></div>
 <div id="shipping-fee-row" style="display:none;margin-top:8px;padding:10px 14px;background:var(--gp);border-radius:8px;justify-content:space-between;align-items:center;"><span style="font-size:12px;font-weight:700;color:var(--g2);">🛵 送料（Grab）</span><span style="font-size:13px;font-weight:800;color:var(--g1);" id="shipping-fee-val">—</span></div>
 <div class="frow"><label class="flabel" id="fl-email">メールアドレス <span class="req">必須</span></label><input class="finput" id="inp-email" type="email" placeholder="you@example.com"></div>
 </div>
+</div>
+<div class="form-card">
+<div class="form-card-ttl" id="fc-note">📝 備考</div>
+<textarea class="ftarea" id="inp-note" placeholder="配達時間の希望など / Ghi chú..."></textarea>
 </div>
 <div class="form-card">
 <div class="form-card-ttl" id="fc-del">🛵 受け取り方法</div>
 <div class="opts-grid">
 <div class="opt-card on" onclick="pickDel(this,'deliver')"><div class="opt-ico">🛵</div><span id="del-deliver">配達</span></div>
 <div class="opt-card" onclick="pickDel(this,'pickup')"><div class="opt-ico">🏡</div><span id="del-pickup">直接受取</span></div>
-<div class="opt-card disabled"><div class="opt-ico">📦</div><span id="del-ship">宅配便</span></div>
+
 </div>
 </div>
 <div class="form-card">
@@ -212,10 +216,7 @@
 </div>
 </div>
 </div>
-<div class="form-card">
-<div class="form-card-ttl" id="fc-note">📝 備考</div>
-<textarea class="ftarea" id="inp-note" placeholder="配達時間の希望など / Ghi chú..."></textarea>
-</div>
+
 <button class="btn-primary" onclick="goConfirm()">✔ <span id="to-confirm-lbl">注文内容を確認する</span></button>
 <button class="btn-outline" onclick="goCart()" id="info-back-btn">← カートに戻る</button>
 </div>
@@ -605,7 +606,7 @@ giữa người sản xuất và người tiêu dùng</textarea></div>
 </div>
 <div class="email-toast" id="email-toast"></div>
 
-<script src="main.js?v=6"></script>
+<script src="main.js?v=7"></script>
 
 <div id="qr-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;flex-direction:column;align-items:center;justify-content:center;">
 <div style="background:#fff;border-radius:16px;padding:24px;max-width:360px;width:90%;text-align:center;">
