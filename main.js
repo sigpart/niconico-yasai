@@ -893,11 +893,13 @@ function g(eid){var e=document.getElementById(eid);return e?e.value:null;}
 var emoji=g("ai-emoji-"+id);if(emoji&&emoji.trim())p.e=emoji.trim();
 var ja=g("ai-ja-"+id);if(ja&&ja.trim())p.ja=ja.trim();
 var vi=g("ai-vi-"+id);if(vi&&vi.trim())p.vi=vi.trim();
+var en=g("ai-en-"+id);if(en!==null)p.en=en.trim();
 var unit=g("ai-unit-"+id);if(unit&&unit.trim())p.unit=unit.trim();
 var unitvi=g("ai-unitvi-"+id);if(unitvi&&unitvi.trim())p.unitvi=unitvi.trim();
 var price=g("ai-p-"+id);if(price!==null)p.price=parseInt(price)||0;
 var dja=g("ai-dja-"+id);if(dja!==null)p.dja=dja;
 var dvi=g("ai-dvi-"+id);if(dvi!==null)p.dvi=dvi;
+var den=g("ai-den-"+id);if(den!==null)p.den=den;
 var sq=g("sq-"+id);if(sq!==null)p.stock=Math.max(0,parseInt(sq)||0);
 saveProducts();
 if(typeof fbSaveProduct==="function")fbSaveProduct(p);
@@ -1908,10 +1910,12 @@ html+='<input type="checkbox" '+(p.pub?"checked":"")+'onchange="togglePub('+p.id
 html+='<span style="font-size:12px;font-weight:700;">'+(adminLang==="vi"?"Hiển thị":"公開")+'</span></label>';
 html+='<div class="apc-field"><label class="apc-lbl">'+(adminLang==="vi"?"Biểu tượng (Emoji)":"絵文字")+'</label>';
 html+='<input class="apc-inp" id="ai-emoji-'+p.id+'" value="'+(p.e||"🥗")+'" style="width:80px;font-size:20px;text-align:center;"></div>';
-html+='<div class="apc-field"><label class="apc-lbl">'+(adminLang==="vi"?"Tên sản phẩm (Tiếng Nhật)":"商品名（日本語）")+'</label>';
-html+='<input class="apc-inp" id="ai-ja-'+p.id+'" value="'+(p.ja||"")+'" placeholder="例：小松菜"></div>';
 html+='<div class="apc-field"><label class="apc-lbl">'+(adminLang==="vi"?"Tên sản phẩm (Tiếng Việt)":"商品名（ベトナム語）")+'</label>';
 html+='<input class="apc-inp" id="ai-vi-'+p.id+'" value="'+(p.vi||"")+'" placeholder="Ví dụ: Rau cải xanh"></div>';
+html+='<div class="apc-field"><label class="apc-lbl">'+(adminLang==="vi"?"Tên sản phẩm (Tiếng Nhật)":"商品名（日本語）")+'</label>';
+html+='<input class="apc-inp" id="ai-ja-'+p.id+'" value="'+(p.ja||"")+'" placeholder="例：小松菜"></div>';
+html+='<div class="apc-field"><label class="apc-lbl">'+(adminLang==="vi"?"Tên sản phẩm (Tiếng Anh)":"商品名（英語）")+'</label>';
+html+='<input class="apc-inp" id="ai-en-'+p.id+'" value="'+(p.en||"")+'" placeholder="e.g. Komatsuna"></div>';
 html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
 html+='<div class="apc-field"><label class="apc-lbl">'+(adminLang==="vi"?"Đơn vị (JP)":"単位（日本語）")+'</label>';
 html+='<input class="apc-inp" id="ai-unit-'+p.id+'" value="'+(p.unit||"個")+'" placeholder="個/束/袋"></div>';
@@ -1925,10 +1929,12 @@ html+='<span>'+(adminLang==="vi"?"📷 Kéo thả hoặc chọn ảnh":"📷 ド
 html+='</div></div>';
 html+='<div class="apc-field"><label class="apc-lbl">'+(adminLang==="vi"?"Giá (₫)":"価格（₫）")+'</label>';
 html+='<input class="apc-inp" type="number" id="ai-p-'+p.id+'" value="'+p.price+'"></div>';
-html+='<div class="apc-field"><label class="apc-lbl">'+(adminLang==="vi"?"Mô tả (tiếng Nhật)":"説明（日本語）")+'</label>';
-html+='<textarea class="apc-inp" id="ai-dja-'+p.id+'" rows="2">'+( p.dja||"")+'</textarea></div>';
 html+='<div class="apc-field"><label class="apc-lbl">'+(adminLang==="vi"?"Mô tả (tiếng Việt)":"説明（ベトナム語）")+'</label>';
-html+='<textarea class="apc-inp" id="ai-dvi-'+p.id+'" rows="2">'+(p.dvi||p.dja||"")+'</textarea></div>';
+html+='<textarea class="apc-inp" id="ai-dvi-'+p.id+'" rows="2">'+(p.dvi||"")+'</textarea></div>';
+html+='<div class="apc-field"><label class="apc-lbl">'+(adminLang==="vi"?"Mô tả (tiếng Nhật)":"説明（日本語）")+'</label>';
+html+='<textarea class="apc-inp" id="ai-dja-'+p.id+'" rows="2">'+(p.dja||"")+'</textarea></div>';
+html+='<div class="apc-field"><label class="apc-lbl">'+(adminLang==="vi"?"Mô tả (tiếng Anh)":"説明（英語）")+'</label>';
+html+='<textarea class="apc-inp" id="ai-den-'+p.id+'" rows="2">'+(p.den||"")+'</textarea></div>';
 html+='<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">';
 html+='<button class="apc-save-btn" onclick="saveProd('+p.id+')">'+(adminLang==="vi"?"💾 Lưu":"💾 保存")+'</button>';
 html+='<button class="apc-save-btn" onclick="autoTranslateProd('+p.id+')" style="background:var(--gold);color:#7a5c00;border-color:var(--gold);">🌐 '+(adminLang==="vi"?"Dịch tự động":"自動翻訳")+'</button>';
@@ -1996,6 +2002,10 @@ var djaEl=document.getElementById("ai-dja-"+id);
 if(djaEl)p.dja=djaEl.value;
 var dviEl=document.getElementById("ai-dvi-"+id);
 if(dviEl)p.dvi=dviEl.value;
+var denEl=document.getElementById("ai-den-"+id);
+if(denEl)p.den=denEl.value;
+var enEl=document.getElementById("ai-en-"+id);
+if(enEl&&enEl.value.trim())p.en=enEl.value.trim();
 var sq=document.getElementById("sq-"+id);
 if(sq)p.stock=Math.max(0,parseInt(sq.value)||0);
 saveProducts();
@@ -2257,48 +2267,38 @@ var modal=document.getElementById("hist-receipt-modal");
 if(modal){modal.style.display="flex";modal.style.alignItems="center";modal.style.justifyContent="center";}
 document.body.style.overflow="hidden";
 }
-// ── Google翻訳API ──
-var GOOGLE_TRANSLATE_KEY="";
-(function(){try{var k=localStorage.getItem("nny_gkey");if(k)GOOGLE_TRANSLATE_KEY=k;}catch(e){}})();
-function saveGoogleKey(){
-var inp=document.getElementById("google-translate-key-inp");
-GOOGLE_TRANSLATE_KEY=(inp?inp.value.trim():"");
-localStorage.setItem("nny_gkey",GOOGLE_TRANSLATE_KEY);
-showToast(adminLang==="vi"?"✅ Đã lưu API Key":"✅ APIキーを保存しました");
-}
-function translateText(text,targetLang,cb){
-if(!GOOGLE_TRANSLATE_KEY||!text){cb(text||"");return;}
-var url="https://translation.googleapis.com/language/translate/v2?key="+GOOGLE_TRANSLATE_KEY;
-fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},
-body:JSON.stringify({q:text,target:targetLang,format:"text"})})
+// ── MyMemory無料翻訳API ──
+function translateText(text,targetLang,sourceLang,cb){
+if(typeof sourceLang==="function"){cb=sourceLang;sourceLang="vi";}
+if(!text){cb("");return;}
+var langPair=sourceLang+"|"+targetLang;
+var url="https://api.mymemory.translated.net/get?q="+encodeURIComponent(text)+"&langpair="+encodeURIComponent(langPair);
+fetch(url)
 .then(function(r){return r.json();})
 .then(function(d){
-var t=d&&d.data&&d.data.translations&&d.data.translations[0];
-cb(t?t.translatedText:text);
+var t=d&&d.responseData&&d.responseData.translatedText;
+cb(t||text);
 })
 .catch(function(){cb(text);});
 }
 function autoTranslateProd(id){
 var p=PRODUCTS.find(function(x){return x.id===id;});if(!p)return;
-var jaInp=document.getElementById("ai-dja-"+id);
-var viInp=document.getElementById("ai-dvi-"+id);
-var jaName=document.getElementById("ai-ja-"+id);
-var viName=document.getElementById("ai-vi-"+id);
-var srcJa=(jaInp?jaInp.value.trim():"");
-var srcVi=(viInp?viInp.value.trim():"");
-if(srcJa&&!srcVi){
-translateText(srcJa,"vi",function(t){if(viInp)viInp.value=t;});
-} else if(srcVi&&!srcJa){
-translateText(srcVi,"ja",function(t){if(jaInp)jaInp.value=t;});
-}
-var nameJa=(p.ja||"");
-var nameVi=(p.vi||"");
-if(nameJa&&!nameVi){
-translateText(nameJa,"vi",function(t){p.vi=t;});
-} else if(nameVi&&!nameJa){
-translateText(nameVi,"ja",function(t){p.ja=t;});
-}
+var viNameEl=document.getElementById("ai-vi-"+id);
+var jaNameEl=document.getElementById("ai-ja-"+id);
+var enNameEl=document.getElementById("ai-en-"+id);
+var viDescEl=document.getElementById("ai-dvi-"+id);
+var jaDescEl=document.getElementById("ai-dja-"+id);
+var enDescEl=document.getElementById("ai-den-"+id);
+var srcNameVi=(viNameEl?viNameEl.value.trim():"")|| p.vi||"";
+var srcDescVi=(viDescEl?viDescEl.value.trim():"")|| p.dvi||"";
 showToast(adminLang==="vi"?"🔄 Đang dịch...":"🔄 翻訳中...");
+var pending=0;
+function done(){pending--;if(pending<=0)showToast(adminLang==="vi"?"✅ Dịch xong!":"✅ 翻訳完了！");}
+if(srcNameVi&&jaNameEl){pending++;translateText(srcNameVi,"ja","vi",function(t){jaNameEl.value=t;done();});}
+if(srcNameVi&&enNameEl){pending++;translateText(srcNameVi,"en","vi",function(t){enNameEl.value=t;done();});}
+if(srcDescVi&&jaDescEl){pending++;translateText(srcDescVi,"ja","vi",function(t){jaDescEl.value=t;done();});}
+if(srcDescVi&&enDescEl){pending++;translateText(srcDescVi,"en","vi",function(t){enDescEl.value=t;done();});}
+if(pending===0)showToast(adminLang==="vi"?"⚠️ Vui lòng nhập tên hoặc mô tả tiếng Việt trước":"⚠️ ベトナム語の名前か説明を入力してください");
 }
 function toggleLangPanel(){
 var dd=document.getElementById("lang-dropdown");
