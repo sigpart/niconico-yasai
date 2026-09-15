@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      message:
+        description: 'デプロイメモ（任意）'
+        required: false
+        default: '手動デプロイ'
 
 jobs:
   deploy:
@@ -11,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy via SFTP
+      - name: Deploy via FTPS
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.SAKURA_FTP_HOST }}
