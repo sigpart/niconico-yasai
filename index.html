@@ -154,8 +154,8 @@
 <div class="opts-grid">
 <div class="opt-card on" onclick="pickDel(this,'deliver')"><div class="opt-ico">🛵</div><span id="del-deliver">配達</span></div>
 <div class="opt-card" onclick="pickDel(this,'pickup')"><div class="opt-ico">🏡</div><span id="del-pickup">直接受取</span></div>
-
 </div>
+<div id="farm-pickup-note" style="display:none;font-size:11.5px;color:var(--muted);margin-top:8px;padding:6px 10px;background:var(--gp);border-radius:6px;line-height:1.6;"></div>
 </div>
 <div class="form-card">
 <div class="form-card-ttl" id="fc-pay">💳 支払い方法</div>
@@ -606,7 +606,7 @@ giữa người sản xuất và người tiêu dùng</textarea></div>
 </div>
 <div class="email-toast" id="email-toast"></div>
 
-<script src="main.js?v=10"></script>
+<script src="main.js?v=11"></script>
 
 <div id="qr-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;flex-direction:column;align-items:center;justify-content:center;">
 <div style="background:#fff;border-radius:16px;padding:24px;max-width:360px;width:90%;text-align:center;">
