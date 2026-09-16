@@ -17,34 +17,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy via sshpass + sftp batch
+      - name: Deploy via rsync over SSH
         env:
           SSHPASS: ${{ secrets.SAKURA_FTP_PASS }}
         run: |
-          sudo apt-get install -y sshpass
+          sudo apt-get install -y sshpass rsync
           REMOTE_DIR="/home/niconicoyasai/www/hanoi-order.niconicoyasai.jp"
           HOST="${{ secrets.SAKURA_FTP_HOST }}"
           USER="${{ secrets.SAKURA_FTP_USER }}"
 
-          # Build sftp batch commands
-          BATCH=$(mktemp)
-          echo "-mkdir $REMOTE_DIR" >> "$BATCH"
-          for f in $(find . -maxdepth 3 \
-              -not -path './.git/*' \
-              -not -path './.github/*' \
-              -not -name '.gitignore' \
-              -type f); do
-            rel="${f#./}"
-            dir=$(dirname "$rel")
-            if [ "$dir" != "." ]; then
-              echo "-mkdir $REMOTE_DIR/$dir" >> "$BATCH"
-            fi
-            echo "put $f $REMOTE_DIR/$rel" >> "$BATCH"
-          done
-          echo "bye" >> "$BATCH"
-
-          sshpass -e sftp \
-            -o StrictHostKeyChecking=no \
-            -o BatchMode=no \
-            -b "$BATCH" \
-            "$USER@$HOST"
+          sshpass -e rsync -avz --no-perms --delete \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='.gitignore' \
+            -e "ssh -o StrictHostKeyChecking=no -o LogLevel=ERROR" \
+            ./ "$USER@$HOST:$REMOTE_DIR/"
