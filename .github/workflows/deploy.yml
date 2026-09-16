@@ -29,6 +29,6 @@ jobs:
             set ssl:verify-certificate no;
             set ftp:passive-mode yes;
             set net:timeout 30;
-            mirror -R --verbose --no-perms --ignore-time --exclude=^\.git/ --exclude=^\.github/ --exclude=^\.gitignore$ . $REMOTE_DIR;
+            mirror -R --verbose --no-perms --ignore-time --transfer-all --exclude=^\.git/ --exclude=^\.github/ --exclude=^\.gitignore$ . $REMOTE_DIR;
             quit
           "
