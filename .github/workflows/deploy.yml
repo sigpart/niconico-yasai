@@ -21,17 +21,14 @@ jobs:
         run: |
           sudo apt-get install -y lftp
           REMOTE_DIR="/home/niconicoyasai/www/hanoi-order.niconicoyasai.jp"
-          HOST="${{ secrets.SAKURA_FTP_HOST }}"
-          USER="${{ secrets.SAKURA_FTP_USER }}"
-          PASS="${{ secrets.SAKURA_FTP_PASS }}"
+          FTP_HOST="${{ secrets.SAKURA_FTP_HOST }}"
+          FTP_USER="${{ secrets.SAKURA_FTP_USER }}"
+          FTP_PASS="${{ secrets.SAKURA_FTP_PASS }}"
 
-          lftp -u "$USER,$PASS" ftp://"$HOST" <<EOF
-          set ssl:verify-certificate no
-          set ftp:passive-mode yes
-          mirror -R --no-perms --ignore-time \
-            --exclude=^\.git/ \
-            --exclude=^\.github/ \
-            --exclude=^\.gitignore$ \
-            . $REMOTE_DIR
-          quit
-          EOF
+          lftp -d -u "$FTP_USER,$FTP_PASS" ftp://"$FTP_HOST" -e "
+            set ssl:verify-certificate no;
+            set ftp:passive-mode yes;
+            set net:timeout 30;
+            mirror -R --verbose --no-perms --ignore-time --exclude=^\.git/ --exclude=^\.github/ --exclude=^\.gitignore$ . $REMOTE_DIR;
+            quit
+          "
