@@ -17,18 +17,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy via rsync over SSH
-        env:
-          SSHPASS: ${{ secrets.SAKURA_FTP_PASS }}
+      - name: Deploy via FTP (lftp)
         run: |
-          sudo apt-get install -y sshpass rsync
+          sudo apt-get install -y lftp
           REMOTE_DIR="/home/niconicoyasai/www/hanoi-order.niconicoyasai.jp"
           HOST="${{ secrets.SAKURA_FTP_HOST }}"
           USER="${{ secrets.SAKURA_FTP_USER }}"
+          PASS="${{ secrets.SAKURA_FTP_PASS }}"
 
-          sshpass -e rsync -avz --no-perms --delete \
-            --exclude='.git' \
-            --exclude='.github' \
-            --exclude='.gitignore' \
-            -e "ssh -o StrictHostKeyChecking=no -o LogLevel=ERROR" \
-            ./ "$USER@$HOST:$REMOTE_DIR/"
+          lftp -u "$USER,$PASS" ftp://"$HOST" <<EOF
+          set ssl:verify-certificate no
+          set ftp:passive-mode yes
+          mirror -R --no-perms --ignore-time \
+            --exclude=^\.git/ \
+            --exclude=^\.github/ \
+            --exclude=^\.gitignore$ \
+            . $REMOTE_DIR
+          quit
+          EOF
