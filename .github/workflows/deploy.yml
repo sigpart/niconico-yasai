@@ -17,14 +17,34 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy via SFTP
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-        with:
-          server: ${{ secrets.SAKURA_FTP_HOST }}
-          username: ${{ secrets.SAKURA_FTP_USER }}
-          password: ${{ secrets.SAKURA_FTP_PASS }}
-          port: 22
-          local_path: './*'
-          remote_path: '/home/niconicoyasai/www/hanoi-order.niconicoyasai.jp'
-          sftp_only: true
-          args: '-o StrictHostKeyChecking=no'
+      - name: Deploy via sshpass + sftp batch
+        env:
+          SSHPASS: ${{ secrets.SAKURA_FTP_PASS }}
+        run: |
+          sudo apt-get install -y sshpass
+          REMOTE_DIR="/home/niconicoyasai/www/hanoi-order.niconicoyasai.jp"
+          HOST="${{ secrets.SAKURA_FTP_HOST }}"
+          USER="${{ secrets.SAKURA_FTP_USER }}"
+
+          # Build sftp batch commands
+          BATCH=$(mktemp)
+          echo "-mkdir $REMOTE_DIR" >> "$BATCH"
+          for f in $(find . -maxdepth 3 \
+              -not -path './.git/*' \
+              -not -path './.github/*' \
+              -not -name '.gitignore' \
+              -type f); do
+            rel="${f#./}"
+            dir=$(dirname "$rel")
+            if [ "$dir" != "." ]; then
+              echo "-mkdir $REMOTE_DIR/$dir" >> "$BATCH"
+            fi
+            echo "put $f $REMOTE_DIR/$rel" >> "$BATCH"
+          done
+          echo "bye" >> "$BATCH"
+
+          sshpass -e sftp \
+            -o StrictHostKeyChecking=no \
+            -o BatchMode=no \
+            -b "$BATCH" \
+            "$USER@$HOST"
