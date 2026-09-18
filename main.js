@@ -2101,12 +2101,12 @@ var VI_PATCHES={
 "Lạc đen khô":{ja:"黒落花生（乾燥）",en:"Dried Black Peanuts",e:"🥜",dja:"香ばしくてコクのある黒落花生。そのままおつまみに、煮豆や料理のアクセントにも。",den:"Fragrant and rich dried black peanuts. Great as a snack or cooking ingredient.",unit:"袋",uniten:"bag",unitvi:"túi"},
 "Rau Mùng Tơi":{ja:"ツルムラサキ",en:"Malabar Spinach",e:"🥬",dja:"ぬめりが特徴のビタミン豊富な葉野菜。スープや炒め物に最適。",den:"Nutritious Malabar spinach with a slightly mucilaginous texture. Perfect in soups or stir-fries.",unit:"束",uniten:"bunch",unitvi:"bó"},
 "Chuối":{ja:"バナナ",en:"Banana",e:"🍌",dja:"甘くて栄養満点の完熟バナナ。そのままでもスムージーにも。",den:"Sweet and nutritious ripe bananas. Eat fresh or blend into smoothies.",unit:"房",uniten:"bunch",unitvi:"nải"},
-"Mứt dâu tây":{ja:"いちごジャム",en:"Strawberry Jam",e:"🍓",dja:"農場産の完熟いちごで手作りしたジャム。パンやヨーグルトに。",den:"Homemade jam crafted from farm-fresh strawberries. Perfect with bread or yogurt.",unit:"瓶",uniten:"jar",unitvi:"hũ"},
+"Mứt dâu tây":{ja:"農家特製無添加いちごジャム",vi:"Mứt dâu tây đặc sản không phụ gia",en:"Homemade Additive-Free Strawberry Jam",e:"🍓",dja:"農場産の完熟いちごで手作りしたジャム。パンやヨーグルトに。",den:"Homemade additive-free jam crafted from farm-fresh strawberries. Perfect with bread or yogurt.",unit:"瓶",uniten:"jar",unitvi:"hũ"},
 "Bí đỏ":{ja:"かぼちゃ",en:"Pumpkin",e:"🎃",dja:"ほくほく甘いかぼちゃ。スープ・煮物・炒め物に幅広く使えます。",den:"Sweet and fluffy pumpkin. Versatile for soups, stews, and stir-fries.",unit:"個",uniten:"piece",unitvi:"quả"}
 };
 PRODUCTS.forEach(function(p){
 var patch=VI_PATCHES[p.vi];
-if(patch&&(!p.ja||p.ja==="新商品"||p.ja==="Sản phẩm mới")){Object.assign(p,patch);}
+if(patch&&(!p.ja||p.ja==="新商品"||p.ja==="Sản phẩm mới")){var _vi=p.vi;Object.assign(p,patch);if(!patch.vi)p.vi=_vi;}
 if(patch&&(!p.dja||p.dja===""||p.dja==="説明を入力")){if(!p.dja||p.dja===""||p.dja==="説明を入力"){p.dja=patch.dja;p.den=patch.den;}}
 });
 })();
