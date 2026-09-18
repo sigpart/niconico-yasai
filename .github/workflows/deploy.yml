@@ -20,7 +20,7 @@ jobs:
       - name: Deploy via FTP (lftp)
         run: |
           sudo apt-get install -y lftp
-          REMOTE_DIR="/home/niconicoyasai/www/hanoi-order.niconicoyasai.jp"
+          REMOTE_DIR="/home/niconicoyasai/www"
           FTP_HOST="${{ secrets.SAKURA_FTP_HOST }}"
           FTP_USER="${{ secrets.SAKURA_FTP_USER }}"
           FTP_PASS="${{ secrets.SAKURA_FTP_PASS }}"
