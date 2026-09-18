@@ -302,6 +302,7 @@ var rv=REVIEWS[pid]||[];if(!rv.length)return 0;
 return Math.round(rv.reduce(function(s,r){return s+r.rating;},0)/rv.length);
 }
 function renderProducts(){
+if(typeof applyViPatches==="function")applyViPatches();
 var grid=document.getElementById("pgrid");
 if(!grid){console.error("[NNY] pgrid not found");return;}
 var list=PRODUCTS.filter(function(p){
