@@ -2735,6 +2735,7 @@ if(p&&d.price!==undefined&&d.price>0)p.price=d.price;
 if(p&&d.pub!==undefined)p.pub=d.pub;
 if(!p&&(d.ja||d.vi||d.en)){PRODUCTS.push(d);}
 });
+applyViPatches();
 renderProducts();
 var batch=fbDb.batch();
 var snapIds=[];
@@ -2912,19 +2913,20 @@ if(d.stock!==undefined&&d.stock>=0&&p.stock!==d.stock){p.stock=d.stock;changed=t
 if(d.price!==undefined&&d.price>0&&p.price!==d.price){p.price=d.price;changed=true;}
 if(d.badge!==undefined&&p.badge!==d.badge){p.badge=d.badge;changed=true;}
 if(d.pub!==undefined&&p.pub!==d.pub){p.pub=d.pub;changed=true;}
-if(d.ja&&p.ja!==d.ja){p.ja=d.ja;changed=true;}
+var _defNames=["新商品","Sản phẩm mới","New Product"];
+if(d.ja&&p.ja!==d.ja&&_defNames.indexOf(d.ja)<0){p.ja=d.ja;changed=true;}
 if(d.vi&&p.vi!==d.vi){p.vi=d.vi;changed=true;}
-if(d.en&&p.en!==d.en){p.en=d.en;changed=true;}
-if(d.dja!==undefined&&p.dja!==d.dja){p.dja=d.dja;changed=true;}
+if(d.en&&p.en!==d.en&&_defNames.indexOf(d.en)<0){p.en=d.en;changed=true;}
+if(d.dja!==undefined&&p.dja!==d.dja&&d.dja!==""&&d.dja!=="説明を入力"){p.dja=d.dja;changed=true;}
 if(d.dvi!==undefined&&p.dvi!==d.dvi){p.dvi=d.dvi;changed=true;}
-if(d.den!==undefined&&p.den!==d.den){p.den=d.den;changed=true;}
+if(d.den!==undefined&&p.den!==d.den&&d.den!==""&&d.den!=="Nhập mô tả"){p.den=d.den;changed=true;}
 if(d.img&&!p.img){p.img=d.img;changed=true;}
 }else if(d.vi||d.ja||d.en){
 // 農家がFirebaseに追加した新規商品をユーザー画面に反映
 PRODUCTS.push(d);changed=true;
 }
 });
-if(changed)renderProducts();
+if(changed){applyViPatches();renderProducts();}
 }).catch(function(){});
 fbDb.collection("reviews").doc("all").get().then(function(doc){
 if(!doc.exists||!doc.data()||!doc.data().data)return;
