@@ -2105,6 +2105,7 @@ var VI_PATCHES={
 "Bí đỏ":{ja:"かぼちゃ",en:"Pumpkin",e:"🎃",dja:"ほくほく甘いかぼちゃ。スープ・煮物・炒め物に幅広く使えます。",den:"Sweet and fluffy pumpkin. Versatile for soups, stews, and stir-fries.",unit:"個",uniten:"piece",unitvi:"quả"}
 };
 function applyViPatches(){
+if(typeof VI_PATCHES==="undefined")return;
 PRODUCTS.forEach(function(p){
 var patch=VI_PATCHES[p.vi];
 if(patch&&(!p.ja||p.ja==="新商品"||p.ja==="Sản phẩm mới")){var _vi=p.vi;Object.assign(p,patch);if(!patch.vi)p.vi=_vi;}
