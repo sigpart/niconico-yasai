@@ -1272,7 +1272,7 @@ if(d.img&&!p.img){p.img=d.img;changed=true;}
 PRODUCTS.push(d);changed=true;
 }
 });
-if(changed)renderProducts();
+if(changed){applyViPatches();renderProducts();}
 }).catch(function(){});
 var d={o:false,p:false,n:false};
 function chk(){if(d.o&&d.p&&d.n&&cb)cb(true);}
@@ -2096,7 +2096,6 @@ if(!exists&&saved.id&&saved.ja){saved.pub=true;PRODUCTS.push(saved);}
 }catch(e){}
 })();
 // 管理画面から追加されたベトナム語のみ商品に日本語・英語を補完
-(function(){
 var VI_PATCHES={
 "Lạc đen khô":{ja:"黒落花生（乾燥）",en:"Dried Black Peanuts",e:"🥜",dja:"香ばしくてコクのある黒落花生。そのままおつまみに、煮豆や料理のアクセントにも。",den:"Fragrant and rich dried black peanuts. Great as a snack or cooking ingredient.",unit:"袋",uniten:"bag",unitvi:"túi"},
 "Rau Mùng Tơi":{ja:"ツルムラサキ",en:"Malabar Spinach",e:"🥬",dja:"ぬめりが特徴のビタミン豊富な葉野菜。スープや炒め物に最適。",den:"Nutritious Malabar spinach with a slightly mucilaginous texture. Perfect in soups or stir-fries.",unit:"束",uniten:"bunch",unitvi:"bó"},
@@ -2104,12 +2103,14 @@ var VI_PATCHES={
 "Mứt dâu tây":{ja:"農家特製無添加いちごジャム",vi:"Mứt dâu tây đặc sản không phụ gia",en:"Homemade Additive-Free Strawberry Jam",e:"🍓",dja:"農場産の完熟いちごで手作りしたジャム。パンやヨーグルトに。",den:"Homemade additive-free jam crafted from farm-fresh strawberries. Perfect with bread or yogurt.",unit:"瓶",uniten:"jar",unitvi:"hũ"},
 "Bí đỏ":{ja:"かぼちゃ",en:"Pumpkin",e:"🎃",dja:"ほくほく甘いかぼちゃ。スープ・煮物・炒め物に幅広く使えます。",den:"Sweet and fluffy pumpkin. Versatile for soups, stews, and stir-fries.",unit:"個",uniten:"piece",unitvi:"quả"}
 };
+function applyViPatches(){
 PRODUCTS.forEach(function(p){
 var patch=VI_PATCHES[p.vi];
 if(patch&&(!p.ja||p.ja==="新商品"||p.ja==="Sản phẩm mới")){var _vi=p.vi;Object.assign(p,patch);if(!patch.vi)p.vi=_vi;}
-if(patch&&(!p.dja||p.dja===""||p.dja==="説明を入力")){if(!p.dja||p.dja===""||p.dja==="説明を入力"){p.dja=patch.dja;p.den=patch.den;}}
+else if(patch&&(!p.dja||p.dja===""||p.dja==="説明を入力")){p.dja=patch.dja;p.den=patch.den;}
 });
-})();
+}
+applyViPatches();
 function renderAdminDB2(){
 var wrap=document.getElementById("adm-orders-db-wrap");
 if(!wrap)return;
