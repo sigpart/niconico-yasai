@@ -307,7 +307,7 @@ var grid=document.getElementById("pgrid");
 if(!grid){console.error("[NNY] pgrid not found");return;}
 var list=PRODUCTS.filter(function(p){
 if(season==="all") return p.pub!==false;
-if(season==="yearround") return p.pub!==false&&(p.season==="all"||(Array.isArray(p.season)&&p.season.indexOf("all")>=0));
+if(season==="yearround") return p.season==="all"||(Array.isArray(p.season)&&p.season.indexOf("all")>=0);
 var id=Number(p.id);
 var pSea=p.season;
 var inSea=(typeof pSea==="string"&&pSea===season)||(Array.isArray(pSea)&&pSea.indexOf(season)>=0);
@@ -317,7 +317,7 @@ if(!inSea){
   else if(season==="autumn")inSea=[12,13,17,18,19,20].indexOf(id)>=0;
   else if(season==="winter")inSea=[13,21,22,23,24,25,26,27].indexOf(id)>=0;
 }
-return p.pub!==false&&inSea;
+return inSea;
 });
 if(season==="all"&&list.length===0&&PRODUCTS.length>0){list=PRODUCTS.slice();}
 if(list.length===0){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:#888;">商品が見つかりません (PRODUCTS:'+PRODUCTS.length+'件, season:'+season+')</div>';return;}
