@@ -735,11 +735,11 @@ var lines=(o.items||[]).map(function(i){var nm=lang==="ja"?i.ja:i.vi,unit=lang==
 var shipFee=o.shippingFee||0;
 var shipLine=shipFee>0?(lang==="ja"?"\n 🛵 送料（Grab）= "+vnd(shipFee):"\n 🛵 Phí giao hàng (Grab) = "+vnd(shipFee)):"";
 if(lang==="ja"){
-return o.name+" 様\n\nNICO NICO YASAIをご利用いただきありがとうございます。\nご注文を承りました。\n\n"+
+return o.name+" 様\n\nNICO NICO 便をご利用いただきありがとうございます。\nご注文を承りました。\n\n"+
 "━━━━━━━━━━━━━━━━\n■ 注文番号："+o.no+"\n■ 日時："+o.ts+"\n━━━━━━━━━━━━━━━━\n\n"+
 "【ご注文内容】\n"+lines+shipLine+"\n\n【合計金額】"+vnd(o.tot)+"\n【受け取り方法】"+(dmap[o.delivery]||o.delivery)+"\n【お支払い】"+(pmap[o.payment]||o.payment)+"\n【お届け先】"+o.addr+
 (o.note?"\n【備考】"+o.note:"")+
-"\n\n━━━━━━━━━━━━━━━━\n配達は日曜日にエムハノイより順次お届けいたします。\nご質問はNICONICOYASAI公式LINE: https://lin.ee/R9dAJtD\n\nNICO NICO YASAI\n※ニコニコ野菜バンホー農場\n━━━━━━━━━━━━━━━━";
+"\n\n━━━━━━━━━━━━━━━━\n通常土曜日〜日曜日16:00までのご注文はエムハノイよりお届け。\n平日はバンホー農場よりお届けいたします。\nご質問はNICONICOYASAI公式LINE: https://lin.ee/R9dAJtD\n\nNICO NICO 便\n※ニコニコ野菜バンホー農場\n━━━━━━━━━━━━━━━━";
 } else {
 return "Kính gửi "+o.name+"\n\nCảm ơn bạn đã đặt hàng tại NICO NICO YASAI.\n\n"+
 "━━━━━━━━━━━━━━━━\n■ Mã đơn: "+o.no+"\n■ Ngày: "+o.ts+"\n━━━━━━━━━━━━━━━━\n\n"+
@@ -750,7 +750,7 @@ return "Kính gửi "+o.name+"\n\nCảm ơn bạn đã đặt hàng tại NICO N
 }
 function sendEmail(o){
 if(!o.email)return;
-var subject=(lang==="ja"?"【ご注文確認】NICO NICO YASAI ":"【Xác nhận đơn hàng】NICO NICO YASAI ")+o.no;
+var subject=(lang==="ja"?"【ご注文確認】NICO NICO 便 ":"【Xác nhận đơn hàng】NICO NICO 便 ")+o.no;
 var body=buildEmailBody(o);
 if(EJ.service&&EJ.template&&EJ.pubkey){
 try{emailjs.init({publicKey:EJ.pubkey});}catch(e){}
