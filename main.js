@@ -739,13 +739,13 @@ return o.name+" 様\n\nNICO NICO 便をご利用いただきありがとうご�
 "━━━━━━━━━━━━━━━━\n■ 注文番号："+o.no+"\n■ 日時："+o.ts+"\n━━━━━━━━━━━━━━━━\n\n"+
 "【ご注文内容】\n"+lines+shipLine+"\n\n【合計金額】"+vnd(o.tot)+"\n【受け取り方法】"+(dmap[o.delivery]||o.delivery)+"\n【お支払い】"+(pmap[o.payment]||o.payment)+"\n【お届け先】"+o.addr+
 (o.note?"\n【備考】"+o.note:"")+
-"\n\n━━━━━━━━━━━━━━━━\n通常土曜日〜日曜日16:00までのご注文はエムハノイよりお届け。\n平日はバンホー農場よりお届けいたします。\n⚠ 雨天等の天候の影響により、当日ご希望のお野菜が変更になる場合や、配達に時間がかかる場合がございます。あらかじめご了承ください。\nご質問はNICONICOYASAI公式LINE: https://lin.ee/R9dAJtD\n\nNICO NICO 便\n※ニコニコ野菜バンホー農場\n━━━━━━━━━━━━━━━━";
+"\n\n━━━━━━━━━━━━━━━━\n通常土曜日〜日曜日16:00までのご注文はエムハノイよりお届け。\n平日はバンホー農場よりお届けいたします。\n雨天等の天候の影響により、当日ご希望のお野菜が変更になる場合や、配達に時間がかかる場合がございます。あらかじめご了承ください。\nご質問はNICONICOYASAI公式LINE: https://lin.ee/R9dAJtD\n\nNICO NICO 便\n※ニコニコ野菜バンホー農場\n━━━━━━━━━━━━━━━━";
 } else {
 return "Kính gửi "+o.name+"\n\nCảm ơn bạn đã đặt hàng tại NICO NICO YASAI.\n\n"+
 "━━━━━━━━━━━━━━━━\n■ Mã đơn: "+o.no+"\n■ Ngày: "+o.ts+"\n━━━━━━━━━━━━━━━━\n\n"+
 "【Chi tiết】\n"+lines+shipLine+"\n\n【Tổng】"+vnd(o.tot)+"\n【Hình thức】"+(dmap[o.delivery]||o.delivery)+"\n【Thanh toán】"+(pmap[o.payment]||o.payment)+"\n【Địa chỉ】"+o.addr+
 (o.note?"\n【Ghi chú】"+o.note:"")+
-"\n\n━━━━━━━━━━━━━━━━\nĐơn đặt từ thứ 7 đến 16:00 Chủ nhật sẽ được giao từ cửa hàng M-Hanoi. Ngày thường giao từ trang trại Vân Hòa.\n⚠ Do thời tiết (mưa v.v.), rau theo yêu cầu có thể bị thay đổi hoặc thời gian giao hàng có thể bị chậm hơn. Mong bạn thông cảm.\nMọi thắc mắc vui lòng liên hệ LINE: https://lin.ee/R9dAJtD\n\nNICO NICO 便\n※ Trang trại Vân Hòa\n━━━━━━━━━━━━━━━━";
+"\n\n━━━━━━━━━━━━━━━━\nĐơn đặt từ thứ 7 đến 16:00 Chủ nhật sẽ được giao từ cửa hàng M-Hanoi. Ngày thường giao từ trang trại Vân Hòa.\nDo thời tiết (mưa v.v.), rau theo yêu cầu có thể bị thay đổi hoặc thời gian giao hàng có thể bị chậm hơn. Mong bạn thông cảm.\nMọi thắc mắc vui lòng liên hệ LINE: https://lin.ee/R9dAJtD\n\nNICO NICO 便\n※ Trang trại Vân Hòa\n━━━━━━━━━━━━━━━━";
 }
 }
 function sendEmail(o){
