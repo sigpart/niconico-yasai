@@ -2345,11 +2345,8 @@ var dd=document.getElementById("lang-dropdown");
 if(dd&&!dd.contains(e.target))dd.classList.remove("open");
 });
 function updateLangBtn(){
-var flags={ja:"🇯🇵",vi:"🇻🇳",en:"🇺🇸"};
 var labels={ja:"日本語",vi:"Tiếng Việt",en:"English"};
-var f=document.getElementById("lg-current-flag");
 var l=document.getElementById("lg-current-label");
-if(f)f.textContent=flags[lang]||"🌐";
 if(l)l.textContent=labels[lang]||"Language";
 ["vi","ja","en"].forEach(function(c){
 var el=document.getElementById("lpi-"+c);
