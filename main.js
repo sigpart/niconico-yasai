@@ -48,6 +48,7 @@ var PRODUCTS = [
 {id:27,e:"🥬",ja:"白菜",en:"Napa Cabbage",vi:"Cải thảo",dja:"やわらかな白菜。鍋料理・炒め物・漬物に。",den:"Tender napa cabbage. Perfect for hotpot, stir-fry, or pickling.",dvi:"Cải thảo mềm ngon. Dùng cho lẩu, xào hoặc làm dưa.",price:15000,stock:25,unit:"個",uniten:"head",unitvi:"bắp",pub:true,season:"winter",badge:""}
 ];
 var ORDERS = [];
+var RECEIPT_ORDER = null;
 // localStorageからORDERSを復元（スクショ含む）
 (function(){
 try{
@@ -516,6 +517,7 @@ setTimeout(function(){sendEmail(order);},600);
 setTimeout(function(){sendToSheets(order);},1000);
 }
 function buildReceipt(o){
+RECEIPT_ORDER = o;
 document.getElementById("rmv-no").textContent=o.no;
 document.getElementById("rmv-date").textContent=o.ts;
 document.getElementById("rmv-name").textContent=o.name;
@@ -3048,7 +3050,7 @@ function chatKey(orderNo){
 function escHtml(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
 function openChat(){
-  var o = ORDERS[ORDERS.length-1] || (ORDER_HISTORY && ORDER_HISTORY[ORDER_HISTORY.length-1]);
+  var o = RECEIPT_ORDER || ORDERS[ORDERS.length-1] || (ORDER_HISTORY && ORDER_HISTORY[ORDER_HISTORY.length-1]);
   if(!o){ alert("注文が見つかりません。"); return; }
   startChat(o.no, o);
 }
