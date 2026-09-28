@@ -1799,20 +1799,20 @@ if(lblP)lblP.textContent=adminLang==="vi"?"⏳ Chờ thanh toán":"⏳ 入金待
 if(lblD)lblD.textContent=adminLang==="vi"?"✅ Hoàn thành":"✅ 完了";
 if(lblC)lblC.textContent=adminLang==="vi"?"❌ Đã hủy":"❌ キャンセル";
 function renderCard(o){
-var realIdx=ORDERS.indexOf(o);
+var safeNo=escHtml(o.no);
+var bodyId="ao-body-"+safeNo.replace(/[^a-zA-Z0-9]/g,'-');
 var statusCls=o.status==="done"?"st-done":o.status==="pending_payment"?"st-pending":o.status==="cancelled"?"st-out":"st-new";
 var statusTxt=o.status==="done"?(adminLang==="vi"?"✅ Hoàn thành":"✅ 完了"):o.status==="pending_payment"?(adminLang==="vi"?"⏳ Chờ thanh toán":"⏳ 入金待ち"):o.status==="cancelled"?(adminLang==="vi"?"❌ Đã hủy":"❌ キャンセル"):(adminLang==="vi"?"🆕 Mới":"🆕 新規");
 var tglBtn=o.status==="cancelled"
-?'<button class="ao-btn" onclick="restoreOrder('+realIdx+')" style="color:#c0392b;border-color:#c0392b;">'+(adminLang==="vi"?"↩ Khôi phục":"↩ キャンセル取り消し")+'</button>'
+?'<button class="ao-btn" onclick="adminOrderAction(\'restore\',\''+safeNo+'\')" style="color:#c0392b;border-color:#c0392b;">'+(adminLang==="vi"?"↩ Khôi phục":"↩ キャンセル取り消し")+'</button>'
 :o.status==="pending_payment"
-?'<button class="ao-btn primary" onclick="toggleOrderStatus('+realIdx+')" style="background:#f0c040;color:#7a5c00;border-color:#f0c040;">'+(adminLang==="vi"?"✅ Xác nhận đã nhận tiền":"✅ 入金確認する")+'</button>'
-:'<button class="ao-btn'+(o.status==="done"?"":" primary")+'" onclick="toggleOrderStatus('+realIdx+')">'+(o.status==="done"?(adminLang==="vi"?"↩ Hoàn tác":"↩ 戻す"):(adminLang==="vi"?"✅ Hoàn thành":"✅ 完了にする"))+'</button>';
-var cancelBtn=o.status!=="cancelled"?'<button class="ao-btn" onclick="cancelOrder('+realIdx+')" style="color:#c0392b;border-color:#c0392b;">❌ '+(adminLang==="vi"?"Hủy đơn":"キャンセル")+'</button>':'';
+?'<button class="ao-btn primary" onclick="adminOrderAction(\'confirm\',\''+safeNo+'\')" style="background:#f0c040;color:#7a5c00;border-color:#f0c040;">'+(adminLang==="vi"?"✅ Xác nhận đã nhận tiền":"✅ 入金確認する")+'</button>'
+:'<button class="ao-btn'+(o.status==="done"?"":" primary")+'" onclick="adminOrderAction(\'toggle\',\''+safeNo+'\')">'+(o.status==="done"?(adminLang==="vi"?"↩ Hoàn tác":"↩ 戻す"):(adminLang==="vi"?"✅ Hoàn thành":"✅ 完了にする"))+'</button>';
+var cancelBtn=o.status!=="cancelled"?'<button class="ao-btn" onclick="adminOrderAction(\'cancel\',\''+safeNo+'\')" style="color:#c0392b;border-color:#c0392b;">❌ '+(adminLang==="vi"?"Hủy đơn":"キャンセル")+'</button>':'';
 var items=(o.items||[]).map(function(it){return it.e+" "+(adminLang==="vi"?it.vi:it.ja)+"×"+it.qty;}).join("、");
 var isOpen=o.status!=="done";
-var bodyId="ao-body-"+realIdx;
 var html='<div class="ao-card">';
-html+='<div class="ao-head" style="cursor:pointer;" onclick="_toggleOC('+realIdx+')">';
+html+='<div class="ao-head" style="cursor:pointer;" onclick="adminToggleCard(\''+bodyId+'\',this)">';
 html+='<span class="ao-no">'+o.no+'</span>';
 html+='<span class="ao-date">'+o.ts+'</span>';
 html+='<span class="st-tag '+statusCls+'">'+statusTxt+'</span>';
@@ -1824,23 +1824,18 @@ html+='<div class="ao-meta">👤 '+esc(o.name)+' · 📞 '+esc(o.phone)+(o.email
 html+='<div class="ao-meta">🏠 '+esc(o.addr||"")+'</div>';
 html+='<div class="ao-items">'+items+'</div>';
 if(o.payment==="vietqr"){
+var ssDocId=o.screenshotUrl||null;
 html+='<div style="display:flex;align-items:center;gap:8px;margin-top:6px;padding-top:6px;border-top:1px solid var(--gp);">';
 html+='<span style="font-size:10px;font-weight:800;color:var(--muted);">'+(adminLang==="vi"?"Ảnh CK:":"送金証明:")+'</span>';
-var ssDocId=o.screenshotUrl||null;
 if(ssDocId){
-html+='<img class="ao-ss-thumb" id="ss-thumb-'+realIdx+'" src="" alt="ss" onclick="loadAndShowSS('+realIdx+')" style="width:80px;height:60px;object-fit:cover;border-radius:6px;border:2px solid var(--g3);cursor:zoom-in;background:#f0f0f0;" data-docid="'+ssDocId+'">';
-setTimeout(function(ri,did){
-if(!fbDb)return;
-fbDb.collection('screenshots').doc(did).get().then(function(doc){
-if(doc.exists){var thumb=document.getElementById('ss-thumb-'+ri);if(thumb)thumb.src=doc.data().data;}
-}).catch(function(){});
-}.bind(null,realIdx,ssDocId),300);
+html+='<img class="ao-ss-thumb" id="ss-thumb-'+bodyId+'" src="" alt="ss" onclick="adminLoadSS(\''+safeNo+'\',this)" style="width:80px;height:60px;object-fit:cover;border-radius:6px;border:2px solid var(--g3);cursor:zoom-in;background:#f0f0f0;" data-docid="'+ssDocId+'">';
+setTimeout(function(bid,did){if(!fbDb)return;fbDb.collection('screenshots').doc(did).get().then(function(doc){if(doc.exists){var t=document.getElementById('ss-thumb-'+bid);if(t)t.src=doc.data().data;}}).catch(function(){});}.bind(null,bodyId,ssDocId),300);
 html+='<div style="display:flex;flex-direction:column;gap:3px;margin-left:4px;">';
 html+='<span style="font-size:10px;font-weight:800;color:var(--muted);">'+(adminLang==="vi"?"Ảnh CK: ✅":"送金証明: ✅")+'</span>';
 html+='<span style="font-size:14px;font-weight:900;color:var(--g1);">'+vnd(o.tot)+'</span>';
-if(o.status!=="done"){html+='<button onclick="confirmPayAdmin('+realIdx+')" style="margin-top:4px;background:var(--g1);color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:800;cursor:pointer;">✅ '+(adminLang==="vi"?"Xác nhận nhận tiền":"入金確認→完了")+'</button>';}
+if(o.status!=="done"){html+='<button onclick="adminOrderAction(\'confirmPay\',\''+safeNo+'\')" style="margin-top:4px;background:var(--g1);color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:800;cursor:pointer;">✅ '+(adminLang==="vi"?"Xác nhận nhận tiền":"入金確認→完了")+'</button>';}
 html+='</div>';
-} else {
+}else{
 html+='<div style="display:flex;flex-direction:column;gap:3px;">';
 html+='<span style="font-size:10.5px;color:var(--ghost);">⚠ '+(adminLang==="vi"?"Chưa có ảnh":"スクショなし")+'</span>';
 html+='<span style="font-size:14px;font-weight:900;color:var(--g1);">'+vnd(o.tot)+'</span>';
@@ -1850,8 +1845,8 @@ html+='</div>';
 }
 html+='<div class="ao-tot">'+vnd(o.tot)+'</div>';
 html+='<div class="ao-btns">'+tglBtn+cancelBtn;
-html+='<button class="ao-btn" onclick="adminViewReceipt('+realIdx+')">'+(adminLang==="vi"?"📄 Hóa đơn":"📄 領収証")+'</button>';
-html+='<button class="ao-btn" onclick="adminChatFromOrder(\''+escHtml(o.no)+'\')" style="color:var(--g1);border-color:var(--g1);">💬 '+(adminLang==="vi"?"Chat":"チャット")+'</button>';
+html+='<button class="ao-btn" onclick="adminViewReceiptByNo(\''+safeNo+'\')">'+(adminLang==="vi"?"📄 Hóa đơn":"📄 領収証")+'</button>';
+html+='<button class="ao-btn" onclick="adminChatFromOrder(\''+safeNo+'\')" style="color:var(--g1);border-color:var(--g1);">💬 '+(adminLang==="vi"?"Chat":"チャット")+'</button>';
 html+='</div></div></div></div>';
 return html;
 }
@@ -1894,6 +1889,42 @@ var us=document.getElementById("user-screen");
 if(as){as.classList.remove("on");as.style.display="none";}
 if(us)us.style.display="block";
 showView("receipt");
+}
+function adminViewReceiptByNo(no){
+var o=ORDERS.find(function(x){return x.no===no;});
+if(!o)return;
+buildReceipt(o);
+var as=document.getElementById("admin-screen");
+var us=document.getElementById("user-screen");
+if(as){as.classList.remove("on");as.style.display="none";}
+if(us)us.style.display="block";
+showView("receipt");
+}
+function adminToggleCard(bodyId,hdEl){
+var b=document.getElementById(bodyId);if(!b)return;
+var open=b.style.display==="none";
+b.style.display=open?"block":"none";
+var arr=hdEl?hdEl.querySelector("span:last-child"):null;
+if(arr)arr.textContent=open?"▲":"▼";
+}
+function adminOrderAction(action,no){
+var o=ORDERS.find(function(x){return x.no===no;});
+if(!o)return;
+if(action==="toggle"){o.status=o.status==="done"?"new":"done";}
+else if(action==="confirm"){o.status="done";}
+else if(action==="confirmPay"){o.status="done";}
+else if(action==="cancel"){o.status="cancelled";}
+else if(action==="restore"){o.status="new";}
+if(typeof fbSaveOrder==="function")fbSaveOrder(o);
+try{localStorage.setItem("nny_orders",JSON.stringify(ORDERS));}catch(e){}
+renderAdminOrders2();renderAdminStats();
+}
+function adminLoadSS(no,imgEl){
+var o=ORDERS.find(function(x){return x.no===no;});
+if(!o||!o.screenshotUrl||!fbDb)return;
+fbDb.collection('screenshots').doc(o.screenshotUrl).get().then(function(doc){
+if(doc.exists&&imgEl)imgEl.src=doc.data().data;
+}).catch(function(){});
 }
 // 商品管理
 function renderAdminProducts2(){
