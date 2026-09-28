@@ -3050,9 +3050,11 @@ function chatKey(orderNo){
 function escHtml(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
 function openChat(){
-  var o = RECEIPT_ORDER || ORDERS[ORDERS.length-1] || (ORDER_HISTORY && ORDER_HISTORY[ORDER_HISTORY.length-1]);
-  if(!o){ alert("注文が見つかりません。"); return; }
-  startChat(o.no, o);
+  try{
+    var o = RECEIPT_ORDER || ORDERS[ORDERS.length-1] || (ORDER_HISTORY && ORDER_HISTORY[ORDER_HISTORY.length-1]);
+    if(!o){ alert("注文が見つかりません。"); return; }
+    startChat(o.no||"unknown", o);
+  }catch(err){ alert("チャットエラー: "+err.message); }
 }
 
 function startChat(orderNo, order){
