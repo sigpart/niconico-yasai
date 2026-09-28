@@ -1851,6 +1851,7 @@ html+='</div>';
 html+='<div class="ao-tot">'+vnd(o.tot)+'</div>';
 html+='<div class="ao-btns">'+tglBtn+cancelBtn;
 html+='<button class="ao-btn" onclick="adminViewReceipt('+realIdx+')">'+(adminLang==="vi"?"📄 Hóa đơn":"📄 領収証")+'</button>';
+html+='<button class="ao-btn" onclick="adminChatFromOrder(\''+escHtml(o.no)+'\')" style="color:var(--g1);border-color:var(--g1);">💬 '+(adminLang==="vi"?"Chat":"チャット")+'</button>';
 html+='</div></div></div></div>';
 return html;
 }
@@ -1888,7 +1889,10 @@ el.style.display=el.style.display==="none"?"block":"none";
 function adminViewReceipt(i){
 if(!ORDERS[i])return;
 buildReceipt(ORDERS[i]);
-exitAdmin();
+var as=document.getElementById("admin-screen");
+var us=document.getElementById("user-screen");
+if(as){as.classList.remove("on");as.style.display="none";}
+if(us)us.style.display="block";
 showView("receipt");
 }
 // 商品管理
@@ -3116,6 +3120,12 @@ document.addEventListener("keydown",function(e){
     if(inp&&document.activeElement===inp){e.preventDefault();sendChatMessage();}
   }
 });
+
+function adminChatFromOrder(orderNo){
+  adminOpenChat(orderNo);
+  var el=document.getElementById("adm-chat-section");
+  if(el)el.scrollIntoView({behavior:"smooth",block:"start"});
+}
 
 function renderAdminChat(){
   var el=document.getElementById("admin-chat-content"); if(!el)return;
