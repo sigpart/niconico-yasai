@@ -3180,6 +3180,7 @@ document.addEventListener("keydown",function(e){
 });
 
 function adminChatFromOrder(orderNo){
+  alert("💬 チャット: "+orderNo);
   // 既存モーダルがあれば削除
   var old=document.getElementById("admin-chat-modal");
   if(old)old.remove();
