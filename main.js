@@ -1898,7 +1898,26 @@ var as=document.getElementById("admin-screen");
 var us=document.getElementById("user-screen");
 if(as){as.classList.remove("on");as.style.display="none";}
 if(us)us.style.display="block";
+// 管理者からの領収書表示：専用ボタンを切り替える
+var btnShop=document.getElementById("rct-shop");
+var btnHist=document.getElementById("rct-hist");
+var btnAdmin=document.getElementById("rct-back-admin");
+if(btnShop)btnShop.style.display="none";
+if(btnHist)btnHist.style.display="none";
+if(btnAdmin)btnAdmin.style.display="";
 showView("receipt");
+}
+function backToAdmin(){
+var btnShop=document.getElementById("rct-shop");
+var btnHist=document.getElementById("rct-hist");
+var btnAdmin=document.getElementById("rct-back-admin");
+if(btnShop)btnShop.style.display="";
+if(btnHist)btnHist.style.display="";
+if(btnAdmin)btnAdmin.style.display="none";
+var as=document.getElementById("admin-screen");
+var us=document.getElementById("user-screen");
+if(us)us.style.display="none";
+if(as){as.style.display="";as.classList.add("on");}
 }
 function adminToggleCard(bodyId,hdEl){
 var b=document.getElementById(bodyId);if(!b)return;
@@ -3154,8 +3173,8 @@ document.addEventListener("keydown",function(e){
 
 function adminChatFromOrder(orderNo){
   adminOpenChat(orderNo);
-  var el=document.getElementById("adm-chat-section");
-  if(el)el.scrollIntoView({behavior:"smooth",block:"start"});
+  var screen=document.getElementById("admin-screen");
+  if(screen)screen.scrollTo({top:0,behavior:"smooth"});
 }
 
 function renderAdminChat(){
