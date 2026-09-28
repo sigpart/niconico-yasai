@@ -3180,54 +3180,53 @@ document.addEventListener("keydown",function(e){
 });
 
 function adminChatFromOrder(orderNo){
-  alert("💬 チャット: "+orderNo);
-  // 既存モーダルがあれば削除
-  var old=document.getElementById("admin-chat-modal");
-  if(old)old.remove();
-  // チャットモーダルを生成
-  var modal=document.createElement("div");
-  modal.id="admin-chat-modal";
-  modal.style.cssText="position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.5);display:flex;flex-direction:column;";
-  var panel=document.createElement("div");
-  panel.style.cssText="background:#fff;margin:auto;width:100%;max-width:520px;max-height:90vh;display:flex;flex-direction:column;border-radius:12px 12px 0 0;margin-bottom:0;margin-top:auto;";
-  panel.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #e0e0e0;font-weight:700;font-size:14px;">💬 '+escHtml(orderNo)+'<button onclick="document.getElementById(\'admin-chat-modal\').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#888;">✕</button></div>'
-    +'<div id="adm-chat-modal-msgs" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;min-height:200px;max-height:50vh;background:#f8f8f8;"></div>'
-    +'<div style="padding:10px;border-top:1px solid #e0e0e0;display:flex;gap:8px;">'
-    +'<textarea id="adm-chat-modal-inp" rows="2" style="flex:1;border:1.5px solid #ccc;border-radius:8px;padding:8px;font-size:13px;font-family:inherit;resize:none;" placeholder="ベトナム語で返信..."></textarea>'
-    +'<button onclick="adminSendChatModal(\''+escHtml(orderNo)+'\')" style="background:#1a6b2a;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;">送信</button>'
+  // admin-screen内にインラインチャット画面を表示（z-index問題を回避）
+  var adminBody=document.querySelector(".admin-body");
+  if(!adminBody)return;
+  var adminScreen=document.getElementById("admin-screen");
+  if(adminScreen)adminScreen.scrollTo({top:0});
+  adminBody.innerHTML=''
+    +'<div id="adm-inline-chat" style="max-width:640px;margin:0 auto;">'
+    +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">'
+    +'<button onclick="renderAdminAll()" style="background:#fff;border:2px solid #1a6b2a;color:#1a6b2a;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">← 注文一覧へ戻る</button>'
+    +'<div style="font-family:\'Shippori Mincho B1\',serif;font-size:18px;font-weight:800;color:#1a6b2a;">💬 チャット: '+escHtml(orderNo)+'</div>'
     +'</div>'
-    +'<div style="font-size:11px;color:#888;text-align:center;padding:6px;">ベトナム語で書くと顧客に日本語翻訳して届きます</div>';
-  modal.appendChild(panel);
-  modal.addEventListener("click",function(e){if(e.target===modal)modal.remove();});
-  document.body.appendChild(modal);
-  // メッセージ読み込み
-  var msgsEl=document.getElementById("adm-chat-modal-msgs");
+    +'<div id="adm-inline-msgs" style="background:#fff;border:1px solid #c4dcc8;border-radius:12px;padding:16px;min-height:260px;max-height:55vh;overflow-y:auto;display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">'
+    +'<div style="color:#aaa;text-align:center;padding:20px;font-size:13px;">読み込み中...</div>'
+    +'</div>'
+    +'<div style="background:#fff;border:1px solid #c4dcc8;border-radius:12px;padding:14px;display:flex;gap:10px;align-items:flex-end;">'
+    +'<textarea id="adm-inline-inp" rows="3" style="flex:1;border:1.5px solid #c4dcc8;border-radius:8px;padding:10px;font-size:13px;font-family:inherit;resize:none;outline:none;" placeholder="日本語で入力（自動でベトナム語に翻訳されて届きます）..."></textarea>'
+    +'<button onclick="adminSendChatInline(\''+escHtml(orderNo)+'\')" style="background:#1a6b2a;color:#fff;border:none;border-radius:8px;padding:12px 20px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;">送信</button>'
+    +'</div>'
+    +'<div style="font-size:11px;color:#888;text-align:center;margin-top:8px;">日本語で書くと顧客にベトナム語翻訳して届きます</div>'
+    +'</div>';
+  var msgsEl=document.getElementById("adm-inline-msgs");
   if(!fbEnabled||!fbDb){
-    msgsEl.innerHTML='<div style="color:#aaa;text-align:center;padding:20px;font-size:13px;">Firebase未接続</div>';
+    msgsEl.innerHTML='<div style="color:#aaa;text-align:center;padding:20px;font-size:13px;">Firebase未接続 — チャット機能にはFirebase接続が必要です</div>';
     return;
   }
-  if(fbDb)fbDb.collection("chats").doc(chatKey(orderNo)).set({unread:false},{merge:true}).catch(function(){});
+  fbDb.collection("chats").doc(chatKey(orderNo)).set({unread:false},{merge:true}).catch(function(){});
   fbDb.collection("chats").doc(chatKey(orderNo)).collection("messages").orderBy("ts").get()
     .then(function(snap){
       if(!msgsEl)return;
       if(snap.empty){msgsEl.innerHTML='<div style="color:#aaa;text-align:center;padding:20px;font-size:13px;">まだメッセージはありません</div>';return;}
       msgsEl.innerHTML=snap.docs.map(function(d){
         var m=d.data();var isF=m.role==="farmer";
-        var trl=m.translation?'<div style="font-size:11px;color:#888;font-style:italic;">→ '+escHtml(m.translation)+'</div>':'';
-        return '<div style="display:flex;flex-direction:column;align-self:'+(isF?"flex-end":"flex-start")+';max-width:80%;gap:2px;">'
-          +'<div style="font-size:10px;color:#888;">'+(isF?"農家 🌱":"顧客")+'</div>'
-          +'<div style="background:'+(isF?"#1a6b2a":"#fff")+';color:'+(isF?"#fff":"#222")+';border:'+(isF?"none":"1px solid #ddd")+';padding:8px 12px;border-radius:12px;font-size:13px;">'+escHtml(m.text)+'</div>'
+        var trl=m.translation?'<div style="font-size:11px;color:#888;font-style:italic;margin-top:3px;">→ '+escHtml(m.translation)+'</div>':'';
+        return '<div style="display:flex;flex-direction:column;align-self:'+(isF?"flex-end":"flex-start")+';max-width:82%;gap:2px;">'
+          +'<div style="font-size:10px;color:#888;">'+(isF?"農家 🌱":"顧客 🙋")+'</div>'
+          +'<div style="background:'+(isF?"#1a6b2a":"#f2f2f2")+';color:'+(isF?"#fff":"#222")+';padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.5;">'+escHtml(m.text)+'</div>'
           +trl+'</div>';
       }).join('');
       msgsEl.scrollTop=msgsEl.scrollHeight;
     }).catch(function(e){if(msgsEl)msgsEl.innerHTML='<div style="color:red;font-size:12px;padding:12px;">エラー: '+escHtml(String(e))+'</div>';});
 }
-function adminSendChatModal(orderNo){
-  var inp=document.getElementById("adm-chat-modal-inp");if(!inp)return;
+function adminSendChatInline(orderNo){
+  var inp=document.getElementById("adm-inline-inp");if(!inp)return;
   var text=inp.value.trim();if(!text)return;
   if(!fbEnabled||!fbDb){alert("Firebase未接続");return;}
   inp.disabled=true;inp.value="";
-  translateText(text,"ja","vi",function(translated){
+  translateText(text,"vi","ja",function(translated){
     var msg={role:"farmer",text:text,translation:translated,ts:Date.now()};
     fbDb.collection("chats").doc(chatKey(orderNo)).collection("messages").add(msg)
       .then(function(){
