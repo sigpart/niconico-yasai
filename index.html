@@ -21,7 +21,34 @@
 #qr-modal-body{flex:1;overflow-y:auto}
 .ss-preview-img{max-height:160px;width:100%;object-fit:contain;display:block}
 @media(max-width:480px){.pcard-body{padding:12px 13px 14px}.pcard-add{padding:10px 12px;font-size:13px;width:100%}}
-
+/* ── Chat ── */
+.rct-btn.chat-btn{background:var(--g1);color:#fff;border-color:var(--g1)}
+.chat-wrap{max-width:680px;margin:0 auto;padding:16px 16px 100px;display:flex;flex-direction:column;gap:12px;min-height:80vh}
+.chat-order-info{font-size:12px;color:var(--muted);background:var(--gp);border-radius:var(--r);padding:8px 12px}
+.chat-messages{flex:1;display:flex;flex-direction:column;gap:10px;min-height:200px}
+.chat-msg{display:flex;flex-direction:column;gap:3px;max-width:80%}
+.chat-msg.me{align-self:flex-end;align-items:flex-end}
+.chat-msg.them{align-self:flex-start;align-items:flex-start}
+.chat-bubble{padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.5;word-break:break-word}
+.chat-msg.me .chat-bubble{background:var(--g1);color:#fff;border-bottom-right-radius:4px}
+.chat-msg.them .chat-bubble{background:var(--wh);border:1px solid var(--border);color:var(--ink);border-bottom-left-radius:4px}
+.chat-translation{font-size:11px;color:var(--muted);padding:0 4px;font-style:italic}
+.chat-time{font-size:10px;color:var(--ghost)}
+.chat-sender{font-size:11px;color:var(--muted);font-weight:600}
+.chat-input-row{display:flex;gap:8px;align-items:flex-end;position:sticky;bottom:16px;background:var(--off);padding:8px 0}
+.chat-textarea{flex:1;border:1.5px solid var(--border);border-radius:var(--rl);padding:10px 14px;font-family:inherit;font-size:14px;resize:none;outline:none;transition:border-color .18s}
+.chat-textarea:focus{border-color:var(--g1)}
+.chat-send-btn{background:var(--g1);color:#fff;border:none;border-radius:var(--rl);padding:10px 20px;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0}
+.chat-note{font-size:11px;color:var(--muted);text-align:center}
+.chat-empty{color:var(--ghost);text-align:center;padding:40px 0;font-size:14px}
+/* Admin chat */
+.admin-chat-list{display:flex;flex-direction:column;gap:8px}
+.admin-chat-item{background:var(--gp);border-radius:var(--r);padding:10px 14px;cursor:pointer;border:1.5px solid transparent}
+.admin-chat-item.unread{border-color:var(--g2);background:var(--gu)}
+.admin-chat-item-no{font-size:12px;color:var(--muted)}
+.admin-chat-item-preview{font-size:13px;font-weight:600;margin-top:2px}
+.admin-chat-panel{display:flex;flex-direction:column;gap:8px}
+.admin-chat-back{font-size:12px;color:var(--g1);cursor:pointer;background:none;border:none;font-weight:700}
 </style>
 
 </head>
@@ -273,6 +300,19 @@
 <div class="receipt-actions">
 <button class="rct-btn solid no-print" onclick="goShop()" id="rct-shop">買い物を続ける</button>
 <button class="rct-btn lined no-print" onclick="goHistory()" id="rct-hist">📋 注文履歴</button>
+<button class="rct-btn chat-btn no-print" onclick="openChat()" id="rct-chat">💬 <span id="rct-chat-lbl">農家とチャット</span></button>
+</div>
+</div>
+<div class="view" id="view-chat">
+<div class="chat-wrap">
+<div class="sec-head"><button class="back-btn" onclick="showView('receipt')" id="chat-back">← 戻る</button><div class="sec-title" id="chat-ttl">💬 農家とチャット</div></div>
+<div class="chat-order-info" id="chat-order-info"></div>
+<div class="chat-messages" id="chat-messages"></div>
+<div class="chat-input-row">
+<textarea class="chat-textarea" id="chat-input" rows="2" placeholder="メッセージを入力..." id="chat-input-el"></textarea>
+<button class="chat-send-btn" onclick="sendChatMessage()" id="chat-send">送信</button>
+</div>
+<div class="chat-note" id="chat-note">農家（ベトナム語）との会話は自動翻訳されます</div>
 </div>
 </div>
 <div class="view" id="view-history">
@@ -556,6 +596,11 @@ giữa người sản xuất và người tiêu dùng</textarea></div>
 </div>
 </div>
 </div>
+<div class="admin-section">
+<div class="admin-sec-title">💬 <span id="adm-chat-ttl">チャット（顧客↔農家）</span></div>
+<div id="admin-chat-content" style="min-height:80px;"></div>
+</div>
+</div>
 </div>
 <div class="pin-gate" id="pin-gate">
 <div class="pin-box">
@@ -613,7 +658,7 @@ giữa người sản xuất và người tiêu dùng</textarea></div>
 </div>
 <div class="email-toast" id="email-toast"></div>
 
-<script src="main.js?v=32"></script>
+<script src="main.js?v=33"></script>
 
 <div id="qr-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;flex-direction:column;align-items:center;justify-content:center;">
 <div style="background:#fff;border-radius:16px;padding:24px;max-width:360px;width:90%;text-align:center;">
