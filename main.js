@@ -540,48 +540,31 @@ document.getElementById("rnt-val").textContent=o.note;
 }
 function renderHistory(){
 var el=document.getElementById("hist-list-el");
-var allOrders=ORDERS.length?ORDERS.slice().reverse():ORDER_HISTORY.slice().reverse();
-if(!allOrders.length){
+var myOrders=ORDER_HISTORY.slice().reverse();
+if(!myOrders.length){
 el.innerHTML='<div class="hist-empty"><div class="hist-empty-ico">📋</div><div>'+T("histEmpty")+'</div></div>';return;
 }
-// Group by customer name
-var groups={};var groupOrder=[];
-allOrders.forEach(function(o){
-var key=o.name||o.phone||"不明";
-if(!groups[key]){groups[key]=[];groupOrder.push(key);}
-groups[key].push(o);
-});
 var html='<div class="hist-list">';
-groupOrder.forEach(function(name){
-var orders=groups[name];
-html+='<div class="hist-card">';
-html+='<div class="hist-card-hdr"><span class="hist-no">👤 '+escHtml(name)+'</span><span class="hist-date">'+(orders[0].phone?'📞 '+escHtml(orders[0].phone):'')+'</span></div>';
-html+='<div class="hist-card-body">';
-orders.forEach(function(o){
+myOrders.forEach(function(o){
 var items=o.items.map(function(i){return i.e+" "+(lang==="ja"?i.ja:i.vi)+" ×"+i.qty;}).join("　");
-var stCls=o.status==="done"?"hst-done":(o.status==="cancelled"?"hst-new":"hst-new");
+var stCls=o.status==="done"?"hst-done":"hst-new";
 var stLbl=o.status==="done"?(lang==="ja"?"完了":"Xong"):(lang==="ja"?"進行中":"Đang xử lý");
-html+='<div style="border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;margin-bottom:8px;background:var(--gs);">';
-html+='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:5px;">';
-html+='<span style="font-family:\'Shippori Mincho B1\',serif;font-weight:800;font-size:12px;color:var(--g1);">'+escHtml(o.no)+'</span>';
-html+='<span class="hist-status '+stCls+'">'+stLbl+'</span>';
-html+='</div>';
-html+='<div class="hist-items" style="margin-bottom:6px;font-size:11px;">'+items+'</div>';
-html+='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">';
-html+='<span class="hist-tot">'+vnd(o.tot)+'</span>';
-html+='<div style="display:flex;gap:6px;">';
+html+='<div class="hist-card">';
+html+='<div class="hist-card-hdr"><span class="hist-no">'+escHtml(o.no)+'</span><span class="hist-date">'+escHtml(o.ts||"")+'</span><span class="hist-status '+stCls+'">'+stLbl+'</span></div>';
+html+='<div class="hist-card-body">';
+html+='<div class="hist-items">'+items+'</div>';
+html+='<div class="hist-tot">'+vnd(o.tot)+'</div>';
+html+='<div class="hist-actions">';
 html+='<button class="hist-act-btn" onclick="showHistReceipt(\''+escHtml(o.no)+'\')">🖨 '+(lang==="ja"?"領収証":"Hóa đơn")+'</button>';
 html+='<button class="hist-act-btn" onclick="openChatFromHistory(\''+escHtml(o.no)+'\')" style="color:var(--g1);border-color:var(--g1);">💬 '+(lang==="ja"?"チャット":"Chat")+'</button>';
-html+='</div></div>';
 html+='</div>';
-});
 html+='</div></div>';
 });
 html+='</div>';
 el.innerHTML=html;
 }
 function openChatFromHistory(no){
-var o=ORDERS.find(function(x){return x.no===no;})||ORDER_HISTORY.find(function(x){return x.no===no;});
+var o=ORDER_HISTORY.find(function(x){return x.no===no;});
 if(!o){alert("注文が見つかりません");return;}
 buildReceipt(o);openChat();
 }
