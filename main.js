@@ -3106,6 +3106,7 @@ initApp();
 // ─────────────────────────────────────────
 var CHAT_ORDER_NO = null;
 var CHAT_LISTENER = null;
+var CHAT_CUSTOMER_NAME = "";
 
 function chatKey(orderNo){
   return (orderNo||"").replace(/[^a-zA-Z0-9_-]/g,'-');
@@ -3122,6 +3123,7 @@ function openChat(){
 
 function startChat(orderNo, order){
   CHAT_ORDER_NO = orderNo;
+  CHAT_CUSTOMER_NAME = (order&&order.name)||"";
   showView("chat");
   var info = document.getElementById("chat-order-info");
   if(info && order) info.textContent = "注文番号: " + orderNo + "  |  " + (order.name||"");
@@ -3147,7 +3149,7 @@ function renderChatMessages(all, el){
   if(!all||!all.length){ el.innerHTML='<div class="chat-empty">まだメッセージはありません</div>'; return; }
   el.innerHTML = all.map(function(m){
     var isMe=m.role==="customer";
-    var sender=isMe?"あなた":"🌱 農家";
+    var sender=isMe?(CHAT_CUSTOMER_NAME||"あなた"):"Bach Manh Ha";
     var trl=m.translation?'<div class="chat-translation">→ '+escHtml(m.translation)+'</div>':'';
     var t=m.ts?new Date(m.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
     return '<div class="chat-msg '+(isMe?"me":"them")+'">'
@@ -3172,7 +3174,7 @@ function sendChatMessage(){
   var srcLang=detectMsgLang(text);
   var tgtLang=srcLang==='en'?'vi':(srcLang==='ja'?'vi':'ja');
   translateText(text,tgtLang,srcLang,function(translated){
-    var msg={role:"customer",text:text,translation:translated,lang:srcLang,ts:Date.now()};
+    var msg={role:"customer",text:text,translation:translated,lang:srcLang,ts:Date.now(),customerName:CHAT_CUSTOMER_NAME||""};
     var key=chatKey(CHAT_ORDER_NO);
     fbDb.collection("chats").doc(key).collection("messages").add(msg).then(function(){
       fbDb.collection("chats").doc(key).set({orderNo:CHAT_ORDER_NO,lastMsg:text,lastTs:Date.now(),unread:true},{merge:true});
@@ -3203,7 +3205,7 @@ function adminChatFromOrder(orderNo){
     +'<div style="color:#aaa;text-align:center;padding:20px;font-size:13px;">読み込み中...</div>'
     +'</div>'
     +'<div style="background:#fff;border:1px solid #c4dcc8;border-radius:12px;padding:12px;display:flex;gap:10px;align-items:flex-end;flex-shrink:0;">'
-    +'<textarea id="adm-inline-inp" rows="2" style="flex:1;border:1.5px solid #c4dcc8;border-radius:8px;padding:10px;font-size:13px;font-family:inherit;resize:none;outline:none;max-height:72px;overflow-y:auto;" placeholder="日本語 / Tiếng Việt / English..."></textarea>'
+    +'<textarea id="adm-inline-inp" rows="2" style="flex:1;border:1.5px solid #c4dcc8;border-radius:8px;padding:10px;font-size:16px;font-family:inherit;resize:none;outline:none;max-height:72px;overflow-y:auto;" placeholder="日本語 / Tiếng Việt / English..."></textarea>'
     +'<button onclick="adminSendChatInline(\''+escHtml(orderNo)+'\')" style="background:#1a6b2a;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;">送信</button>'
     +'</div>'
     +'<div id="adm-chat-hint" style="font-size:10px;color:#888;text-align:center;padding:6px 0;flex-shrink:0;">自動翻訳対応</div>'
@@ -3230,7 +3232,7 @@ function adminChatFromOrder(orderNo){
         if(m.translationEn)trlParts.push('🇬🇧 '+escHtml(m.translationEn));
         var trl=trlParts.length?'<div style="font-size:11px;color:#888;font-style:italic;margin-top:3px;">'+trlParts.join('<br>')+'</div>':'';
         return '<div style="display:flex;flex-direction:column;align-self:'+(isF?"flex-end":"flex-start")+';max-width:82%;gap:2px;">'
-          +'<div style="font-size:10px;color:#888;">'+(isF?"農家 🌱":"顧客 🙋")+'</div>'
+          +'<div style="font-size:10px;color:#888;">'+(isF?"Bach Manh Ha":(escHtml(m.customerName||"顧客")))+'</div>'
           +'<div style="background:'+(isF?"#1a6b2a":"#f2f2f2")+';color:'+(isF?"#fff":"#222")+';padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.5;">'+escHtml(m.text)+'</div>'
           +trl+'</div>';
       }).join('');
