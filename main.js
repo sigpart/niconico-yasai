@@ -3212,7 +3212,7 @@ function adminChatFromOrder(orderNo){
   adminBody.innerHTML=''
     +'<div id="adm-inline-chat" style="max-width:640px;margin:0 auto;display:flex;flex-direction:column;height:calc(100vh - 180px);">'
     +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-shrink:0;">'
-    +'<button onclick="renderAdminAll()" style="background:#fff;border:2px solid #1a6b2a;color:#1a6b2a;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">← 注文一覧へ戻る</button>'
+    +'<button onclick="renderAdminAll()" style="background:#fff;border:2px solid #1a6b2a;color:#1a6b2a;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">← 戻る</button>'
     +'<div style="font-family:\'Shippori Mincho B1\',serif;font-size:17px;font-weight:800;color:#1a6b2a;">💬 '+escHtml(orderNo)+'</div>'
     +'</div>'
     +'<div id="adm-inline-msgs" style="flex:1;background:#fff;border:1px solid #c4dcc8;border-radius:12px;padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:10px;margin-bottom:12px;">'
