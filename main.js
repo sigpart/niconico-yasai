@@ -3252,11 +3252,7 @@ function adminSendChatInline(orderNo){
       }).catch(function(e){inp.disabled=false;alert("送信失敗: "+e.message);});
   }
   var custLang=ADMIN_CHAT_CUST_LANG||'ja';
-  if(srcLang==='vi'){
-    translateText(text,custLang,"vi",function(tr){_save({role:"farmer",text:text,translation:tr,lang:'vi',ts:Date.now()});});
-  } else {
-    translateText(text,"vi",srcLang,function(tr){_save({role:"farmer",text:text,translation:tr,lang:srcLang,ts:Date.now()});});
-  }
+  translateText(text,custLang,srcLang,function(tr){_save({role:"farmer",text:text,translation:tr,lang:srcLang,ts:Date.now()});});
 }
 
 function renderAdminChat(){
