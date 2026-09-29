@@ -540,32 +540,50 @@ document.getElementById("rnt-val").textContent=o.note;
 }
 function renderHistory(){
 var el=document.getElementById("hist-list-el");
-var lookupHtml='<div class="hist-lookup-box">'
-+'<div class="hist-lookup-ttl">📞 '+T("histLookup")+'</div>'
-+'<div class="hist-lookup-row">'
-+'<input class="hist-lookup-inp" id="hist-phone-inp" type="tel" placeholder="'+T("histLookupPlaceholder")+'">'
-+'<button class="hist-lookup-btn" onclick="lookupOrdersByPhone()">'+T("histLookupBtn")+'</button>'
-+'</div>'
-+'<div id="hist-lookup-result"></div>'
-+'</div>';
-if(!ORDER_HISTORY.length){
-el.innerHTML=lookupHtml+'<div class="hist-empty"><div class="hist-empty-ico">📋</div><div>'+T("histEmpty")+'</div></div>';return;
+var allOrders=ORDERS.length?ORDERS.slice().reverse():ORDER_HISTORY.slice().reverse();
+if(!allOrders.length){
+el.innerHTML='<div class="hist-empty"><div class="hist-empty-ico">📋</div><div>'+T("histEmpty")+'</div></div>';return;
 }
+// Group by customer name
+var groups={};var groupOrder=[];
+allOrders.forEach(function(o){
+var key=o.name||o.phone||"不明";
+if(!groups[key]){groups[key]=[];groupOrder.push(key);}
+groups[key].push(o);
+});
 var html='<div class="hist-list">';
-ORDER_HISTORY.forEach(function(o,i){
-var items=o.items.map(function(i){return i.e+" "+(lang==="ja"?i.ja:i.vi)+" ×"+i.qty;}).join("　");
-var stCls=o.status==="done"?"hst-done":"hst-new";
-var stLbl=o.status==="done"?T("stDone"):T("stNew");
+groupOrder.forEach(function(name){
+var orders=groups[name];
 html+='<div class="hist-card">';
-html+='<div class="hist-card-hdr"><span class="hist-no">'+o.no+'</span><span class="hist-date">'+o.ts+'</span><span class="hist-status '+stCls+'">'+stLbl+'</span></div>';
+html+='<div class="hist-card-hdr"><span class="hist-no">👤 '+escHtml(name)+'</span><span class="hist-date">'+(orders[0].phone?'📞 '+escHtml(orders[0].phone):'')+'</span></div>';
 html+='<div class="hist-card-body">';
-html+='<div class="hist-items">'+items+'</div>';
-html+='<div class="hist-tot">'+vnd(o.tot)+'</div>';
-html+='<div class="hist-actions"><button class="hist-act-btn" onclick="showHistReceiptByIdx('+i+')">🖨 '+(lang==="ja"?"領収証を見る":"Xem hóa đơn")+'</button></div>';
+orders.forEach(function(o){
+var items=o.items.map(function(i){return i.e+" "+(lang==="ja"?i.ja:i.vi)+" ×"+i.qty;}).join("　");
+var stCls=o.status==="done"?"hst-done":(o.status==="cancelled"?"hst-new":"hst-new");
+var stLbl=o.status==="done"?(lang==="ja"?"完了":"Xong"):(lang==="ja"?"進行中":"Đang xử lý");
+html+='<div style="border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;margin-bottom:8px;background:var(--gs);">';
+html+='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:5px;">';
+html+='<span style="font-family:\'Shippori Mincho B1\',serif;font-weight:800;font-size:12px;color:var(--g1);">'+escHtml(o.no)+'</span>';
+html+='<span class="hist-status '+stCls+'">'+stLbl+'</span>';
+html+='</div>';
+html+='<div class="hist-items" style="margin-bottom:6px;font-size:11px;">'+items+'</div>';
+html+='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">';
+html+='<span class="hist-tot">'+vnd(o.tot)+'</span>';
+html+='<div style="display:flex;gap:6px;">';
+html+='<button class="hist-act-btn" onclick="showHistReceipt(\''+escHtml(o.no)+'\')">🖨 '+(lang==="ja"?"領収証":"Hóa đơn")+'</button>';
+html+='<button class="hist-act-btn" onclick="openChatFromHistory(\''+escHtml(o.no)+'\')" style="color:var(--g1);border-color:var(--g1);">💬 '+(lang==="ja"?"チャット":"Chat")+'</button>';
+html+='</div></div>';
+html+='</div>';
+});
 html+='</div></div>';
 });
 html+='</div>';
 el.innerHTML=html;
+}
+function openChatFromHistory(no){
+var o=ORDERS.find(function(x){return x.no===no;})||ORDER_HISTORY.find(function(x){return x.no===no;});
+if(!o){alert("注文が見つかりません");return;}
+buildReceipt(o);openChat();
 }
 function showHistReceipt(no){
 var o=ORDER_HISTORY.find(function(x){return x.no===no;}); if(!o)return;
@@ -1976,7 +1994,7 @@ html+='</div>';
 html+='<span style="position:absolute;bottom:-4px;right:-4px;font-size:10px;font-weight:800;padding:2px 5px;border-radius:6px;background:'+(p.pub?'var(--g1)':'#e53935')+';color:#fff;">'+(p.pub?(adminLang==="vi"?"ON":"公開"):(adminLang==="vi"?"OFF":"非公開"))+'</span>';
 html+='</div>';
 html+='<div class="apc-info"><div class="apc-name">'+nm+'</div><div class="apc-meta">'+vnd(p.price)+'</div></div>';
-html+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;" onclick="event.stopPropagation()">';
+html+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:1;min-width:0;max-width:55%;overflow:hidden;" onclick="event.stopPropagation()">';
 html+=sqHtml;
 html+='<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;font-weight:800;color:'+(p.pub?'var(--g1)':'var(--muted)')+';white-space:nowrap;" onclick="event.stopPropagation()">';
 html+='<input type="checkbox" '+(p.pub?'checked':'')+' onchange="togglePub('+p.id+',this.checked)" style="width:16px;height:16px;accent-color:var(--g1);cursor:pointer;">';
@@ -3157,13 +3175,20 @@ function renderChatMessages(all, el){
   el.scrollTop=el.scrollHeight;
 }
 
+function detectMsgLang(text){
+  if(/[぀-ヿ一-鿿㐀-䶿]/.test(text)) return 'ja';
+  if(/^[\x00-\x7F\s]+$/.test(text.trim())) return 'en';
+  return 'vi';
+}
 function sendChatMessage(){
   var inp=document.getElementById("chat-input"); if(!inp)return;
   var text=inp.value.trim(); if(!text||!CHAT_ORDER_NO)return;
   if(!fbEnabled||!fbDb){alert("Firebase接続が必要です");return;}
   inp.value=""; inp.disabled=true;
-  translateText(text,"vi","ja",function(translated){
-    var msg={role:"customer",text:text,translation:translated,ts:Date.now()};
+  var srcLang=detectMsgLang(text);
+  var tgtLang=srcLang==='en'?'vi':(srcLang==='ja'?'vi':'ja');
+  translateText(text,tgtLang,srcLang,function(translated){
+    var msg={role:"customer",text:text,translation:translated,lang:srcLang,ts:Date.now()};
     var key=chatKey(CHAT_ORDER_NO);
     fbDb.collection("chats").doc(key).collection("messages").add(msg).then(function(){
       fbDb.collection("chats").doc(key).set({orderNo:CHAT_ORDER_NO,lastMsg:text,lastTs:Date.now(),unread:true},{merge:true});
@@ -3180,29 +3205,28 @@ document.addEventListener("keydown",function(e){
 });
 
 function adminChatFromOrder(orderNo){
-  // admin-screen内にインラインチャット画面を表示（z-index問題を回避）
   var adminBody=document.querySelector(".admin-body");
   if(!adminBody)return;
   var adminScreen=document.getElementById("admin-screen");
   if(adminScreen)adminScreen.scrollTo({top:0});
   adminBody.innerHTML=''
-    +'<div id="adm-inline-chat" style="max-width:640px;margin:0 auto;">'
-    +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">'
+    +'<div id="adm-inline-chat" style="max-width:640px;margin:0 auto;display:flex;flex-direction:column;height:calc(100vh - 180px);">'
+    +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-shrink:0;">'
     +'<button onclick="renderAdminAll()" style="background:#fff;border:2px solid #1a6b2a;color:#1a6b2a;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">← 注文一覧へ戻る</button>'
-    +'<div style="font-family:\'Shippori Mincho B1\',serif;font-size:18px;font-weight:800;color:#1a6b2a;">💬 チャット: '+escHtml(orderNo)+'</div>'
+    +'<div style="font-family:\'Shippori Mincho B1\',serif;font-size:17px;font-weight:800;color:#1a6b2a;">💬 '+escHtml(orderNo)+'</div>'
     +'</div>'
-    +'<div id="adm-inline-msgs" style="background:#fff;border:1px solid #c4dcc8;border-radius:12px;padding:16px;min-height:260px;max-height:55vh;overflow-y:auto;display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">'
+    +'<div id="adm-inline-msgs" style="flex:1;background:#fff;border:1px solid #c4dcc8;border-radius:12px;padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:10px;margin-bottom:12px;">'
     +'<div style="color:#aaa;text-align:center;padding:20px;font-size:13px;">読み込み中...</div>'
     +'</div>'
-    +'<div style="background:#fff;border:1px solid #c4dcc8;border-radius:12px;padding:14px;display:flex;gap:10px;align-items:flex-end;">'
-    +'<textarea id="adm-inline-inp" rows="3" style="flex:1;border:1.5px solid #c4dcc8;border-radius:8px;padding:10px;font-size:13px;font-family:inherit;resize:none;outline:none;" placeholder="日本語で入力（自動でベトナム語に翻訳されて届きます）..."></textarea>'
-    +'<button onclick="adminSendChatInline(\''+escHtml(orderNo)+'\')" style="background:#1a6b2a;color:#fff;border:none;border-radius:8px;padding:12px 20px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;">送信</button>'
+    +'<div style="background:#fff;border:1px solid #c4dcc8;border-radius:12px;padding:12px;display:flex;gap:10px;align-items:flex-end;flex-shrink:0;">'
+    +'<textarea id="adm-inline-inp" rows="2" style="flex:1;border:1.5px solid #c4dcc8;border-radius:8px;padding:10px;font-size:13px;font-family:inherit;resize:none;outline:none;max-height:72px;overflow-y:auto;" placeholder="日本語 / Tiếng Việt / English..."></textarea>'
+    +'<button onclick="adminSendChatInline(\''+escHtml(orderNo)+'\')" style="background:#1a6b2a;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;">送信</button>'
     +'</div>'
-    +'<div style="font-size:11px;color:#888;text-align:center;margin-top:8px;">日本語で書くと顧客にベトナム語翻訳して届きます</div>'
+    +'<div style="font-size:10px;color:#888;text-align:center;padding:6px 0;flex-shrink:0;">日本語→ベトナム語 / ベトナム語→日本語・英語 に自動翻訳</div>'
     +'</div>';
   var msgsEl=document.getElementById("adm-inline-msgs");
   if(!fbEnabled||!fbDb){
-    msgsEl.innerHTML='<div style="color:#aaa;text-align:center;padding:20px;font-size:13px;">Firebase未接続 — チャット機能にはFirebase接続が必要です</div>';
+    msgsEl.innerHTML='<div style="color:#aaa;text-align:center;padding:20px;font-size:13px;">Firebase未接続</div>';
     return;
   }
   fbDb.collection("chats").doc(chatKey(orderNo)).set({unread:false},{merge:true}).catch(function(){});
@@ -3212,7 +3236,11 @@ function adminChatFromOrder(orderNo){
       if(snap.empty){msgsEl.innerHTML='<div style="color:#aaa;text-align:center;padding:20px;font-size:13px;">まだメッセージはありません</div>';return;}
       msgsEl.innerHTML=snap.docs.map(function(d){
         var m=d.data();var isF=m.role==="farmer";
-        var trl=m.translation?'<div style="font-size:11px;color:#888;font-style:italic;margin-top:3px;">→ '+escHtml(m.translation)+'</div>':'';
+        var trlParts=[];
+        if(m.translation)trlParts.push(escHtml(m.translation));
+        if(m.translationJa)trlParts.push('🇯🇵 '+escHtml(m.translationJa));
+        if(m.translationEn)trlParts.push('🇬🇧 '+escHtml(m.translationEn));
+        var trl=trlParts.length?'<div style="font-size:11px;color:#888;font-style:italic;margin-top:3px;">'+trlParts.join('<br>')+'</div>':'';
         return '<div style="display:flex;flex-direction:column;align-self:'+(isF?"flex-end":"flex-start")+';max-width:82%;gap:2px;">'
           +'<div style="font-size:10px;color:#888;">'+(isF?"農家 🌱":"顧客 🙋")+'</div>'
           +'<div style="background:'+(isF?"#1a6b2a":"#f2f2f2")+';color:'+(isF?"#fff":"#222")+';padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.5;">'+escHtml(m.text)+'</div>'
@@ -3226,15 +3254,26 @@ function adminSendChatInline(orderNo){
   var text=inp.value.trim();if(!text)return;
   if(!fbEnabled||!fbDb){alert("Firebase未接続");return;}
   inp.disabled=true;inp.value="";
-  translateText(text,"vi","ja",function(translated){
-    var msg={role:"farmer",text:text,translation:translated,ts:Date.now()};
+  var srcLang=detectMsgLang(text);
+  function _save(msg){
     fbDb.collection("chats").doc(chatKey(orderNo)).collection("messages").add(msg)
       .then(function(){
-        fbDb.collection("chats").doc(chatKey(orderNo)).set({lastMsg:text,lastTs:Date.now(),unread:false},{merge:true});
+        fbDb.collection("chats").doc(chatKey(orderNo)).set({lastMsg:msg.text,lastTs:Date.now(),unread:false},{merge:true});
         inp.disabled=false;
         adminChatFromOrder(orderNo);
       }).catch(function(e){inp.disabled=false;alert("送信失敗: "+e.message);});
-  });
+  }
+  if(srcLang==='ja'){
+    translateText(text,"vi","ja",function(tr){_save({role:"farmer",text:text,translation:tr,lang:'ja',ts:Date.now()});});
+  } else if(srcLang==='vi'){
+    translateText(text,"ja","vi",function(trJa){
+      translateText(text,"en","vi",function(trEn){
+        _save({role:"farmer",text:text,translationJa:trJa,translationEn:trEn,lang:'vi',ts:Date.now()});
+      });
+    });
+  } else {
+    translateText(text,"vi","en",function(tr){_save({role:"farmer",text:text,translation:tr,lang:'en',ts:Date.now()});});
+  }
 }
 
 function renderAdminChat(){

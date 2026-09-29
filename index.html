@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>NICO NICO YASAI v44</title>
+<title>NICO NICO YASAI v45</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
@@ -23,9 +23,10 @@
 @media(max-width:480px){.pcard-body{padding:12px 13px 14px}.pcard-add{padding:10px 12px;font-size:13px;width:100%}}
 /* ── Chat ── */
 .rct-btn.chat-btn{background:var(--g1);color:#fff;border-color:var(--g1)}
-.chat-wrap{max-width:680px;margin:0 auto;padding:16px 16px 100px;display:flex;flex-direction:column;gap:12px;min-height:80vh}
-.chat-order-info{font-size:12px;color:var(--muted);background:var(--gp);border-radius:var(--r);padding:8px 12px}
-.chat-messages{flex:1;display:flex;flex-direction:column;gap:10px;min-height:200px}
+#view-chat.on{display:flex;flex-direction:column;height:100dvh;height:calc(var(--vh,1vh)*100);overflow:hidden}
+.chat-wrap{max-width:680px;width:100%;margin:0 auto;padding:12px 16px 0;display:flex;flex-direction:column;gap:8px;flex:1;overflow:hidden}
+.chat-order-info{font-size:12px;color:var(--muted);background:var(--gp);border-radius:var(--r);padding:8px 12px;flex-shrink:0}
+.chat-messages{flex:1;display:flex;flex-direction:column;gap:10px;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px}
 .chat-msg{display:flex;flex-direction:column;gap:3px;max-width:80%}
 .chat-msg.me{align-self:flex-end;align-items:flex-end}
 .chat-msg.them{align-self:flex-start;align-items:flex-start}
@@ -35,11 +36,11 @@
 .chat-translation{font-size:11px;color:var(--muted);padding:0 4px;font-style:italic}
 .chat-time{font-size:10px;color:var(--ghost)}
 .chat-sender{font-size:11px;color:var(--muted);font-weight:600}
-.chat-input-row{display:flex;gap:8px;align-items:flex-end;position:sticky;bottom:16px;background:var(--off);padding:8px 0}
-.chat-textarea{flex:1;border:1.5px solid var(--border);border-radius:var(--rl);padding:10px 14px;font-family:inherit;font-size:14px;resize:none;outline:none;transition:border-color .18s}
+.chat-input-row{display:flex;gap:8px;align-items:flex-end;flex-shrink:0;background:var(--off);padding:10px 0 env(safe-area-inset-bottom,10px)}
+.chat-textarea{flex:1;border:1.5px solid var(--border);border-radius:var(--rl);padding:10px 14px;font-family:inherit;font-size:14px;resize:none;outline:none;transition:border-color .18s;max-height:80px;overflow-y:auto}
 .chat-textarea:focus{border-color:var(--g1)}
 .chat-send-btn{background:var(--g1);color:#fff;border:none;border-radius:var(--rl);padding:10px 20px;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0}
-.chat-note{font-size:11px;color:var(--muted);text-align:center}
+.chat-note{font-size:11px;color:var(--muted);text-align:center;flex-shrink:0;padding-bottom:6px}
 .chat-empty{color:var(--ghost);text-align:center;padding:40px 0;font-size:14px}
 /* Admin chat */
 .admin-chat-list{display:flex;flex-direction:column;gap:8px}
@@ -328,7 +329,7 @@
 </div>
 <div class="admin-screen" id="admin-screen">
 <div class="admin-topbar">
-<div class="admin-topbar-title" id="adm-topbar-title"><img class="admin-topbar-logo" src="NICO_LOGO_PLACEHOLDER" loading="lazy" alt="">NICO NICO YASAI <span id="adm-title-sub" style="font-size:13px;opacity:.7;font-weight:500;">管理パネル</span><span style="font-size:10px;opacity:.5;margin-left:8px;">v44</span></div>
+<div class="admin-topbar-title" id="adm-topbar-title"><img class="admin-topbar-logo" src="NICO_LOGO_PLACEHOLDER" loading="lazy" alt="">NICO NICO YASAI <span id="adm-title-sub" style="font-size:13px;opacity:.7;font-weight:500;">管理パネル</span><span style="font-size:10px;opacity:.5;margin-left:8px;">v45</span></div>
 <div class="admin-topbar-right">
 <div class="admin-lang-sw">
 <button class="adm-lb" onclick="setAdminLang('ja')" id="adm-btn-ja">日本語</button>
@@ -659,7 +660,7 @@ giữa người sản xuất và người tiêu dùng</textarea></div>
 </div>
 <div class="email-toast" id="email-toast"></div>
 
-<script src="main.js?v=44"></script>
+<script src="main.js?v=45"></script>
 
 <div id="qr-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;flex-direction:column;align-items:center;justify-content:center;">
 <div style="background:#fff;border-radius:16px;padding:24px;max-width:360px;width:90%;text-align:center;">
