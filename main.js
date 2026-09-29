@@ -547,8 +547,8 @@ el.innerHTML='<div class="hist-empty"><div class="hist-empty-ico">📋</div><div
 var html='<div class="hist-list">';
 myOrders.forEach(function(o){
 var items=o.items.map(function(i){return i.e+" "+(lang==="ja"?i.ja:i.vi)+" ×"+i.qty;}).join("　");
-var stCls=o.status==="done"?"hst-done":"hst-new";
-var stLbl=o.status==="done"?(lang==="ja"?"完了":"Xong"):(lang==="ja"?"進行中":"Đang xử lý");
+var stCls=o.status==="done"?"hst-done":o.status==="cancelled"?"hst-cancelled":"hst-new";
+var stLbl=o.status==="done"?(lang==="ja"?"完了":"Xong"):o.status==="cancelled"?(lang==="ja"?"キャンセル済":"Đã hủy"):(lang==="ja"?"進行中":"Đang xử lý");
 html+='<div class="hist-card">';
 html+='<div class="hist-card-hdr"><span class="hist-no">'+escHtml(o.no)+'</span><span class="hist-date">'+escHtml(o.ts||"")+'</span><span class="hist-status '+stCls+'">'+stLbl+'</span></div>';
 html+='<div class="hist-card-body">';
