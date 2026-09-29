@@ -1978,7 +1978,7 @@ if(!el)return;
 var html="";
 PRODUCTS.forEach(function(p){
 var nm=adminLang==="vi"?p.vi:p.ja;
-var sqHtml=(p.variants&&p.variants.length>0?(function(){var _ul=adminLang==="vi"?p.unitvi:p.unit;var rows='';p.variants.forEach(function(v){var sk="stock"+v.replace("g","");var sv=p[sk]!==undefined?p[sk]:p.stock;var pk="price"+v.replace("g","");var pv=p[pk]||p.price;rows+='<div style="background:var(--gp);border-radius:10px;padding:10px;">'+'<div style="font-size:13px;font-weight:800;color:var(--g1);margin-bottom:8px;">'+v+'</div>'+'<div style="display:flex;align-items:center;gap:4px;" onclick="event.stopPropagation()">'+'<button class="sqbtn" onclick="adjVariantStock('+p.id+",'"+v+"'"+',-1)">−</button>'+'<input class="sq-num" id="sq-'+p.id+'-'+v+'" type="number" value="'+sv+'" min="0" onchange="setVariantStock('+p.id+",'"+v+"'"+',this.value)" onclick="this.select()">'+'<button class="sqbtn" onclick="adjVariantStock('+p.id+",'"+v+"'"+',1)">＋</button>'+'<span style="font-size:11px;color:var(--muted);margin-left:3px;">'+_ul+'</span>'+'</div>'+'<div style="display:flex;align-items:center;gap:4px;margin-top:6px;" onclick="event.stopPropagation()">'+'<input type="number" id="pe-price-'+p.id+'-'+v+'" value="'+pv+'" min="0" step="1000" onchange="saveVariantPrice('+p.id+",'"+v+"'"+',this.value)" onclick="this.select()" style="width:80px;font-size:12px;font-weight:700;border:2px solid var(--g3);border-radius:6px;padding:4px 8px;text-align:right;">'+'<span style="font-size:11px;color:var(--g2);">₫</span>'+'</div>'+'</div>';});return '<div class="stock-quick" onclick="event.stopPropagation()"><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">'+rows+'</div></div>';})():'<div onclick="event.stopPropagation()" style="display:flex;flex-direction:column;gap:5px;"><div style="display:flex;align-items:center;gap:4px;"><button class="sqbtn" onclick="adjStock('+p.id+',-1)">−</button><input class="sq-num" id="sq-'+p.id+'" type="number" value="'+p.stock+'" min="0" onchange="setStock('+p.id+',this.value)" onclick="this.select()"><button class="sqbtn" onclick="adjStock('+p.id+',1)">＋</button><span style="font-size:11px;color:var(--muted);margin-left:3px;">'+(adminLang==="vi"?p.unitvi:p.unit)+'</span></div><div style="display:flex;align-items:center;gap:4px;"><input type="number" id="pe-price-'+p.id+'" value="'+p.price+'" min="0" step="1000" onchange="saveProductEdit('+p.id+')" onclick="this.select()" style="width:80px;font-size:12px;font-weight:700;border:2px solid var(--g3);border-radius:6px;padding:4px 8px;text-align:right;"><span style="font-size:11px;color:var(--g2);">₫</span></div></div>')
+var sqHtml=(p.variants&&p.variants.length>0?(function(){var _ul=adminLang==="vi"?p.unitvi:p.unit;var rows='';p.variants.forEach(function(v){var sk="stock"+v.replace("g","");var sv=p[sk]!==undefined?p[sk]:p.stock;var pk="price"+v.replace("g","");var pv=p[pk]||p.price;rows+='<div style="background:var(--gp);border-radius:10px;padding:10px;">'+'<div style="font-size:13px;font-weight:800;color:var(--g1);margin-bottom:8px;">'+v+'</div>'+'<div style="display:flex;align-items:center;gap:4px;" onclick="event.stopPropagation()">'+'<button class="sqbtn" onclick="adjVariantStock('+p.id+",'"+v+"'"+',-1)">−</button>'+'<input class="sq-num" id="sq-'+p.id+'-'+v+'" type="number" value="'+sv+'" min="0" onchange="setVariantStock('+p.id+",'"+v+"'"+',this.value)" onclick="this.select()">'+'<button class="sqbtn" onclick="adjVariantStock('+p.id+",'"+v+"'"+',1)">＋</button>'+'<span style="font-size:11px;color:var(--muted);margin-left:3px;">'+_ul+'</span>'+'</div>'+'<div style="display:flex;align-items:center;gap:4px;margin-top:6px;" onclick="event.stopPropagation()">'+'<input type="number" id="pe-price-'+p.id+'-'+v+'" value="'+pv+'" min="0" step="1000" onchange="saveVariantPrice('+p.id+",'"+v+"'"+',this.value)" onclick="this.select()" style="width:80px;font-size:12px;font-weight:700;border:2px solid var(--g3);border-radius:6px;padding:4px 8px;text-align:right;">'+'<span style="font-size:11px;color:var(--g2);">₫</span>'+'</div>'+'</div>';});return '<div class="stock-quick" onclick="event.stopPropagation()"><div style="display:grid;grid-template-columns:1fr;gap:6px;">'+rows+'</div></div>';})():'<div onclick="event.stopPropagation()" style="display:flex;flex-direction:column;gap:5px;"><div style="display:flex;align-items:center;gap:4px;"><button class="sqbtn" onclick="adjStock('+p.id+',-1)">−</button><input class="sq-num" id="sq-'+p.id+'" type="number" value="'+p.stock+'" min="0" onchange="setStock('+p.id+',this.value)" onclick="this.select()"><button class="sqbtn" onclick="adjStock('+p.id+',1)">＋</button><span style="font-size:11px;color:var(--muted);margin-left:3px;">'+(adminLang==="vi"?p.unitvi:p.unit)+'</span></div><div style="display:flex;align-items:center;gap:4px;"><input type="number" id="pe-price-'+p.id+'" value="'+p.price+'" min="0" step="1000" onchange="saveProductEdit('+p.id+')" onclick="this.select()" style="width:80px;font-size:12px;font-weight:700;border:2px solid var(--g3);border-radius:6px;padding:4px 8px;text-align:right;"><span style="font-size:11px;color:var(--g2);">₫</span></div></div>')
 +'<div style="margin-top:6px;display:flex;align-items:center;gap:6px;">'
 +'<span style="font-size:10px;color:var(--muted);white-space:nowrap;">'+(adminLang==="vi"?"Nhãn:":"バッジ:")+'</span>'
 +'<select id="pe-badge-'+p.id+'" onchange="saveProductEdit('+p.id+')" style="font-size:11px;border:1px solid var(--border);border-radius:4px;padding:2px 4px;flex:1;">'+'<option value="" '+((!p.badge||p.badge==="")?"selected":"")+'>— '+(adminLang==="vi"?"Không có":adminLang==="en"?"None":"なし")+'</option>'+'<option value="NEW" '+(p.badge==="NEW"?"selected":"")+'>NEW</option>'+'<option value="おすすめ" '+(p.badge==="おすすめ"?"selected":"")+'>⭐ '+(adminLang==="vi"?"Nổi bật":adminLang==="en"?"Recommended":"おすすめ")+'</option>'+'<option value="旬" '+(p.badge==="旬"?"selected":"")+'>🌿 '+(adminLang==="vi"?"Đặc sản":adminLang==="en"?"In Season":"旬")+'</option>'+'</select>'
@@ -3175,6 +3175,7 @@ function renderChatMessages(all, el){
   el.scrollTop=el.scrollHeight;
 }
 
+var ADMIN_CHAT_CUST_LANG='ja';
 function detectMsgLang(text){
   if(/[぀-ヿ一-鿿㐀-䶿]/.test(text)) return 'ja';
   if(/^[\x00-\x7F\s]+$/.test(text.trim())) return 'en';
@@ -3210,7 +3211,7 @@ function adminChatFromOrder(orderNo){
   var adminScreen=document.getElementById("admin-screen");
   if(adminScreen)adminScreen.scrollTo({top:0});
   adminBody.innerHTML=''
-    +'<div id="adm-inline-chat" style="max-width:640px;margin:0 auto;display:flex;flex-direction:column;height:calc(100vh - 180px);">'
+    +'<div id="adm-inline-chat" style="max-width:640px;margin:0 auto;display:flex;flex-direction:column;height:calc(100dvh - 180px);">'
     +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-shrink:0;">'
     +'<button onclick="renderAdminAll()" style="background:#fff;border:2px solid #1a6b2a;color:#1a6b2a;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">← 戻る</button>'
     +'<div style="font-family:\'Shippori Mincho B1\',serif;font-size:17px;font-weight:800;color:#1a6b2a;">💬 '+escHtml(orderNo)+'</div>'
@@ -3222,7 +3223,7 @@ function adminChatFromOrder(orderNo){
     +'<textarea id="adm-inline-inp" rows="2" style="flex:1;border:1.5px solid #c4dcc8;border-radius:8px;padding:10px;font-size:13px;font-family:inherit;resize:none;outline:none;max-height:72px;overflow-y:auto;" placeholder="日本語 / Tiếng Việt / English..."></textarea>'
     +'<button onclick="adminSendChatInline(\''+escHtml(orderNo)+'\')" style="background:#1a6b2a;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;">送信</button>'
     +'</div>'
-    +'<div style="font-size:10px;color:#888;text-align:center;padding:6px 0;flex-shrink:0;">日本語→ベトナム語 / ベトナム語→日本語・英語 に自動翻訳</div>'
+    +'<div id="adm-chat-hint" style="font-size:10px;color:#888;text-align:center;padding:6px 0;flex-shrink:0;">自動翻訳対応</div>'
     +'</div>';
   var msgsEl=document.getElementById("adm-inline-msgs");
   if(!fbEnabled||!fbDb){
@@ -3234,6 +3235,10 @@ function adminChatFromOrder(orderNo){
     .then(function(snap){
       if(!msgsEl)return;
       if(snap.empty){msgsEl.innerHTML='<div style="color:#aaa;text-align:center;padding:20px;font-size:13px;">まだメッセージはありません</div>';return;}
+      var custMsg=snap.docs.map(function(d){return d.data();}).find(function(m){return m.role==='customer';});
+      if(custMsg&&custMsg.lang){ADMIN_CHAT_CUST_LANG=custMsg.lang;}
+      var hint=document.getElementById('adm-chat-hint');
+      if(hint)hint.textContent=ADMIN_CHAT_CUST_LANG==='en'?'English↔Vietnamese自動翻訳':'日本語↔ベトナム語 自動翻訳';
       msgsEl.innerHTML=snap.docs.map(function(d){
         var m=d.data();var isF=m.role==="farmer";
         var trlParts=[];
@@ -3263,16 +3268,11 @@ function adminSendChatInline(orderNo){
         adminChatFromOrder(orderNo);
       }).catch(function(e){inp.disabled=false;alert("送信失敗: "+e.message);});
   }
-  if(srcLang==='ja'){
-    translateText(text,"vi","ja",function(tr){_save({role:"farmer",text:text,translation:tr,lang:'ja',ts:Date.now()});});
-  } else if(srcLang==='vi'){
-    translateText(text,"ja","vi",function(trJa){
-      translateText(text,"en","vi",function(trEn){
-        _save({role:"farmer",text:text,translationJa:trJa,translationEn:trEn,lang:'vi',ts:Date.now()});
-      });
-    });
+  var custLang=ADMIN_CHAT_CUST_LANG||'ja';
+  if(srcLang==='vi'){
+    translateText(text,custLang,"vi",function(tr){_save({role:"farmer",text:text,translation:tr,lang:'vi',ts:Date.now()});});
   } else {
-    translateText(text,"vi","en",function(tr){_save({role:"farmer",text:text,translation:tr,lang:'en',ts:Date.now()});});
+    translateText(text,"vi",srcLang,function(tr){_save({role:"farmer",text:text,translation:tr,lang:srcLang,ts:Date.now()});});
   }
 }
 
