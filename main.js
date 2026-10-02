@@ -3072,7 +3072,8 @@ applyI18n();
 renderHistory();
 loadSheetUrl();
 updateLangBtn();
-setSeason("all");
+var _autoSeasonMap={0:"winter",1:"winter",2:"spring",3:"spring",4:"spring",5:"summer",6:"summer",7:"summer",8:"autumn",9:"autumn",10:"autumn",11:"winter"};
+setSeason(_autoSeasonMap[new Date().getMonth()]||"all");
 if(typeof updatePickupAvailability==="function")updatePickupAvailability();
 if(window.__ADMIN_AUTO_OPEN){
 var us=document.getElementById("user-screen");if(us)us.style.display="none";
