@@ -48,6 +48,7 @@ var PRODUCTS = [
 {id:27,e:"🥬",ja:"白菜",en:"Napa Cabbage",vi:"Cải thảo",dja:"やわらかな白菜。鍋料理・炒め物・漬物に。",den:"Tender napa cabbage. Perfect for hotpot, stir-fry, or pickling.",dvi:"Cải thảo mềm ngon. Dùng cho lẩu, xào hoặc làm dưa.",price:15000,stock:25,unit:"個",uniten:"head",unitvi:"bắp",pub:true,season:"winter",badge:""}
 ];
 var ORDERS = [];
+var RECEIPT_ORDER = null;
 // localStorageからORDERSを復元（スクショ含む）
 (function(){
 try{
@@ -98,9 +99,9 @@ function saveNotifyList(){try{localStorage.setItem("nny_notify",JSON.stringify(N
 function saveOrderHistory(){try{localStorage.setItem("nny_hist",JSON.stringify(ORDER_HISTORY));}catch(e){}}
 function saveQRImgs(){try{localStorage.setItem("nny_qr",JSON.stringify(QR_IMGS));}catch(e){try{var small={};Object.keys(QR_IMGS).forEach(function(k){if(QR_IMGS[k])small[k]=QR_IMGS[k].slice(0,512);});localStorage.setItem("nny_qr","{}");localStorage.setItem("nny_qr",JSON.stringify(QR_IMGS));}catch(e2){console.warn("[NNY] QR save failed (localStorage full):",e2);}}}
 var I = {
-ja:{hdrCart:"カート",shopTitle:"🥦 今週のお野菜",cartTtl:"🛒 カートの中身",cartBack:"← 買い物を続ける",sumQty:"商品点数",sumTot:"合計",toInfo:"購入に進む",infoTtl:"📋 注文情報",infoBack:"← カートに戻る",fcCust:"🙋 お客様情報",fcDel:"🛵 受け取り方法",fcPay:"支払い方法",fcNote:"📝 備考",flName:"お名前",flPhone:"電話番号",flZalo:"Zalo ID",flAddr:"住所",flEmail:"メールアドレス",req:"必須",delDeliver:"配達",delPickup:"直接受取",payCash:"現金",toConfirm:"注文内容を確認する",confirmTtl:"✔ 注文確認",confirmBack:"← 情報を修正する",ccLblItems:"注文商品",ccLblTot:"合計",ccLblCust:"お客様情報",ccLblDel:"受け取り方法",ccLblPay:"支払い方法",ccLblNote:"備考",placeLbl:"注文を確定する",rptTtl:"領収証 兼 注文書",rmlNo:"注文番号",rmlDate:"日時",rmlName:"お名前",rmlPhone:"電話番号",rmlAddr:"お届け先",rmlEmail:"メール",rmlDel:"受け取り",rmlPay:"支払い",rptItemsTtl:"ご注文内容",rthItem:"商品",rthQty:"数量",rthPrice:"単価",rthSub:"小計",rgtLbl:"合計金額",rntLbl:"備考：",rctShop:"買い物を続ける",rctHist:"📋 注文履歴",rptFarm:"ご注文ありがとうございます。配達は日曜日にエムハノイより順次お届けいたします。<br>ご質問等がございましたらお手数ですが、以下NICONICOYASAI公式LINEにてお気軽にご連絡ください。<br><a href='https://lin.ee/R9dAJtD' target='_blank' style='color:var(--g1);font-weight:700;'>https://lin.ee/R9dAJtD</a><br>NICO NICO YASAI ※ニコニコ野菜バンホー農場",pg1:"カート",pg2:"情報入力",pg3:"確認",pg4:"完了",heroEyebrow:"🌿 農薬不使用・化学肥料不使用",heroH1:"生産者と消費者の<br>顔と顔の見える関係づくり",heroSub:"ベトナムの大地で丁寧に育てた新鮮野菜を直接お届けします",spAll:"今週のお野菜",spSpring:"春",spSummer:"夏",spAutumn:"秋",spWinter:"冬",spYearround:"通年",shopTitleYearround:"🌿 通年野菜",badgeNew:"NEW",badgeRec:"⭐ おすすめ",badgeSeason:"🌿 旬",badgeNone:"なし",shopTitleSpring:"🌸 春に採れる野菜",shopTitleSummer:"☀️ 夏に採れる野菜",shopTitleAutumn:"🍂 秋に採れる野菜",shopTitleWinter:"❄️ 冬に採れる野菜",drawerTtl:"🌿 NICO NICO YASAI 管理",dtOrders:"📋 注文",dtDB:"🗄 データ",dtStats:"📊 売上",dtProducts:"🥦 商品",dtNotify:"🔔 入荷通知",dtSite:"⚙️ 設定",ocToggleDone:"✅ 完了にする",ocViewReceipt:"🖨 領収証",pubToggleOn:"🟢 公開中",pubToggleOff:"🔴 非公開",adminLangNote:"管理画面の言語：",ejWizTitle:"📧 メール自動送信の設定",ejStep1:"ステップ1: emailjs.com で無料登録",ejStep2:"ステップ2: 以下に入力",ejTestBtn:"🧪 テスト送信",ejSaveBtn:"💾 設定を保存",ejTestSuccess:"✅ 送信成功！メールが動作しています。",ejTestFail:"❌ 送信失敗。Service ID/Template ID/Public Keyを確認してください。",noOrders:"まだ注文はありません 📭",stockLabel:"在庫数",priceLabel:"価格",saveProduct:"💾 保存",deleteProduct:"🗑 削除",addProductBtn:"➕ 商品を追加",publishAll:"✅ 全て公開",hideAll:"🔴 全て非公開",seasonOnly:"🌸 季節だけ公開",exportData:"⬇ CSV ダウンロード",copyData:"📋 データをコピー",clearData:"🗑 データクリア",sheetsUrlLabel:"Google Sheets リンク:",sheetsSaveBtn:"リンクを保存",notifyEmpty:"入荷通知の登録はありません",adminQuickStats:"本日のサマリー",stlOrders:"総注文数",stlRev:"総売上",stlAvg:"平均注文",stlPub:"公開中商品",peNewLbl:"商品を追加",fabLbl:"管理・編集",abarBtnLbl:"管理",noOrders:"注文はまだありません",stNew:"新規",stDone:"完了",swarnLbl:"在庫少",soutLbl:"在庫切れ",swTitle:"⚠️ 在庫警告",pubLbl:"公開中",unpubLbl:"非公開",cartEmpty:"カートに商品がありません",addBtn:"カートへ",stockOut:"在庫なし",stockLow:"残り",navShop:"野菜を買う",navHist:"注文履歴",histBack:"← トップへ戻る",savedLbl:"前回の情報を自動入力",rctShop:"買い物を続ける",rctHist:"📋 注文履歴",rvEdit:"編集",histTtl:"📋 注文履歴",histBack:"← トップへ戻る",histEmpty:"注文履歴がありません",histLookup:"電話番号で注文を検索",histLookupBtn:"検索",histLookupEmpty:"この電話番号の注文は見つかりませんでした",histLookupPlaceholder:"電話番号を入力",hdrContact:"お問い合わせ",rvModalTitle:"レビュー",wrTitle:"✍ レビューを書く",rvSubmit:"投稿する",ntfModalTitle:"🔔 入荷通知",ntfDesc:"在庫が補充されたらメールでお知らせします。",ntfSubmit:"🔔 通知を受け取る",ntfSuccess:"✅ 登録しました！入荷時にご連絡します。",savedLbl:"前回の情報を自動入力",guideTtl4:"お問い合わせ",guideBody4:"<a href='https://lin.ee/UJ0Pjx6' target='_blank' rel='noopener' style='color:var(--g1);font-weight:700;'>LINE: lin.ee/UJ0Pjx6</a>",guideTtl1:"ご注文方法",guideBody1:"お野菜をカートに追加し、ご注文ください。ご注文後、Gmailにてご連絡いたします。<br><br>⚠️ 季節の影響により、ご購入後にお求めのお野菜がない場合がございます。その際は別途ご対応させていただきます。ご理解の程、何卒よろしくお願いいたします。",guideTtl2:"配送について",guideTtl3:"お支払いについて",guideBody3:"現金でのお取引は行っておりません。お支払いは<b>銀行QR（銀行振込）のみ</b>となります。",heroBadge:"🌿 農薬不使用・化学肥料不使用",heroH1:"生産者と消費者の<br>顔と顔の見える関係づくり",heroSub:"ベトナムの大地で丁寧に育てた新鮮野菜を直接お届けします",farmLbl:"※ニコニコ野菜バンホー農場",rptFarm:"ご注文ありがとうございます。配達は日曜日にエムハノイより順次お届けいたします。<br>ご質問等がございましたらお手数ですが、以下NICONICOYASAI公式LINEにてお気軽にご連絡ください。<br><a href='https://lin.ee/R9dAJtD' target='_blank' style='color:var(--g1);font-weight:700;'>https://lin.ee/R9dAJtD</a><br>NICO NICO YASAI ※ニコニコ野菜バンホー農場",rvNamePh:"お名前（任意）",rvTextPh:"野菜の感想をお聞かせください...",payVietqr:"🏦 銀行QRコード",fcProfil:"👤 プロフィール（任意）",privacyNote:"※ご入力いただいた情報はプライバシーを保護した上で、サービス改善・品揃えの最適化のためにのみ活用します。",flAge:"年齢層",flGender:"性別",flFamily:"家族構成",flSource:"どこで知りましたか？",flNote:"配達時間の希望など",prog1:"カート",spAll:"今週のお野菜",spSpring:"春",spSummer:"夏",spAutumn:"秋",spWinter:"冬",prog2:"情報入力",prog3:"確認",prog4:"完了",selOptional:"-- 選択（任意）--",ageOpt1:"20代",ageOpt2:"30代",ageOpt3:"40代",ageOpt4:"50代以上",genderF:"女性",genderM:"男性",genderO:"その他",familyS:"1人",familyM:"2〜3人",familyL:"4人以上",sourceZalo:"Zalo",sourceFB:"Facebook",sourceRef:"知人の紹介",sourceMkt:"市場・店頭",sourceOth:"その他"},
-vi:{hdrCart:"Giỏ hàng",shopTitle:"🥦 Rau tuần này",cartTtl:"🛒 Giỏ hàng",cartBack:"← Tiếp tục mua",sumQty:"Số lượng",sumTot:"Tổng cộng",toInfo:"Tiến hành mua",infoTtl:"📋 Thông tin đặt hàng",infoBack:"← Quay lại",fcCust:"🙋 Thông tin khách hàng",fcDel:"🛵 Hình thức nhận",fcPay:"Thanh toán",fcNote:"📝 Ghi chú",flName:"Họ và tên",flPhone:"Số điện thoại",flZalo:"Zalo ID",flAddr:"Địa chỉ",flEmail:"Email",req:"Bắt buộc",delDeliver:"Giao hàng",delPickup:"Nhận trực tiếp",payCash:"Tiền mặt",toConfirm:"Xem lại đơn hàng",confirmTtl:"✔ Xác nhận",confirmBack:"← Sửa thông tin",ccLblItems:"Sản phẩm",ccLblTot:"Tổng cộng",ccLblCust:"Thông tin khách",ccLblDel:"Hình thức nhận",ccLblPay:"Thanh toán",ccLblNote:"Ghi chú",placeLbl:"Xác nhận đặt hàng",rptTtl:"Hóa đơn / Phiếu đặt",rmlNo:"Mã đơn",rmlDate:"Ngày giờ",rmlName:"Họ tên",rmlPhone:"Điện thoại",rmlAddr:"Địa chỉ",rmlEmail:"Email",rmlDel:"Hình thức",rmlPay:"Thanh toán",rptItemsTtl:"Chi tiết đơn hàng",rthItem:"Sản phẩm",rthQty:"SL",rthPrice:"Đơn giá",rthSub:"Thành tiền",rgtLbl:"Tổng cộng",rntLbl:"Ghi chú：",rctShop:"Tiếp tục mua",rctHist:"📋 Lịch sử",rptFarm:"Cảm ơn bạn đã đặt hàng. Hàng sẽ được giao vào Chủ nhật từ cửa hàng em Hanoi.<br>Nếu có thắc mắc, vui lòng liên hệ qua LINE chính thức của NICONICOYASAI:<br><a href='https://lin.ee/R9dAJtD' target='_blank' style='color:var(--g1);font-weight:700;'>https://lin.ee/R9dAJtD</a><br>NICO NICO YASAI · Trang trại Bản Hồ",pg1:"Giỏ hàng",pg2:"Thông tin",pg3:"Xác nhận",pg4:"Hoàn tất",heroEyebrow:"🌿 Trồng không hóa chất",heroH1:"Xây dựng mối quan hệ mặt đối mặt<br>giữa người sản xuất và người tiêu dùng",heroSub:"Rau củ tươi ngon được trồng cẩn thận trên đất Việt Nam",spAll:"🌸 Tất cả",spSpring:"Xuân",spSummer:"Hè",spAutumn:"Thu",spWinter:"Đông",spYearround:"Quanh năm",shopTitleYearround:"🌿 Rau quanh năm",badgeNew:"NEW",badgeRec:"⭐ Nổi bật",badgeSeason:"🌿 Đặc sản",badgeNone:"Không có",shopTitleSpring:"🌸 Rau mùa Xuân",shopTitleSummer:"☀️ Rau mùa Hạ",shopTitleAutumn:"🍂 Rau mùa Thu",shopTitleWinter:"❄️ Rau mùa Đông",drawerTtl:"🌿 Bảng quản lý NICO NICO YASAI",dtOrders:"📋 Đơn hàng",dtDB:"🗄 Dữ liệu",dtStats:"📊 Doanh thu",dtProducts:"🥦 Sản phẩm",dtNotify:"🔔 Thông báo nhập hàng",dtSite:"⚙️ Cài đặt",ocToggleDone:"✅ Đánh dấu hoàn thành",ocViewReceipt:"🖨 Xem hóa đơn",pubToggleOn:"🟢 Đang bán",pubToggleOff:"🔴 Ẩn đi",adminLangNote:"Chọn ngôn ngữ bảng quản lý:",ejWizTitle:"📧 Thiết lập gửi email tự động",ejStep1:"Bước 1: Đăng ký miễn phí tại emailjs.com",ejStep2:"Bước 2: Điền thông tin bên dưới",ejTestBtn:"🧪 Gửi email thử",ejSaveBtn:"💾 Lưu cài đặt",ejTestSuccess:"✅ Gửi thử thành công! Email đang hoạt động.",ejTestFail:"❌ Gửi thất bại. Kiểm tra lại Service ID / Template ID / Public Key.",noOrders:"Chưa có đơn hàng nào 📭",stockLabel:"Tồn kho",priceLabel:"Giá bán",saveProduct:"💾 Lưu sản phẩm",deleteProduct:"🗑 Xóa",addProductBtn:"➕ Thêm sản phẩm mới",publishAll:"✅ Hiện tất cả",hideAll:"🔴 Ẩn tất cả",seasonOnly:"🌸 Chỉ hiện theo mùa",exportData:"⬇ Tải xuống CSV",copyData:"📋 Sao chép dữ liệu",clearData:"🗑 Xóa dữ liệu",sheetsUrlLabel:"Liên kết Google Sheets:",sheetsSaveBtn:"Lưu liên kết",notifyEmpty:"Chưa có yêu cầu thông báo nhập hàng",adminQuickStats:"Tổng quan hôm nay",stlOrders:"Tổng đơn",stlRev:"Doanh thu",stlAvg:"TB đơn",stlPub:"Đang bán",peNewLbl:"Thêm sản phẩm",fabLbl:"Quản lý",abarBtnLbl:"Quản lý",noOrders:"Chưa có đơn hàng",stNew:"Mới",stDone:"Hoàn thành",swarnLbl:"Gần hết",soutLbl:"Hết hàng",swTitle:"⚠️ Cảnh báo",pubLbl:"Đang bán",unpubLbl:"Ẩn",cartEmpty:"Giỏ hàng trống",addBtn:"Thêm",stockOut:"Hết hàng",stockLow:"Còn",navShop:"Mua rau",navHist:"Lịch sử",histTtl:"📋 Lịch sử đặt hàng",histBack:"← Quay về trang chủ",savedLbl:"Tự động điền thông tin lần trước",rctShop:"Tiếp tục mua",rctHist:"📋 Lịch sử đặt hàng",rvSubmit:"Gửi đánh giá",rvEdit:"Sửa",histBack:"← Quay lại",histEmpty:"Chưa có lịch sử đặt hàng",histLookup:"Tra cứu đơn hàng bằng số điện thoại",histLookupBtn:"Tìm kiếm",histLookupEmpty:"Không tìm thấy đơn hàng với số điện thoại này",histLookupPlaceholder:"Nhập số điện thoại",hdrContact:"Liên hệ",rvModalTitle:"Đánh giá",wrTitle:"✍ Viết đánh giá",rvSubmit:"Gửi",ntfModalTitle:"🔔 Thông báo nhập hàng",ntfDesc:"Chúng tôi sẽ thông báo khi sản phẩm có hàng.",ntfSubmit:"🔔 Đăng ký nhận thông báo",ntfSuccess:"✅ Đã đăng ký! Chúng tôi sẽ thông báo khi có hàng.",savedLbl:"Tự động điền thông tin cũ",guideTtl4:"Liên hệ",guideBody4:"<a href='https://lin.ee/UJ0Pjx6' target='_blank' rel='noopener' style='color:var(--g1);font-weight:700;'>LINE: lin.ee/UJ0Pjx6</a>",guideTtl1:"Cách đặt hàng",guideBody1:"Thêm rau củ vào giỏ hàng và đặt mua. Sau khi đặt hàng, chúng tôi sẽ liên hệ với bạn qua Gmail.<br><br>⚠️ Do ảnh hưởng của mùa vụ, sau khi đặt hàng có thể xảy ra tình trạng hết sản phẩm. Trong trường hợp đó, chúng tôi sẽ liên hệ và xử lý riêng. Rất mong quý khách thông cảm và ủng hộ chúng tôi.",guideTtl2:"Về giao hàng",guideTtl3:"Về thanh toán",guideBody3:"Chúng tôi không nhận tiền mặt. Vui lòng thanh toán bằng <b>mã QR ngân hàng (chuyển khoản)</b>.",heroBadge:"🌿 Không thuốc trừ sâu · Không phân bón hóa học",heroH1:"Kết nối trực tiếp<br>giữa nông dân và người tiêu dùng",heroSub:"Rau tươi trồng trên đất Việt Nam được giao trực tiếp đến bạn",farmLbl:"Trang trại NICO NICO YASAI Bản Hồ",rptFarm:"Cảm ơn bạn đã đặt hàng. Hàng sẽ được giao vào Chủ nhật từ cửa hàng em Hanoi.<br>Nếu có thắc mắc, vui lòng liên hệ qua LINE chính thức của NICONICOYASAI:<br><a href='https://lin.ee/R9dAJtD' target='_blank' style='color:var(--g1);font-weight:700;'>https://lin.ee/R9dAJtD</a><br>NICO NICO YASAI · Trang trại Bản Hồ",rvNamePh:"Tên của bạn (tùy chọn)",rvTextPh:"Hãy chia sẻ cảm nhận về rau của bạn...",payVietqr:"🏦 QR Ngân hàng",fcProfil:"👤 Hồ sơ (tùy chọn)",privacyNote:"※Thông tin bạn cung cấp sẽ được bảo mật và chỉ dùng để cải thiện dịch vụ và tối ưu hóa sản phẩm.",flAge:"Độ tuổi",flGender:"Giới tính",flFamily:"Thành phần gia đình",flSource:"Bạn biết đến chúng tôi qua đâu?",flNote:"Ghi chú thêm (thời gian giao hàng mong muốn...)",prog1:"Giỏ hàng",spAll:"Rau tuần này",spSpring:"Xuân",spSummer:"Hạ",spAutumn:"Thu",spWinter:"Đông",prog2:"Thông tin",prog3:"Xác nhận",prog4:"Hoàn tất",selOptional:"-- Chọn (tùy chọn) --",ageOpt1:"20-29 tuổi",ageOpt2:"30-39 tuổi",ageOpt3:"40-49 tuổi",ageOpt4:"50 tuổi trở lên",genderF:"Nữ",genderM:"Nam",genderO:"Khác",familyS:"1 người",familyM:"2-3 người",familyL:"4 người trở lên",sourceZalo:"Zalo",sourceFB:"Facebook",sourceRef:"Bạn bè giới thiệu",sourceMkt:"Chợ / cửa hàng",sourceOth:"Khác"},
-en:{hdrCart:"Cart",shopTitle:"🥦 This Week's Vegetables",cartTtl:"🛒 Your Cart",cartBack:"← Continue Shopping",sumQty:"Items",sumTot:"Total",toInfo:"Proceed to Purchase",infoTtl:"📋 Order Information",infoBack:"← Back to Cart",fcCust:"🙋 Customer Info",fcDel:"🛵 Delivery Method",fcPay:"Payment",fcNote:"📝 Notes",flName:"Full Name",flPhone:"Phone Number",flZalo:"Zalo ID",flAddr:"Address",flEmail:"Email Address",req:"Required",delDeliver:"Delivery",delPickup:"Pickup",payCash:"Cash",toConfirm:"Review Order",confirmTtl:"✔ Order Confirmation",confirmBack:"← Edit Info",ccLblItems:"Items",ccLblTot:"Total",ccLblCust:"Customer Info",ccLblDel:"Delivery",ccLblPay:"Payment",ccLblNote:"Notes",placeLbl:"Place Order",rptTtl:"Receipt & Order",rmlNo:"Order No.",rmlDate:"Date",rmlName:"Name",rmlPhone:"Phone",rmlAddr:"Address",rmlEmail:"Email",rmlDel:"Delivery",rmlPay:"Payment",rptItemsTtl:"Order Details",rthItem:"Item",rthQty:"Qty",rthPrice:"Unit Price",rthSub:"Subtotal",rgtLbl:"Total",rntLbl:"Notes:",rctShop:"Continue Shopping",rctHist:"📋 Order History",rptFarm:"Thank you for your order. Delivery is every Sunday from em Hanoi store.<br>For inquiries, please contact us via our official NICONICOYASAI LINE:<br><a href='https://lin.ee/R9dAJtD' target='_blank' style='color:var(--g1);font-weight:700;'>https://lin.ee/R9dAJtD</a><br>NICO NICO YASAI · Ban Ho Farm",pg1:"Cart",pg2:"Info",pg3:"Review",pg4:"Done",heroEyebrow:"🌿 Pesticide-Free & No Chemical Fertilizers",heroH1:"Farm-to-Table<br>Fresh from Vietnam",heroSub:"Fresh organic vegetables grown with care, delivered directly to you",spAll:"🥬 This Week's Veg",spSpring:"Spring",spSummer:"Summer",spAutumn:"Autumn",spWinter:"Winter",spYearround:"Year-round",shopTitleYearround:"🌿 Year-round Vegetables",badgeNew:"NEW",badgeRec:"⭐ Recommended",badgeSeason:"🌿 In Season",badgeNone:"None",shopTitleSpring:"🌸 Spring Vegetables",shopTitleSummer:"☀️ Summer Vegetables",shopTitleAutumn:"🍂 Autumn Vegetables",shopTitleWinter:"❄️ Winter Vegetables",drawerTtl:"🌿 NICO NICO YASAI Admin",dtOrders:"📋 Orders",dtDB:"🗄 Data",dtStats:"📊 Sales",dtProducts:"🥦 Products",dtNotify:"🔔 Restock",dtSite:"⚙️ Settings",ocToggleDone:"✅ Mark Done",ocViewReceipt:"Receipt",pubToggleOn:"🟢 Public",pubToggleOff:"🔴 Hidden",adminLangNote:"Admin language:",ejWizTitle:"📧 Email Auto-Send Setup",ejStep1:"Step 1: Register at emailjs.com (free)",ejStep2:"Step 2: Enter your credentials",ejTestBtn:"🧪 Test Send",ejSaveBtn:"💾 Save Settings",ejTestSuccess:"✅ Success! Email is working.",ejTestFail:"❌ Failed. Check Service/Template/Public Key.",noOrders:"No orders yet 📭",stockLabel:"Stock",priceLabel:"Price",saveProduct:"💾 Save",deleteProduct:"🗑 Delete",addProductBtn:"➕ Add Product",publishAll:"✅ Publish All",hideAll:"🔴 Hide All",seasonOnly:"🌸 Seasonal Only",exportData:"⬇ Download CSV",copyData:"📋 Copy Data",clearData:"🗑 Clear Data",sheetsUrlLabel:"Google Sheets Link:",sheetsSaveBtn:"Save Link",notifyEmpty:"No restock notifications",adminQuickStats:"Today's Summary",stlOrders:"Total Orders",stlRev:"Total Revenue",stlAvg:"Avg Order",stlPub:"Live Products",peNewLbl:"Add Product",fabLbl:"Admin",abarBtnLbl:"Admin",stNew:"New",stDone:"Done",swarnLbl:"Low Stock",soutLbl:"Out of Stock",swTitle:"⚠️ Stock Warning",pubLbl:"Public",unpubLbl:"Hidden",cartEmpty:"Your cart is empty",addBtn:"Add to Cart",stockOut:"Out of Stock",stockLow:"Only ",navShop:"Shop",navHist:"Order History",histTtl:"📋 Order History",histBack:"← Back to Top",savedLbl:"Auto-fill from last order",rctShop:"Continue Shopping",rctHist:"📋 Order History",rvSubmit:"Submit Review",rvEdit:"Edit",histBack:"← Back",histEmpty:"No order history",rvModalTitle:"Review",wrTitle:"✍ Write a Review",rvSubmit:"Submit",ntfModalTitle:"🔔 Restock Alert",ntfDesc:"We'll email you when this item is back in stock.",ntfSubmit:"🔔 Notify Me",ntfSuccess:"✅ Registered! We'll notify you when it's back.",savedLbl:"Auto-filled from last order",payVietqr:"Bank Transfer (VietQR)",stDone:"Done",stPending:"Pending Payment",histLookup:"Look up by phone",histLookupBtn:"Search",histLookupEmpty:"No orders found for this number",histLookupPlaceholder:"Enter phone number",hdrContact:"Contact",farmLbl:"Ban Ho NICO NICO YASAI Farm",rptFarm:"Thank you for your order. Delivery is every Sunday from em Hanoi store.<br>For inquiries, please contact us via our official NICONICOYASAI LINE:<br><a href='https://lin.ee/R9dAJtD' target='_blank' style='color:var(--g1);font-weight:700;'>https://lin.ee/R9dAJtD</a><br>NICO NICO YASAI · Ban Ho Farm",payVietqr:"🏦 Bank QR Code",fcProfil:"👤 Profile (optional)",privacyNote:"※Your information will be kept private and used only to improve our service.",flAge:"Age Group",flGender:"Gender",flFamily:"Household Size",flSource:"How did you find us?",flNote:"Delivery time preference, etc.",prog1:"Cart",spAll:"This Week",spSpring:"Spring",spSummer:"Summer",spAutumn:"Autumn",spWinter:"Winter",prog2:"Info",prog3:"Confirm",prog4:"Done",ageOpt1:"20s",ageOpt2:"30s",ageOpt3:"40s",ageOpt4:"50+",genderF:"Female",genderM:"Male",genderO:"Other",familyS:"1 person",familyM:"2-3 people",familyL:"4+ people",sourceZalo:"Zalo",sourceFB:"Facebook",sourceRef:"Friend referral",sourceMkt:"Market / store",sourceOth:"Other",heroBadge:"🌿 No Pesticides · No Chemical Fertilizers",heroH1:"Connecting farmers<br>directly with consumers",heroSub:"Fresh vegetables grown on Vietnamese soil, delivered straight to you",farmLbl:"※Nico Nico Yasai — Ban Ho Farm",guideTtl4:"Contact",guideBody4:"<a href='https://lin.ee/UJ0Pjx6' target='_blank' rel='noopener' style='color:var(--g1);font-weight:700;'>LINE: lin.ee/UJ0Pjx6</a>",guideTtl1:"How to Order",guideBody1:"Add vegetables to your cart and place your order. We will contact you by Gmail after your order is confirmed.<br><br>⚠️ Due to seasonal conditions, some items may be unavailable after ordering. In such cases, we will contact you separately. We appreciate your understanding.",guideTtl2:"Delivery",guideTtl3:"Payment",guideBody3:"We do not accept cash. Payment is by <b>bank QR code (bank transfer) only</b>.",rptFarm:"Thank you for your order. Delivery is every Sunday from em Hanoi store.<br>For inquiries, please contact us via our official NICONICOYASAI LINE:<br><a href='https://lin.ee/R9dAJtD' target='_blank' style='color:var(--g1);font-weight:700;'>https://lin.ee/R9dAJtD</a><br>NICO NICO YASAI · Ban Ho Farm",rvNamePh:"Your name (optional)",rvTextPh:"Share your thoughts about the vegetables...",rvSubmit:"Submit Review"}
+ja:{hdrCart:"カート",shopTitle:"🥦 今週のお野菜",cartTtl:"🛒 カートの中身",cartBack:"← 買い物を続ける",sumQty:"商品点数",sumTot:"合計",toInfo:"購入に進む",infoTtl:"📋 注文情報",infoBack:"← カートに戻る",fcCust:"🙋 お客様情報",fcDel:"🛵 受け取り方法",fcPay:"支払い方法",fcNote:"📝 備考",flName:"お名前",flPhone:"電話番号",flZalo:"Zalo ID",flAddr:"住所",flEmail:"メールアドレス",req:"必須",delDeliver:"配達",delPickup:"直接受取",payCash:"現金",toConfirm:"注文内容を確認する",confirmTtl:"✔ 注文確認",confirmBack:"← 情報を修正する",ccLblItems:"注文商品",ccLblTot:"合計",ccLblCust:"お客様情報",ccLblDel:"受け取り方法",ccLblPay:"支払い方法",ccLblNote:"備考",placeLbl:"注文を確定する",rptTtl:"領収証 兼 注文書",rmlNo:"注文番号",rmlDate:"日時",rmlName:"お名前",rmlPhone:"電話番号",rmlAddr:"お届け先",rmlEmail:"メール",rmlDel:"受け取り",rmlPay:"支払い",rptItemsTtl:"ご注文内容",rthItem:"商品",rthQty:"数量",rthPrice:"単価",rthSub:"小計",rgtLbl:"合計金額",rntLbl:"備考：",rctShop:"買い物を続ける",rctHist:"📋 注文履歴",rptFarm:"ご注文ありがとうございます。配達は日曜日にエムハノイより順次お届けいたします。<br>ご質問等がございましたらお手数ですが、以下NICONICOYASAI公式LINEにてお気軽にご連絡ください。<br><a href='https://lin.ee/R9dAJtD' target='_blank' style='color:var(--g1);font-weight:700;'>https://lin.ee/R9dAJtD</a><br>NICO NICO YASAI ※ニコニコ野菜バンホー農場",pg1:"カート",pg2:"情報入力",pg3:"確認",pg4:"完了",heroEyebrow:"🌿 農薬不使用・化学肥料不使用",heroH1:"生産者と消費者の<br>顔と顔の見える関係づくり",heroSub:"ベトナムの大地で丁寧に育てた新鮮野菜を直接お届けします",spAll:"今週のお野菜",spSpring:"春",spSummer:"夏",spAutumn:"秋",spWinter:"冬",spYearround:"通年",shopTitleYearround:"🌿 通年野菜",badgeNew:"NEW",badgeRec:"⭐ おすすめ",badgeSeason:"🌿 旬",badgeNone:"なし",shopTitleSpring:"🌸 春に採れる野菜",shopTitleSummer:"☀️ 夏に採れる野菜",shopTitleAutumn:"🍂 秋に採れる野菜",shopTitleWinter:"❄️ 冬に採れる野菜",drawerTtl:"🌿 NICO NICO YASAI 管理",dtOrders:"📋 注文",dtDB:"🗄 データ",dtStats:"📊 売上",dtProducts:"🥦 商品",dtNotify:"🔔 入荷通知",dtSite:"⚙️ 設定",ocToggleDone:"✅ 完了にする",ocViewReceipt:"🖨 領収証",pubToggleOn:"🟢 公開中",pubToggleOff:"🔴 非公開",adminLangNote:"管理画面の言語：",ejWizTitle:"📧 メール自動送信の設定",ejStep1:"ステップ1: emailjs.com で無料登録",ejStep2:"ステップ2: 以下に入力",ejTestBtn:"🧪 テスト送信",ejSaveBtn:"💾 設定を保存",ejTestSuccess:"✅ 送信成功！メールが動作しています。",ejTestFail:"❌ 送信失敗。Service ID/Template ID/Public Keyを確認してください。",noOrders:"まだ注文はありません 📭",stockLabel:"在庫数",priceLabel:"価格",saveProduct:"💾 保存",deleteProduct:"🗑 削除",addProductBtn:"➕ 商品を追加",publishAll:"✅ 全て公開",hideAll:"🔴 全て非公開",seasonOnly:"🌸 季節だけ公開",exportData:"⬇ CSV ダウンロード",copyData:"📋 データをコピー",clearData:"🗑 データクリア",sheetsUrlLabel:"Google Sheets リンク:",sheetsSaveBtn:"リンクを保存",notifyEmpty:"入荷通知の登録はありません",adminQuickStats:"本日のサマリー",stlOrders:"総注文数",stlRev:"総売上",stlAvg:"平均注文",stlPub:"公開中商品",peNewLbl:"商品を追加",fabLbl:"管理・編集",abarBtnLbl:"管理",noOrders:"注文はまだありません",stNew:"新規",stDone:"完了",swarnLbl:"在庫少",soutLbl:"在庫切れ",swTitle:"⚠️ 在庫警告",pubLbl:"公開中",unpubLbl:"非公開",cartEmpty:"カートに商品がありません",addBtn:"カートへ",stockOut:"在庫なし",stockLow:"残り",navShop:"野菜を買う",navHist:"注文履歴",histBack:"← トップへ戻る",savedLbl:"前回の情報を自動入力",rctShop:"買い物を続ける",rctHist:"📋 注文履歴",rvEdit:"編集",histTtl:"📋 注文履歴",histBack:"← トップへ戻る",histEmpty:"注文履歴がありません",histLookup:"電話番号で注文を検索",histLookupBtn:"検索",histLookupEmpty:"この電話番号の注文は見つかりませんでした",histLookupPlaceholder:"電話番号を入力",hdrContact:"お問い合わせ",rvModalTitle:"レビュー",wrTitle:"✍ レビューを書く",rvSubmit:"投稿する",ntfModalTitle:"🔔 入荷通知",ntfDesc:"在庫が補充されたらメールでお知らせします。",ntfSubmit:"🔔 通知を受け取る",ntfSuccess:"✅ 登録しました！入荷時にご連絡します。",savedLbl:"前回の情報を自動入力",guideTtl4:"お問い合わせ",guideBody4:"<a href='https://lin.ee/UJ0Pjx6' target='_blank' rel='noopener' style='color:var(--g1);font-weight:700;'>NICO NICO YASAI公式LINE</a>",guideTtl1:"ご注文方法",guideBody1:"お野菜をカートに追加し、ご注文ください。ご注文後、Gmailにてご連絡いたします。<br><br>💬 購入後、チャットボタンより農家と直接やりとりが可能です。<br><br>⚠️ 季節の影響により、ご購入後にお求めのお野菜がない場合がございます。その際は別途ご対応させていただきます。ご理解の程、何卒よろしくお願いいたします。",guideTtl2:"配送について",guideTtl3:"お支払いについて",guideBody3:"現金でのお取引は行っておりません。お支払いは<b>銀行QR（銀行振込）のみ</b>となります。",heroBadge:"🌿 農薬不使用・化学肥料不使用",heroH1:"生産者と消費者の<br>顔と顔の見える関係づくり",heroSub:"ベトナムの大地で丁寧に育てた新鮮野菜を直接お届けします",farmLbl:"※ニコニコ野菜バンホー農場",rptFarm:"ご注文ありがとうございます。配達は日曜日にエムハノイより順次お届けいたします。<br>ご質問等がございましたらお手数ですが、以下NICONICOYASAI公式LINEにてお気軽にご連絡ください。<br><a href='https://lin.ee/R9dAJtD' target='_blank' style='color:var(--g1);font-weight:700;'>https://lin.ee/R9dAJtD</a><br>NICO NICO YASAI ※ニコニコ野菜バンホー農場",rvNamePh:"お名前（任意）",rvTextPh:"野菜の感想をお聞かせください...",payVietqr:"🏦 銀行QRコード",fcProfil:"👤 プロフィール（任意）",privacyNote:"※ご入力いただいた情報はプライバシーを保護した上で、サービス改善・品揃えの最適化のためにのみ活用します。",flAge:"年齢層",flGender:"性別",flFamily:"家族構成",flSource:"どこで知りましたか？",flNote:"配達時間の希望など",prog1:"カート",spAll:"今週のお野菜",spSpring:"春",spSummer:"夏",spAutumn:"秋",spWinter:"冬",prog2:"情報入力",prog3:"確認",prog4:"完了",selOptional:"-- 選択（任意）--",ageOpt1:"20代",ageOpt2:"30代",ageOpt3:"40代",ageOpt4:"50代以上",genderF:"女性",genderM:"男性",genderO:"その他",familyS:"1人",familyM:"2〜3人",familyL:"4人以上",sourceZalo:"Zalo",sourceFB:"Facebook",sourceRef:"知人の紹介",sourceMkt:"市場・店頭",sourceOth:"その他"},
+vi:{hdrCart:"Giỏ hàng",shopTitle:"🥦 Rau tuần này",cartTtl:"🛒 Giỏ hàng",cartBack:"← Tiếp tục mua",sumQty:"Số lượng",sumTot:"Tổng cộng",toInfo:"Tiến hành mua",infoTtl:"📋 Thông tin đặt hàng",infoBack:"← Quay lại",fcCust:"🙋 Thông tin khách hàng",fcDel:"🛵 Hình thức nhận",fcPay:"Thanh toán",fcNote:"📝 Ghi chú",flName:"Họ và tên",flPhone:"Số điện thoại",flZalo:"Zalo ID",flAddr:"Địa chỉ",flEmail:"Email",req:"Bắt buộc",delDeliver:"Giao hàng",delPickup:"Nhận trực tiếp",payCash:"Tiền mặt",toConfirm:"Xem lại đơn hàng",confirmTtl:"✔ Xác nhận",confirmBack:"← Sửa thông tin",ccLblItems:"Sản phẩm",ccLblTot:"Tổng cộng",ccLblCust:"Thông tin khách",ccLblDel:"Hình thức nhận",ccLblPay:"Thanh toán",ccLblNote:"Ghi chú",placeLbl:"Xác nhận đặt hàng",rptTtl:"Hóa đơn / Phiếu đặt",rmlNo:"Mã đơn",rmlDate:"Ngày giờ",rmlName:"Họ tên",rmlPhone:"Điện thoại",rmlAddr:"Địa chỉ",rmlEmail:"Email",rmlDel:"Hình thức",rmlPay:"Thanh toán",rptItemsTtl:"Chi tiết đơn hàng",rthItem:"Sản phẩm",rthQty:"SL",rthPrice:"Đơn giá",rthSub:"Thành tiền",rgtLbl:"Tổng cộng",rntLbl:"Ghi chú：",rctShop:"Tiếp tục mua",rctHist:"📋 Lịch sử",rptFarm:"Cảm ơn bạn đã đặt hàng. Hàng sẽ được giao vào Chủ nhật từ cửa hàng em Hanoi.<br>Nếu có thắc mắc, vui lòng liên hệ qua LINE chính thức của NICONICOYASAI:<br><a href='https://lin.ee/R9dAJtD' target='_blank' style='color:var(--g1);font-weight:700;'>https://lin.ee/R9dAJtD</a><br>NICO NICO YASAI · Trang trại Bản Hồ",pg1:"Giỏ hàng",pg2:"Thông tin",pg3:"Xác nhận",pg4:"Hoàn tất",heroEyebrow:"🌿 Trồng không hóa chất",heroH1:"Xây dựng mối quan hệ mặt đối mặt<br>giữa người sản xuất và người tiêu dùng",heroSub:"Rau củ tươi ngon được trồng cẩn thận trên đất Việt Nam",spAll:"🌸 Tất cả",spSpring:"Xuân",spSummer:"Hè",spAutumn:"Thu",spWinter:"Đông",spYearround:"Quanh năm",shopTitleYearround:"🌿 Rau quanh năm",badgeNew:"NEW",badgeRec:"⭐ Nổi bật",badgeSeason:"🌿 Đặc sản",badgeNone:"Không có",shopTitleSpring:"🌸 Rau mùa Xuân",shopTitleSummer:"☀️ Rau mùa Hạ",shopTitleAutumn:"🍂 Rau mùa Thu",shopTitleWinter:"❄️ Rau mùa Đông",drawerTtl:"🌿 Bảng quản lý NICO NICO YASAI",dtOrders:"📋 Đơn hàng",dtDB:"🗄 Dữ liệu",dtStats:"📊 Doanh thu",dtProducts:"🥦 Sản phẩm",dtNotify:"🔔 Thông báo nhập hàng",dtSite:"⚙️ Cài đặt",ocToggleDone:"✅ Đánh dấu hoàn thành",ocViewReceipt:"🖨 Xem hóa đơn",pubToggleOn:"🟢 Đang bán",pubToggleOff:"🔴 Ẩn đi",adminLangNote:"Chọn ngôn ngữ bảng quản lý:",ejWizTitle:"📧 Thiết lập gửi email tự động",ejStep1:"Bước 1: Đăng ký miễn phí tại emailjs.com",ejStep2:"Bước 2: Điền thông tin bên dưới",ejTestBtn:"🧪 Gửi email thử",ejSaveBtn:"💾 Lưu cài đặt",ejTestSuccess:"✅ Gửi thử thành công! Email đang hoạt động.",ejTestFail:"❌ Gửi thất bại. Kiểm tra lại Service ID / Template ID / Public Key.",noOrders:"Chưa có đơn hàng nào 📭",stockLabel:"Tồn kho",priceLabel:"Giá bán",saveProduct:"💾 Lưu sản phẩm",deleteProduct:"🗑 Xóa",addProductBtn:"➕ Thêm sản phẩm mới",publishAll:"✅ Hiện tất cả",hideAll:"🔴 Ẩn tất cả",seasonOnly:"🌸 Chỉ hiện theo mùa",exportData:"⬇ Tải xuống CSV",copyData:"📋 Sao chép dữ liệu",clearData:"🗑 Xóa dữ liệu",sheetsUrlLabel:"Liên kết Google Sheets:",sheetsSaveBtn:"Lưu liên kết",notifyEmpty:"Chưa có yêu cầu thông báo nhập hàng",adminQuickStats:"Tổng quan hôm nay",stlOrders:"Tổng đơn",stlRev:"Doanh thu",stlAvg:"TB đơn",stlPub:"Đang bán",peNewLbl:"Thêm sản phẩm",fabLbl:"Quản lý",abarBtnLbl:"Quản lý",noOrders:"Chưa có đơn hàng",stNew:"Mới",stDone:"Hoàn thành",swarnLbl:"Gần hết",soutLbl:"Hết hàng",swTitle:"⚠️ Cảnh báo",pubLbl:"Đang bán",unpubLbl:"Ẩn",cartEmpty:"Giỏ hàng trống",addBtn:"Thêm",stockOut:"Hết hàng",stockLow:"Còn",navShop:"Mua rau",navHist:"Lịch sử",histTtl:"📋 Lịch sử đặt hàng",histBack:"← Quay về trang chủ",savedLbl:"Tự động điền thông tin lần trước",rctShop:"Tiếp tục mua",rctHist:"📋 Lịch sử đặt hàng",rvSubmit:"Gửi đánh giá",rvEdit:"Sửa",histBack:"← Quay lại",histEmpty:"Chưa có lịch sử đặt hàng",histLookup:"Tra cứu đơn hàng bằng số điện thoại",histLookupBtn:"Tìm kiếm",histLookupEmpty:"Không tìm thấy đơn hàng với số điện thoại này",histLookupPlaceholder:"Nhập số điện thoại",hdrContact:"Liên hệ",rvModalTitle:"Đánh giá",wrTitle:"✍ Viết đánh giá",rvSubmit:"Gửi",ntfModalTitle:"🔔 Thông báo nhập hàng",ntfDesc:"Chúng tôi sẽ thông báo khi sản phẩm có hàng.",ntfSubmit:"🔔 Đăng ký nhận thông báo",ntfSuccess:"✅ Đã đăng ký! Chúng tôi sẽ thông báo khi có hàng.",savedLbl:"Tự động điền thông tin cũ",guideTtl4:"Liên hệ",guideBody4:"<a href='https://lin.ee/UJ0Pjx6' target='_blank' rel='noopener' style='color:var(--g1);font-weight:700;'>LINE chính thức NICO NICO YASAI</a>",guideTtl1:"Cách đặt hàng",guideBody1:"Thêm rau củ vào giỏ hàng và đặt mua. Sau khi đặt hàng, chúng tôi sẽ liên hệ với bạn qua Gmail.<br><br>💬 Sau khi mua hàng, bạn có thể liên lạc trực tiếp với nông dân qua nút Chat.<br><br>⚠️ Do ảnh hưởng của mùa vụ, sau khi đặt hàng có thể xảy ra tình trạng hết sản phẩm. Trong trường hợp đó, chúng tôi sẽ liên hệ và xử lý riêng. Rất mong quý khách thông cảm và ủng hộ chúng tôi.",guideTtl2:"Về giao hàng",guideTtl3:"Về thanh toán",guideBody3:"Chúng tôi không nhận tiền mặt. Vui lòng thanh toán bằng <b>mã QR ngân hàng (chuyển khoản)</b>.",heroBadge:"🌿 Không thuốc trừ sâu · Không phân bón hóa học",heroH1:"Kết nối trực tiếp<br>giữa nông dân và người tiêu dùng",heroSub:"Rau tươi trồng trên đất Việt Nam được giao trực tiếp đến bạn",farmLbl:"Trang trại NICO NICO YASAI Bản Hồ",rptFarm:"Cảm ơn bạn đã đặt hàng. Hàng sẽ được giao vào Chủ nhật từ cửa hàng em Hanoi.<br>Nếu có thắc mắc, vui lòng liên hệ qua LINE chính thức của NICONICOYASAI:<br><a href='https://lin.ee/R9dAJtD' target='_blank' style='color:var(--g1);font-weight:700;'>https://lin.ee/R9dAJtD</a><br>NICO NICO YASAI · Trang trại Bản Hồ",rvNamePh:"Tên của bạn (tùy chọn)",rvTextPh:"Hãy chia sẻ cảm nhận về rau của bạn...",payVietqr:"🏦 QR Ngân hàng",fcProfil:"👤 Hồ sơ (tùy chọn)",privacyNote:"※Thông tin bạn cung cấp sẽ được bảo mật và chỉ dùng để cải thiện dịch vụ và tối ưu hóa sản phẩm.",flAge:"Độ tuổi",flGender:"Giới tính",flFamily:"Thành phần gia đình",flSource:"Bạn biết đến chúng tôi qua đâu?",flNote:"Ghi chú thêm (thời gian giao hàng mong muốn...)",prog1:"Giỏ hàng",spAll:"Rau tuần này",spSpring:"Xuân",spSummer:"Hạ",spAutumn:"Thu",spWinter:"Đông",prog2:"Thông tin",prog3:"Xác nhận",prog4:"Hoàn tất",selOptional:"-- Chọn (tùy chọn) --",ageOpt1:"20-29 tuổi",ageOpt2:"30-39 tuổi",ageOpt3:"40-49 tuổi",ageOpt4:"50 tuổi trở lên",genderF:"Nữ",genderM:"Nam",genderO:"Khác",familyS:"1 người",familyM:"2-3 người",familyL:"4 người trở lên",sourceZalo:"Zalo",sourceFB:"Facebook",sourceRef:"Bạn bè giới thiệu",sourceMkt:"Chợ / cửa hàng",sourceOth:"Khác"},
+en:{hdrCart:"Cart",shopTitle:"🥦 This Week's Vegetables",cartTtl:"🛒 Your Cart",cartBack:"← Continue Shopping",sumQty:"Items",sumTot:"Total",toInfo:"Proceed to Purchase",infoTtl:"📋 Order Information",infoBack:"← Back to Cart",fcCust:"🙋 Customer Info",fcDel:"🛵 Delivery Method",fcPay:"Payment",fcNote:"📝 Notes",flName:"Full Name",flPhone:"Phone Number",flZalo:"Zalo ID",flAddr:"Address",flEmail:"Email Address",req:"Required",delDeliver:"Delivery",delPickup:"Pickup",payCash:"Cash",toConfirm:"Review Order",confirmTtl:"✔ Order Confirmation",confirmBack:"← Edit Info",ccLblItems:"Items",ccLblTot:"Total",ccLblCust:"Customer Info",ccLblDel:"Delivery",ccLblPay:"Payment",ccLblNote:"Notes",placeLbl:"Place Order",rptTtl:"Receipt & Order",rmlNo:"Order No.",rmlDate:"Date",rmlName:"Name",rmlPhone:"Phone",rmlAddr:"Address",rmlEmail:"Email",rmlDel:"Delivery",rmlPay:"Payment",rptItemsTtl:"Order Details",rthItem:"Item",rthQty:"Qty",rthPrice:"Unit Price",rthSub:"Subtotal",rgtLbl:"Total",rntLbl:"Notes:",rctShop:"Continue Shopping",rctHist:"📋 Order History",rptFarm:"Thank you for your order. Delivery is every Sunday from em Hanoi store.<br>For inquiries, please contact us via our official NICONICOYASAI LINE:<br><a href='https://lin.ee/R9dAJtD' target='_blank' style='color:var(--g1);font-weight:700;'>https://lin.ee/R9dAJtD</a><br>NICO NICO YASAI · Ban Ho Farm",pg1:"Cart",pg2:"Info",pg3:"Review",pg4:"Done",heroEyebrow:"🌿 Pesticide-Free & No Chemical Fertilizers",heroH1:"Farm-to-Table<br>Fresh from Vietnam",heroSub:"Fresh organic vegetables grown with care, delivered directly to you",spAll:"🥬 This Week's Veg",spSpring:"Spring",spSummer:"Summer",spAutumn:"Autumn",spWinter:"Winter",spYearround:"Year-round",shopTitleYearround:"🌿 Year-round Vegetables",badgeNew:"NEW",badgeRec:"⭐ Recommended",badgeSeason:"🌿 In Season",badgeNone:"None",shopTitleSpring:"🌸 Spring Vegetables",shopTitleSummer:"☀️ Summer Vegetables",shopTitleAutumn:"🍂 Autumn Vegetables",shopTitleWinter:"❄️ Winter Vegetables",drawerTtl:"🌿 NICO NICO YASAI Admin",dtOrders:"📋 Orders",dtDB:"🗄 Data",dtStats:"📊 Sales",dtProducts:"🥦 Products",dtNotify:"🔔 Restock",dtSite:"⚙️ Settings",ocToggleDone:"✅ Mark Done",ocViewReceipt:"Receipt",pubToggleOn:"🟢 Public",pubToggleOff:"🔴 Hidden",adminLangNote:"Admin language:",ejWizTitle:"📧 Email Auto-Send Setup",ejStep1:"Step 1: Register at emailjs.com (free)",ejStep2:"Step 2: Enter your credentials",ejTestBtn:"🧪 Test Send",ejSaveBtn:"💾 Save Settings",ejTestSuccess:"✅ Success! Email is working.",ejTestFail:"❌ Failed. Check Service/Template/Public Key.",noOrders:"No orders yet 📭",stockLabel:"Stock",priceLabel:"Price",saveProduct:"💾 Save",deleteProduct:"🗑 Delete",addProductBtn:"➕ Add Product",publishAll:"✅ Publish All",hideAll:"🔴 Hide All",seasonOnly:"🌸 Seasonal Only",exportData:"⬇ Download CSV",copyData:"📋 Copy Data",clearData:"🗑 Clear Data",sheetsUrlLabel:"Google Sheets Link:",sheetsSaveBtn:"Save Link",notifyEmpty:"No restock notifications",adminQuickStats:"Today's Summary",stlOrders:"Total Orders",stlRev:"Total Revenue",stlAvg:"Avg Order",stlPub:"Live Products",peNewLbl:"Add Product",fabLbl:"Admin",abarBtnLbl:"Admin",stNew:"New",stDone:"Done",swarnLbl:"Low Stock",soutLbl:"Out of Stock",swTitle:"⚠️ Stock Warning",pubLbl:"Public",unpubLbl:"Hidden",cartEmpty:"Your cart is empty",addBtn:"Add to Cart",stockOut:"Out of Stock",stockLow:"Only ",navShop:"Shop",navHist:"Order History",histTtl:"📋 Order History",histBack:"← Back to Top",savedLbl:"Auto-fill from last order",rctShop:"Continue Shopping",rctHist:"📋 Order History",rvSubmit:"Submit Review",rvEdit:"Edit",histBack:"← Back",histEmpty:"No order history",rvModalTitle:"Review",wrTitle:"✍ Write a Review",rvSubmit:"Submit",ntfModalTitle:"🔔 Restock Alert",ntfDesc:"We'll email you when this item is back in stock.",ntfSubmit:"🔔 Notify Me",ntfSuccess:"✅ Registered! We'll notify you when it's back.",savedLbl:"Auto-filled from last order",payVietqr:"Bank Transfer (VietQR)",stDone:"Done",stPending:"Pending Payment",histLookup:"Look up by phone",histLookupBtn:"Search",histLookupEmpty:"No orders found for this number",histLookupPlaceholder:"Enter phone number",hdrContact:"Contact",farmLbl:"Ban Ho NICO NICO YASAI Farm",rptFarm:"Thank you for your order. Delivery is every Sunday from em Hanoi store.<br>For inquiries, please contact us via our official NICONICOYASAI LINE:<br><a href='https://lin.ee/R9dAJtD' target='_blank' style='color:var(--g1);font-weight:700;'>https://lin.ee/R9dAJtD</a><br>NICO NICO YASAI · Ban Ho Farm",payVietqr:"🏦 Bank QR Code",fcProfil:"👤 Profile (optional)",privacyNote:"※Your information will be kept private and used only to improve our service.",flAge:"Age Group",flGender:"Gender",flFamily:"Household Size",flSource:"How did you find us?",flNote:"Delivery time preference, etc.",prog1:"Cart",spAll:"This Week",spSpring:"Spring",spSummer:"Summer",spAutumn:"Autumn",spWinter:"Winter",prog2:"Info",prog3:"Confirm",prog4:"Done",ageOpt1:"20s",ageOpt2:"30s",ageOpt3:"40s",ageOpt4:"50+",genderF:"Female",genderM:"Male",genderO:"Other",familyS:"1 person",familyM:"2-3 people",familyL:"4+ people",sourceZalo:"Zalo",sourceFB:"Facebook",sourceRef:"Friend referral",sourceMkt:"Market / store",sourceOth:"Other",heroBadge:"🌿 No Pesticides · No Chemical Fertilizers",heroH1:"Connecting farmers<br>directly with consumers",heroSub:"Fresh vegetables grown on Vietnamese soil, delivered straight to you",farmLbl:"※Nico Nico Yasai — Ban Ho Farm",guideTtl4:"Contact",guideBody4:"<a href='https://lin.ee/UJ0Pjx6' target='_blank' rel='noopener' style='color:var(--g1);font-weight:700;'>NICO NICO YASAI Official LINE</a>",guideTtl1:"How to Order",guideBody1:"Add vegetables to your cart and place your order. We will contact you by Gmail after your order is confirmed.<br><br>💬 After purchase, you can communicate directly with the farmer via the Chat button.<br><br>⚠️ Due to seasonal conditions, some items may be unavailable after ordering. In such cases, we will contact you separately. We appreciate your understanding.",guideTtl2:"Delivery",guideTtl3:"Payment",guideBody3:"We do not accept cash. Payment is by <b>bank QR code (bank transfer) only</b>.",rptFarm:"Thank you for your order. Delivery is every Sunday from em Hanoi store.<br>For inquiries, please contact us via our official NICONICOYASAI LINE:<br><a href='https://lin.ee/R9dAJtD' target='_blank' style='color:var(--g1);font-weight:700;'>https://lin.ee/R9dAJtD</a><br>NICO NICO YASAI · Ban Ho Farm",rvNamePh:"Your name (optional)",rvTextPh:"Share your thoughts about the vegetables...",rvSubmit:"Submit Review"}
 };
 function T(k){return I[lang][k]||"";}
 function setLang(l){
@@ -516,6 +517,7 @@ setTimeout(function(){sendEmail(order);},600);
 setTimeout(function(){sendToSheets(order);},1000);
 }
 function buildReceipt(o){
+RECEIPT_ORDER = o;
 document.getElementById("rmv-no").textContent=o.no;
 document.getElementById("rmv-date").textContent=o.ts;
 document.getElementById("rmv-name").textContent=o.name;
@@ -536,34 +538,53 @@ document.getElementById("rgt-val").textContent=vnd(o.tot);
 document.getElementById("rpt-note-box").style.display=o.note?"":"none";
 document.getElementById("rnt-val").textContent=o.note;
 }
-function renderHistory(){
-var el=document.getElementById("hist-list-el");
-var lookupHtml='<div class="hist-lookup-box">'
-+'<div class="hist-lookup-ttl">📞 '+T("histLookup")+'</div>'
-+'<div class="hist-lookup-row">'
-+'<input class="hist-lookup-inp" id="hist-phone-inp" type="tel" placeholder="'+T("histLookupPlaceholder")+'">'
-+'<button class="hist-lookup-btn" onclick="lookupOrdersByPhone()">'+T("histLookupBtn")+'</button>'
-+'</div>'
-+'<div id="hist-lookup-result"></div>'
-+'</div>';
-if(!ORDER_HISTORY.length){
-el.innerHTML=lookupHtml+'<div class="hist-empty"><div class="hist-empty-ico">📋</div><div>'+T("histEmpty")+'</div></div>';return;
-}
+function _buildHistHTML(myOrders, statusMap){
 var html='<div class="hist-list">';
-ORDER_HISTORY.forEach(function(o,i){
+myOrders.forEach(function(o){
 var items=o.items.map(function(i){return i.e+" "+(lang==="ja"?i.ja:i.vi)+" ×"+i.qty;}).join("　");
-var stCls=o.status==="done"?"hst-done":"hst-new";
-var stLbl=o.status==="done"?T("stDone"):T("stNew");
+var st=statusMap[o.no]||o.status;
+var stCls=st==="done"?"hst-done":st==="cancelled"?"hst-cancelled":"hst-new";
+var stLbl=st==="done"?(lang==="ja"?"完了":"Xong"):st==="cancelled"?(lang==="ja"?"キャンセル済":"Đã hủy"):(lang==="ja"?"進行中":"Đang xử lý");
 html+='<div class="hist-card">';
-html+='<div class="hist-card-hdr"><span class="hist-no">'+o.no+'</span><span class="hist-date">'+o.ts+'</span><span class="hist-status '+stCls+'">'+stLbl+'</span></div>';
+html+='<div class="hist-card-hdr"><span class="hist-no">'+escHtml(o.no)+'</span><span class="hist-date">'+escHtml(o.ts||"")+'</span><span class="hist-status '+stCls+'">'+stLbl+'</span></div>';
 html+='<div class="hist-card-body">';
 html+='<div class="hist-items">'+items+'</div>';
 html+='<div class="hist-tot">'+vnd(o.tot)+'</div>';
-html+='<div class="hist-actions"><button class="hist-act-btn" onclick="showHistReceiptByIdx('+i+')">🖨 '+(lang==="ja"?"領収証を見る":"Xem hóa đơn")+'</button></div>';
+html+='<div class="hist-actions">';
+html+='<button class="hist-act-btn" onclick="showHistReceipt(\''+escHtml(o.no)+'\')">🖨 '+(lang==="ja"?"領収証":"Hóa đơn")+'</button>';
+html+='<button class="hist-act-btn" onclick="openChatFromHistory(\''+escHtml(o.no)+'\')" style="color:var(--g1);border-color:var(--g1);">💬 '+(lang==="ja"?"チャット":"Chat")+'</button>';
+html+='</div>';
 html+='</div></div>';
 });
-html+='</div>';
-el.innerHTML=html;
+return html+'</div>';
+}
+function renderHistory(){
+var el=document.getElementById("hist-list-el");
+var myOrders=ORDER_HISTORY.slice().reverse();
+if(!myOrders.length){
+el.innerHTML='<div class="hist-empty"><div class="hist-empty-ico">📋</div><div>'+T("histEmpty")+'</div></div>';return;
+}
+el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px;">読み込み中...</div>';
+if(fbEnabled&&fbDb){
+var nos=myOrders.map(function(o){return o.no.replace(/[^a-zA-Z0-9]/g,"-");});
+var promises=nos.map(function(docId){return fbDb.collection("orders").doc(docId).get();});
+Promise.all(promises).then(function(docs){
+var statusMap={};
+docs.forEach(function(doc){
+if(doc.exists){var d=doc.data();if(d&&d.no&&d.status)statusMap[d.no]=d.status;}
+});
+el.innerHTML=_buildHistHTML(myOrders,statusMap);
+}).catch(function(){
+el.innerHTML=_buildHistHTML(myOrders,{});
+});
+} else {
+el.innerHTML=_buildHistHTML(myOrders,{});
+}
+}
+function openChatFromHistory(no){
+var o=ORDER_HISTORY.find(function(x){return x.no===no;});
+if(!o){alert("注文が見つかりません");return;}
+buildReceipt(o);openChat();
 }
 function showHistReceipt(no){
 var o=ORDER_HISTORY.find(function(x){return x.no===no;}); if(!o)return;
@@ -740,12 +761,14 @@ return o.name+" 様\n\nNICO NICO 便をご利用いただきありがとうご�
 "━━━━━━━━━━━━━━━━\n■ 注文番号："+o.no+"\n■ 日時："+o.ts+"\n━━━━━━━━━━━━━━━━\n\n"+
 "【ご注文内容】\n"+lines+shipLine+"\n\n【合計金額】"+vnd(o.tot)+"\n【受け取り方法】"+(dmap[o.delivery]||o.delivery)+"\n【お支払い】"+(pmap[o.payment]||o.payment)+"\n【お届け先】"+o.addr+
 (o.note?"\n【備考】"+o.note:"")+
+"\n\n💬 農家との直接チャット\n購入後、チャットボタンより農家と直接やりとりが可能です。\n以下のURLより注文履歴を開き、チャットボタンをタップしてください。\nhttps://hanoi-order.niconicoyasai.jp/"+
 "\n\n━━━━━━━━━━━━━━━━\n通常土曜日〜日曜日16:00までのご注文はエムハノイよりお届け。\n平日はバンホー農場よりお届けいたします。\n雨天等の天候の影響により、当日ご希望のお野菜が変更になる場合や、配達に時間がかかる場合がございます。あらかじめご了承ください。\nご質問はNICONICOYASAI公式LINE: https://lin.ee/R9dAJtD\n\nNICO NICO 便\n※ニコニコ野菜バンホー農場\n━━━━━━━━━━━━━━━━";
 } else {
 return "Kính gửi "+o.name+"\n\nCảm ơn bạn đã đặt hàng tại NICO NICO YASAI.\n\n"+
 "━━━━━━━━━━━━━━━━\n■ Mã đơn: "+o.no+"\n■ Ngày: "+o.ts+"\n━━━━━━━━━━━━━━━━\n\n"+
 "【Chi tiết】\n"+lines+shipLine+"\n\n【Tổng】"+vnd(o.tot)+"\n【Hình thức】"+(dmap[o.delivery]||o.delivery)+"\n【Thanh toán】"+(pmap[o.payment]||o.payment)+"\n【Địa chỉ】"+o.addr+
 (o.note?"\n【Ghi chú】"+o.note:"")+
+"\n\n💬 Chat trực tiếp với nông dân\nSau khi mua hàng, bạn có thể liên lạc trực tiếp với nông dân qua nút Chat.\nMở lịch sử đặt hàng tại URL sau và nhấn nút Chat:\nhttps://hanoi-order.niconicoyasai.jp/"+
 "\n\n━━━━━━━━━━━━━━━━\nĐơn đặt từ thứ 7 đến 16:00 Chủ nhật sẽ được giao từ cửa hàng M-Hanoi. Ngày thường giao từ trang trại Vân Hòa.\nDo thời tiết (mưa v.v.), rau theo yêu cầu có thể bị thay đổi hoặc thời gian giao hàng có thể bị chậm hơn. Mong bạn thông cảm.\nMọi thắc mắc vui lòng liên hệ LINE: https://lin.ee/R9dAJtD\n\nNICO NICO 便\n※ Trang trại Vân Hòa\n━━━━━━━━━━━━━━━━";
 }
 }
@@ -828,6 +851,7 @@ else if(pane==="dp-db")renderDB();
 else if(pane==="dp-stats")renderStats();
 else if(pane==="dp-products")renderPE();
 else if(pane==="dp-notify")renderNotifyList();
+else if(pane==="dp-chat")renderAdminChat();
 }
 function renderAdminOrders(){
 var el=document.getElementById("order-cards-el");
@@ -1723,6 +1747,7 @@ renderAdminProducts2();
 renderAdminDB2();
 renderAdminNotify2();
 renderAdminReviews();
+renderAdminChat();
 }
 // 統計
 function initAdminStatsFilter(){
@@ -1795,20 +1820,20 @@ if(lblP)lblP.textContent=adminLang==="vi"?"⏳ Chờ thanh toán":"⏳ 入金待
 if(lblD)lblD.textContent=adminLang==="vi"?"✅ Hoàn thành":"✅ 完了";
 if(lblC)lblC.textContent=adminLang==="vi"?"❌ Đã hủy":"❌ キャンセル";
 function renderCard(o){
-var realIdx=ORDERS.indexOf(o);
+var safeNo=escHtml(o.no);
+var bodyId="ao-body-"+safeNo.replace(/[^a-zA-Z0-9]/g,'-');
 var statusCls=o.status==="done"?"st-done":o.status==="pending_payment"?"st-pending":o.status==="cancelled"?"st-out":"st-new";
 var statusTxt=o.status==="done"?(adminLang==="vi"?"✅ Hoàn thành":"✅ 完了"):o.status==="pending_payment"?(adminLang==="vi"?"⏳ Chờ thanh toán":"⏳ 入金待ち"):o.status==="cancelled"?(adminLang==="vi"?"❌ Đã hủy":"❌ キャンセル"):(adminLang==="vi"?"🆕 Mới":"🆕 新規");
 var tglBtn=o.status==="cancelled"
-?'<button class="ao-btn" onclick="restoreOrder('+realIdx+')" style="color:#c0392b;border-color:#c0392b;">'+(adminLang==="vi"?"↩ Khôi phục":"↩ キャンセル取り消し")+'</button>'
+?'<button class="ao-btn" onclick="adminOrderAction(\'restore\',\''+safeNo+'\')" style="color:#c0392b;border-color:#c0392b;">'+(adminLang==="vi"?"↩ Khôi phục":"↩ キャンセル取り消し")+'</button>'
 :o.status==="pending_payment"
-?'<button class="ao-btn primary" onclick="toggleOrderStatus('+realIdx+')" style="background:#f0c040;color:#7a5c00;border-color:#f0c040;">'+(adminLang==="vi"?"✅ Xác nhận đã nhận tiền":"✅ 入金確認する")+'</button>'
-:'<button class="ao-btn'+(o.status==="done"?"":" primary")+'" onclick="toggleOrderStatus('+realIdx+')">'+(o.status==="done"?(adminLang==="vi"?"↩ Hoàn tác":"↩ 戻す"):(adminLang==="vi"?"✅ Hoàn thành":"✅ 完了にする"))+'</button>';
-var cancelBtn=o.status!=="cancelled"?'<button class="ao-btn" onclick="cancelOrder('+realIdx+')" style="color:#c0392b;border-color:#c0392b;">❌ '+(adminLang==="vi"?"Hủy đơn":"キャンセル")+'</button>':'';
+?'<button class="ao-btn primary" onclick="adminOrderAction(\'confirm\',\''+safeNo+'\')" style="background:#f0c040;color:#7a5c00;border-color:#f0c040;">'+(adminLang==="vi"?"✅ Xác nhận đã nhận tiền":"✅ 入金確認する")+'</button>'
+:'<button class="ao-btn'+(o.status==="done"?"":" primary")+'" onclick="adminOrderAction(\'toggle\',\''+safeNo+'\')">'+(o.status==="done"?(adminLang==="vi"?"↩ Hoàn tác":"↩ 戻す"):(adminLang==="vi"?"✅ Hoàn thành":"✅ 完了にする"))+'</button>';
+var cancelBtn=o.status!=="cancelled"?'<button class="ao-btn" onclick="nnyConfirm(\''+(adminLang==="vi"?"本当にキャンセルしますか？ / Xác nhận hủy đơn?":"本当にキャンセルしますか？")+'\',function(){adminOrderAction(\'cancel\',\''+safeNo+'\');})" style="color:#c0392b;border-color:#c0392b;">❌ '+(adminLang==="vi"?"Hủy đơn":"キャンセル")+'</button>':'';
 var items=(o.items||[]).map(function(it){return it.e+" "+(adminLang==="vi"?it.vi:it.ja)+"×"+it.qty;}).join("、");
 var isOpen=o.status!=="done";
-var bodyId="ao-body-"+realIdx;
 var html='<div class="ao-card">';
-html+='<div class="ao-head" style="cursor:pointer;" onclick="_toggleOC('+realIdx+')">';
+html+='<div class="ao-head" style="cursor:pointer;" onclick="adminToggleCard(\''+bodyId+'\',this)">';
 html+='<span class="ao-no">'+o.no+'</span>';
 html+='<span class="ao-date">'+o.ts+'</span>';
 html+='<span class="st-tag '+statusCls+'">'+statusTxt+'</span>';
@@ -1820,23 +1845,18 @@ html+='<div class="ao-meta">👤 '+esc(o.name)+' · 📞 '+esc(o.phone)+(o.email
 html+='<div class="ao-meta">🏠 '+esc(o.addr||"")+'</div>';
 html+='<div class="ao-items">'+items+'</div>';
 if(o.payment==="vietqr"){
+var ssDocId=o.screenshotUrl||null;
 html+='<div style="display:flex;align-items:center;gap:8px;margin-top:6px;padding-top:6px;border-top:1px solid var(--gp);">';
 html+='<span style="font-size:10px;font-weight:800;color:var(--muted);">'+(adminLang==="vi"?"Ảnh CK:":"送金証明:")+'</span>';
-var ssDocId=o.screenshotUrl||null;
 if(ssDocId){
-html+='<img class="ao-ss-thumb" id="ss-thumb-'+realIdx+'" src="" alt="ss" onclick="loadAndShowSS('+realIdx+')" style="width:80px;height:60px;object-fit:cover;border-radius:6px;border:2px solid var(--g3);cursor:zoom-in;background:#f0f0f0;" data-docid="'+ssDocId+'">';
-setTimeout(function(ri,did){
-if(!fbDb)return;
-fbDb.collection('screenshots').doc(did).get().then(function(doc){
-if(doc.exists){var thumb=document.getElementById('ss-thumb-'+ri);if(thumb)thumb.src=doc.data().data;}
-}).catch(function(){});
-}.bind(null,realIdx,ssDocId),300);
+html+='<img class="ao-ss-thumb" id="ss-thumb-'+bodyId+'" src="" alt="ss" onclick="adminLoadSS(\''+safeNo+'\',this)" style="width:80px;height:60px;object-fit:cover;border-radius:6px;border:2px solid var(--g3);cursor:zoom-in;background:#f0f0f0;" data-docid="'+ssDocId+'">';
+setTimeout(function(bid,did){if(!fbDb)return;fbDb.collection('screenshots').doc(did).get().then(function(doc){if(doc.exists){var t=document.getElementById('ss-thumb-'+bid);if(t)t.src=doc.data().data;}}).catch(function(){});}.bind(null,bodyId,ssDocId),300);
 html+='<div style="display:flex;flex-direction:column;gap:3px;margin-left:4px;">';
 html+='<span style="font-size:10px;font-weight:800;color:var(--muted);">'+(adminLang==="vi"?"Ảnh CK: ✅":"送金証明: ✅")+'</span>';
 html+='<span style="font-size:14px;font-weight:900;color:var(--g1);">'+vnd(o.tot)+'</span>';
-if(o.status!=="done"){html+='<button onclick="confirmPayAdmin('+realIdx+')" style="margin-top:4px;background:var(--g1);color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:800;cursor:pointer;">✅ '+(adminLang==="vi"?"Xác nhận nhận tiền":"入金確認→完了")+'</button>';}
+if(o.status!=="done"){html+='<button onclick="adminOrderAction(\'confirmPay\',\''+safeNo+'\')" style="margin-top:4px;background:var(--g1);color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:800;cursor:pointer;">✅ '+(adminLang==="vi"?"Xác nhận nhận tiền":"入金確認→完了")+'</button>';}
 html+='</div>';
-} else {
+}else{
 html+='<div style="display:flex;flex-direction:column;gap:3px;">';
 html+='<span style="font-size:10.5px;color:var(--ghost);">⚠ '+(adminLang==="vi"?"Chưa có ảnh":"スクショなし")+'</span>';
 html+='<span style="font-size:14px;font-weight:900;color:var(--g1);">'+vnd(o.tot)+'</span>';
@@ -1846,7 +1866,8 @@ html+='</div>';
 }
 html+='<div class="ao-tot">'+vnd(o.tot)+'</div>';
 html+='<div class="ao-btns">'+tglBtn+cancelBtn;
-html+='<button class="ao-btn" onclick="adminViewReceipt('+realIdx+')">'+(adminLang==="vi"?"📄 Hóa đơn":"📄 領収証")+'</button>';
+html+='<button class="ao-btn" onclick="adminViewReceiptByNo(\''+safeNo+'\')">'+(adminLang==="vi"?"📄 Hóa đơn":"📄 領収証")+'</button>';
+html+='<button class="ao-btn" onclick="adminChatFromOrder(\''+safeNo+'\')" style="color:var(--g1);border-color:var(--g1);">💬 '+(adminLang==="vi"?"Chat":"チャット")+'</button>';
 html+='</div></div></div></div>';
 return html;
 }
@@ -1884,8 +1905,86 @@ el.style.display=el.style.display==="none"?"block":"none";
 function adminViewReceipt(i){
 if(!ORDERS[i])return;
 buildReceipt(ORDERS[i]);
-exitAdmin();
+var as=document.getElementById("admin-screen");
+var us=document.getElementById("user-screen");
+if(as){as.classList.remove("on");as.style.display="none";}
+if(us)us.style.display="block";
 showView("receipt");
+}
+function adminViewReceiptByNo(no){
+var o=ORDERS.find(function(x){return x.no===no;});
+if(!o)return;
+buildReceipt(o);
+var as=document.getElementById("admin-screen");
+var us=document.getElementById("user-screen");
+if(as){as.classList.remove("on");as.style.display="none";}
+if(us)us.style.display="block";
+showView("receipt");
+// 管理者専用ボタンを動的に差し込む
+var ra=document.querySelector(".receipt-actions");
+if(ra){
+// 通常ボタンを隠す
+ra.querySelectorAll(".rct-btn").forEach(function(b){b.style.display="none";});
+// 既存の戻るボタンがあれば削除
+var old=document.getElementById("rct-back-admin-dyn");
+if(old)old.remove();
+var btn=document.createElement("button");
+btn.id="rct-back-admin-dyn";
+btn.className="rct-btn lined no-print";
+btn.textContent="← 管理者画面へ戻る";
+btn.onclick=backToAdmin;
+ra.appendChild(btn);
+}
+}
+function backToAdmin(){
+var ra=document.querySelector(".receipt-actions");
+if(ra){
+ra.querySelectorAll(".rct-btn").forEach(function(b){b.style.display="";});
+var dyn=document.getElementById("rct-back-admin-dyn");
+if(dyn)dyn.remove();
+}
+var as=document.getElementById("admin-screen");
+var us=document.getElementById("user-screen");
+if(us)us.style.display="none";
+if(as){as.style.display="block";as.classList.add("on");}
+}
+function adminToggleCard(bodyId,hdEl){
+var b=document.getElementById(bodyId);if(!b)return;
+var open=b.style.display==="none";
+b.style.display=open?"block":"none";
+var arr=hdEl?hdEl.querySelector("span:last-child"):null;
+if(arr)arr.textContent=open?"▲":"▼";
+}
+function deleteChatData(no){
+if(!fbEnabled||!fbDb)return;
+var ref=fbDb.collection("chats").doc(chatKey(no));
+ref.collection("messages").get().then(function(snap){
+var b=fbDb.batch();
+snap.forEach(function(d){b.delete(d.ref);});
+b.delete(ref);
+b.commit().catch(function(){});
+}).catch(function(){});
+}
+function adminOrderAction(action,no){
+var o=ORDERS.find(function(x){return x.no===no;});
+if(!o)return;
+var prevStatus=o.status;
+if(action==="toggle"){o.status=o.status==="done"?"new":"done";}
+else if(action==="confirm"){o.status="done";}
+else if(action==="confirmPay"){o.status="done";}
+else if(action==="cancel"){o.status="cancelled";}
+else if(action==="restore"){o.status="new";}
+if(o.status==="done"&&prevStatus!=="done")deleteChatData(no);
+if(typeof fbSaveOrder==="function")fbSaveOrder(o);
+try{localStorage.setItem("nny_orders",JSON.stringify(ORDERS));}catch(e){}
+renderAdminOrders2();renderAdminStats();
+}
+function adminLoadSS(no,imgEl){
+var o=ORDERS.find(function(x){return x.no===no;});
+if(!o||!o.screenshotUrl||!fbDb)return;
+fbDb.collection('screenshots').doc(o.screenshotUrl).get().then(function(doc){
+if(doc.exists&&imgEl)imgEl.src=doc.data().data;
+}).catch(function(){});
 }
 // 商品管理
 function renderAdminProducts2(){
@@ -1894,7 +1993,7 @@ if(!el)return;
 var html="";
 PRODUCTS.forEach(function(p){
 var nm=adminLang==="vi"?p.vi:p.ja;
-var sqHtml=(p.variants&&p.variants.length>0?(function(){var _ul=adminLang==="vi"?p.unitvi:p.unit;var rows='';p.variants.forEach(function(v){var sk="stock"+v.replace("g","");var sv=p[sk]!==undefined?p[sk]:p.stock;var pk="price"+v.replace("g","");var pv=p[pk]||p.price;rows+='<div style="background:var(--gp);border-radius:10px;padding:10px;">'+'<div style="font-size:13px;font-weight:800;color:var(--g1);margin-bottom:8px;">'+v+'</div>'+'<div style="display:flex;align-items:center;gap:4px;" onclick="event.stopPropagation()">'+'<button class="sqbtn" onclick="adjVariantStock('+p.id+",'"+v+"'"+',-1)">−</button>'+'<input class="sq-num" id="sq-'+p.id+'-'+v+'" type="number" value="'+sv+'" min="0" onchange="setVariantStock('+p.id+",'"+v+"'"+',this.value)" onclick="this.select()">'+'<button class="sqbtn" onclick="adjVariantStock('+p.id+",'"+v+"'"+',1)">＋</button>'+'<span style="font-size:11px;color:var(--muted);margin-left:3px;">'+_ul+'</span>'+'</div>'+'<div style="display:flex;align-items:center;gap:4px;margin-top:6px;" onclick="event.stopPropagation()">'+'<input type="number" id="pe-price-'+p.id+'-'+v+'" value="'+pv+'" min="0" step="1000" onchange="saveVariantPrice('+p.id+",'"+v+"'"+',this.value)" onclick="this.select()" style="width:80px;font-size:12px;font-weight:700;border:2px solid var(--g3);border-radius:6px;padding:4px 8px;text-align:right;">'+'<span style="font-size:11px;color:var(--g2);">₫</span>'+'</div>'+'</div>';});return '<div class="stock-quick" onclick="event.stopPropagation()"><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">'+rows+'</div></div>';})():'<div onclick="event.stopPropagation()" style="display:flex;flex-direction:column;gap:5px;"><div style="display:flex;align-items:center;gap:4px;"><button class="sqbtn" onclick="adjStock('+p.id+',-1)">−</button><input class="sq-num" id="sq-'+p.id+'" type="number" value="'+p.stock+'" min="0" onchange="setStock('+p.id+',this.value)" onclick="this.select()"><button class="sqbtn" onclick="adjStock('+p.id+',1)">＋</button><span style="font-size:11px;color:var(--muted);margin-left:3px;">'+(adminLang==="vi"?p.unitvi:p.unit)+'</span></div><div style="display:flex;align-items:center;gap:4px;"><input type="number" id="pe-price-'+p.id+'" value="'+p.price+'" min="0" step="1000" onchange="saveProductEdit('+p.id+')" onclick="this.select()" style="width:80px;font-size:12px;font-weight:700;border:2px solid var(--g3);border-radius:6px;padding:4px 8px;text-align:right;"><span style="font-size:11px;color:var(--g2);">₫</span></div></div>')
+var sqHtml=(p.variants&&p.variants.length>0?(function(){var _ul=adminLang==="vi"?p.unitvi:p.unit;var rows='';p.variants.forEach(function(v){var sk="stock"+v.replace("g","");var sv=p[sk]!==undefined?p[sk]:p.stock;var pk="price"+v.replace("g","");var pv=p[pk]||p.price;rows+='<div style="background:var(--gp);border-radius:10px;padding:10px;">'+'<div style="font-size:13px;font-weight:800;color:var(--g1);margin-bottom:8px;">'+v+'</div>'+'<div style="display:flex;align-items:center;gap:4px;" onclick="event.stopPropagation()">'+'<button class="sqbtn" onclick="adjVariantStock('+p.id+",'"+v+"'"+',-1)">−</button>'+'<input class="sq-num" id="sq-'+p.id+'-'+v+'" type="number" value="'+sv+'" min="0" onchange="setVariantStock('+p.id+",'"+v+"'"+',this.value)" onclick="this.select()">'+'<button class="sqbtn" onclick="adjVariantStock('+p.id+",'"+v+"'"+',1)">＋</button>'+'<span style="font-size:11px;color:var(--muted);margin-left:3px;">'+_ul+'</span>'+'</div>'+'<div style="display:flex;align-items:center;gap:4px;margin-top:6px;" onclick="event.stopPropagation()">'+'<input type="number" id="pe-price-'+p.id+'-'+v+'" value="'+pv+'" min="0" step="1000" onchange="saveVariantPrice('+p.id+",'"+v+"'"+',this.value)" onclick="this.select()" style="width:80px;font-size:12px;font-weight:700;border:2px solid var(--g3);border-radius:6px;padding:4px 8px;text-align:right;">'+'<span style="font-size:11px;color:var(--g2);">₫</span>'+'</div>'+'</div>';});return '<div class="stock-quick" onclick="event.stopPropagation()"><div style="display:grid;grid-template-columns:1fr;gap:6px;">'+rows+'</div></div>';})():'<div onclick="event.stopPropagation()" style="display:flex;flex-direction:column;gap:5px;"><div style="display:flex;align-items:center;gap:4px;"><button class="sqbtn" onclick="adjStock('+p.id+',-1)">−</button><input class="sq-num" id="sq-'+p.id+'" type="number" value="'+p.stock+'" min="0" onchange="setStock('+p.id+',this.value)" onclick="this.select()"><button class="sqbtn" onclick="adjStock('+p.id+',1)">＋</button><span style="font-size:11px;color:var(--muted);margin-left:3px;">'+(adminLang==="vi"?p.unitvi:p.unit)+'</span></div><div style="display:flex;align-items:center;gap:4px;"><input type="number" id="pe-price-'+p.id+'" value="'+p.price+'" min="0" step="1000" onchange="saveProductEdit('+p.id+')" onclick="this.select()" style="width:80px;font-size:12px;font-weight:700;border:2px solid var(--g3);border-radius:6px;padding:4px 8px;text-align:right;"><span style="font-size:11px;color:var(--g2);">₫</span></div></div>')
 +'<div style="margin-top:6px;display:flex;align-items:center;gap:6px;">'
 +'<span style="font-size:10px;color:var(--muted);white-space:nowrap;">'+(adminLang==="vi"?"Nhãn:":"バッジ:")+'</span>'
 +'<select id="pe-badge-'+p.id+'" onchange="saveProductEdit('+p.id+')" style="font-size:11px;border:1px solid var(--border);border-radius:4px;padding:2px 4px;flex:1;">'+'<option value="" '+((!p.badge||p.badge==="")?"selected":"")+'>— '+(adminLang==="vi"?"Không có":adminLang==="en"?"None":"なし")+'</option>'+'<option value="NEW" '+(p.badge==="NEW"?"selected":"")+'>NEW</option>'+'<option value="おすすめ" '+(p.badge==="おすすめ"?"selected":"")+'>⭐ '+(adminLang==="vi"?"Nổi bật":adminLang==="en"?"Recommended":"おすすめ")+'</option>'+'<option value="旬" '+(p.badge==="旬"?"selected":"")+'>🌿 '+(adminLang==="vi"?"Đặc sản":adminLang==="en"?"In Season":"旬")+'</option>'+'</select>'
@@ -1910,7 +2009,7 @@ html+='</div>';
 html+='<span style="position:absolute;bottom:-4px;right:-4px;font-size:10px;font-weight:800;padding:2px 5px;border-radius:6px;background:'+(p.pub?'var(--g1)':'#e53935')+';color:#fff;">'+(p.pub?(adminLang==="vi"?"ON":"公開"):(adminLang==="vi"?"OFF":"非公開"))+'</span>';
 html+='</div>';
 html+='<div class="apc-info"><div class="apc-name">'+nm+'</div><div class="apc-meta">'+vnd(p.price)+'</div></div>';
-html+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;" onclick="event.stopPropagation()">';
+html+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:1;min-width:0;max-width:55%;overflow:hidden;" onclick="event.stopPropagation()">';
 html+=sqHtml;
 html+='<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;font-weight:800;color:'+(p.pub?'var(--g1)':'var(--muted)')+';white-space:nowrap;" onclick="event.stopPropagation()">';
 html+='<input type="checkbox" '+(p.pub?'checked':'')+' onchange="togglePub('+p.id+',this.checked)" style="width:16px;height:16px;accent-color:var(--g1);cursor:pointer;">';
@@ -2345,11 +2444,8 @@ var dd=document.getElementById("lang-dropdown");
 if(dd&&!dd.contains(e.target))dd.classList.remove("open");
 });
 function updateLangBtn(){
-var flags={ja:"🇯🇵",vi:"🇻🇳",en:"🇺🇸"};
 var labels={ja:"日本語",vi:"Tiếng Việt",en:"English"};
-var f=document.getElementById("lg-current-flag");
 var l=document.getElementById("lg-current-label");
-if(f)f.textContent=flags[lang]||"🌐";
 if(l)l.textContent=labels[lang]||"Language";
 ["vi","ja","en"].forEach(function(c){
 var el=document.getElementById("lpi-"+c);
@@ -3035,3 +3131,246 @@ initApp();
  if(el.getAttribute('src')==='NICO_LOGO_PLACEHOLDER')el.src=src;
  });
 })();
+
+
+// ─────────────────────────────────────────
+// CHAT MODULE (Firestore)
+// ─────────────────────────────────────────
+var CHAT_ORDER_NO = null;
+var CHAT_LISTENER = null;
+var CHAT_CUSTOMER_NAME = "";
+
+function chatKey(orderNo){
+  return (orderNo||"").replace(/[^a-zA-Z0-9_-]/g,'-');
+}
+function escHtml(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function getFarmerIconHTML(size){
+  var el=document.getElementById("hero-bg");
+  var bg=el?el.style.backgroundImage:"";
+  if(bg&&bg.indexOf("url(")===0){
+    return '<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background-image:'+bg+';background-size:300% auto;background-position:15% center;flex-shrink:0;display:inline-block;vertical-align:middle;"></div>';
+  }
+  return '';
+}
+
+function openChat(){
+  try{
+    var o = RECEIPT_ORDER || ORDERS[ORDERS.length-1] || (ORDER_HISTORY && ORDER_HISTORY[ORDER_HISTORY.length-1]);
+    if(!o){ alert("注文が見つかりません。"); return; }
+    startChat(o.no||"unknown", o);
+  }catch(err){ alert("チャットエラー: "+err.message); }
+}
+
+function startChat(orderNo, order){
+  CHAT_ORDER_NO = orderNo;
+  CHAT_CUSTOMER_NAME = (order&&order.name)||"";
+  showView("chat");
+  var info = document.getElementById("chat-order-info");
+  if(info && order) info.textContent = "注文番号: " + orderNo + "  |  " + (order.name||"");
+  loadChatMessages(orderNo);
+}
+
+function loadChatMessages(orderNo){
+  var msgs = document.getElementById("chat-messages");
+  if(!msgs) return;
+  if(!fbEnabled||!fbDb){ msgs.innerHTML='<div class="chat-empty">Firebase接続が必要です</div>'; return; }
+  msgs.innerHTML = '<div class="chat-empty">読み込み中...</div>';
+  if(CHAT_LISTENER){ try{CHAT_LISTENER();}catch(e){} CHAT_LISTENER=null; }
+  CHAT_LISTENER = fbDb.collection("chats").doc(chatKey(orderNo))
+    .collection("messages").orderBy("ts")
+    .onSnapshot(function(snap){
+      var all=[]; snap.forEach(function(d){all.push(d.data());}); renderChatMessages(all, msgs);
+    }, function(){ msgs.innerHTML='<div class="chat-empty">まだメッセージはありません</div>'; });
+}
+
+function renderChatMessages(all, el){
+  if(!el) el = document.getElementById("chat-messages");
+  if(!el) return;
+  if(!all||!all.length){ el.innerHTML='<div class="chat-empty">まだメッセージはありません</div>'; return; }
+  el.innerHTML = all.map(function(m){
+    var isMe=m.role==="customer";
+    var sender=isMe?"":getFarmerIconHTML(20)+'<span style="vertical-align:middle;margin-left:4px;">Bach Manh Ha</span>';
+    var trl=m.translation?'<div class="chat-translation">→ '+escHtml(m.translation)+'</div>':'';
+    var t=m.ts?new Date(m.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
+    return '<div class="chat-msg '+(isMe?"me":"them")+'">'
+      +(sender?'<div class="chat-sender">'+sender+'</div>':'')
+      +'<div class="chat-bubble">'+escHtml(m.text)+'</div>'+trl
+      +'<div class="chat-time">'+t+'</div></div>';
+  }).join('');
+  el.scrollTop=el.scrollHeight;
+}
+
+var ADMIN_CHAT_CUST_LANG='ja';
+var ADMIN_BODY_SAVED_HTML="";
+function detectMsgLang(text){
+  if(/[぀-ヿ一-鿿㐀-䶿]/.test(text)) return 'ja';
+  if(/^[\x00-\x7F\s]+$/.test(text.trim())) return 'en';
+  return 'vi';
+}
+function sendChatMessage(){
+  var inp=document.getElementById("chat-input"); if(!inp)return;
+  var text=inp.value.trim(); if(!text||!CHAT_ORDER_NO)return;
+  if(!fbEnabled||!fbDb){alert("Firebase接続が必要です");return;}
+  inp.value=""; inp.disabled=true;
+  var srcLang=detectMsgLang(text);
+  var tgtLang=srcLang==='en'?'vi':(srcLang==='ja'?'vi':'ja');
+  translateText(text,tgtLang,srcLang,function(translated){
+    var msg={role:"customer",text:text,translation:translated,lang:srcLang,ts:Date.now(),customerName:CHAT_CUSTOMER_NAME||""};
+    var key=chatKey(CHAT_ORDER_NO);
+    fbDb.collection("chats").doc(key).collection("messages").add(msg).then(function(){
+      fbDb.collection("chats").doc(key).set({orderNo:CHAT_ORDER_NO,lastMsg:text,lastTs:Date.now(),unread:true},{merge:true});
+    });
+    inp.disabled=false;
+  });
+}
+
+document.addEventListener("keydown",function(e){
+  if(e.key==="Enter"&&!e.shiftKey){
+    var inp=document.getElementById("chat-input");
+    if(inp&&document.activeElement===inp){e.preventDefault();sendChatMessage();}
+  }
+});
+
+function restoreAdminBody(){
+  var adminBody=document.querySelector(".admin-body");
+  if(!adminBody)return;
+  if(ADMIN_BODY_SAVED_HTML)adminBody.innerHTML=ADMIN_BODY_SAVED_HTML;
+  renderAdminAll();
+}
+function adminChatFromOrder(orderNo){
+  var adminBody=document.querySelector(".admin-body");
+  if(!adminBody)return;
+  ADMIN_BODY_SAVED_HTML=adminBody.innerHTML;
+  var adminScreen=document.getElementById("admin-screen");
+  if(adminScreen)adminScreen.scrollTo({top:0});
+  adminBody.innerHTML=''
+    +'<div id="adm-inline-chat" style="max-width:640px;margin:0 auto;display:flex;flex-direction:column;height:calc(100dvh - 180px);">'
+    +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-shrink:0;">'
+    +'<button onclick="restoreAdminBody()" style="background:#fff;border:2px solid #1a6b2a;color:#1a6b2a;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">← 戻る</button>'
+    +'<div style="font-family:\'Shippori Mincho B1\',serif;font-size:17px;font-weight:800;color:#1a6b2a;">💬 '+escHtml(orderNo)+'</div>'
+    +'</div>'
+    +'<div id="adm-inline-msgs" style="flex:1;background:#fff;border:1px solid #c4dcc8;border-radius:12px;padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:10px;margin-bottom:12px;">'
+    +'<div style="color:#aaa;text-align:center;padding:20px;font-size:13px;">読み込み中...</div>'
+    +'</div>'
+    +'<div style="background:#fff;border:1px solid #c4dcc8;border-radius:12px;padding:12px;display:flex;gap:10px;align-items:flex-end;flex-shrink:0;">'
+    +'<textarea id="adm-inline-inp" rows="2" style="flex:1;border:1.5px solid #c4dcc8;border-radius:8px;padding:10px;font-size:16px;font-family:inherit;resize:none;outline:none;max-height:72px;overflow-y:auto;" placeholder="日本語 / Tiếng Việt / English..."></textarea>'
+    +'<button onclick="adminSendChatInline(\''+escHtml(orderNo)+'\')" style="background:#1a6b2a;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;">送信</button>'
+    +'</div>'
+    +'<div id="adm-chat-hint" style="font-size:10px;color:#888;text-align:center;padding:6px 0;flex-shrink:0;">自動翻訳対応</div>'
+    +'</div>';
+  var msgsEl=document.getElementById("adm-inline-msgs");
+  if(!fbEnabled||!fbDb){
+    msgsEl.innerHTML='<div style="color:#aaa;text-align:center;padding:20px;font-size:13px;">Firebase未接続</div>';
+    return;
+  }
+  fbDb.collection("chats").doc(chatKey(orderNo)).set({unread:false},{merge:true}).catch(function(){});
+  fbDb.collection("chats").doc(chatKey(orderNo)).collection("messages").orderBy("ts").get()
+    .then(function(snap){
+      if(!msgsEl)return;
+      if(snap.empty){msgsEl.innerHTML='<div style="color:#aaa;text-align:center;padding:20px;font-size:13px;">まだメッセージはありません</div>';return;}
+      var custMsg=snap.docs.map(function(d){return d.data();}).find(function(m){return m.role==='customer';});
+      if(custMsg&&custMsg.lang){ADMIN_CHAT_CUST_LANG=custMsg.lang;}
+      var hint=document.getElementById('adm-chat-hint');
+      if(hint)hint.textContent=ADMIN_CHAT_CUST_LANG==='en'?'English↔Vietnamese自動翻訳':'日本語↔ベトナム語 自動翻訳';
+      msgsEl.innerHTML=snap.docs.map(function(d){
+        var m=d.data();var isF=m.role==="farmer";
+        var trlParts=[];
+        if(m.translation)trlParts.push(escHtml(m.translation));
+        if(m.translationJa)trlParts.push('🇯🇵 '+escHtml(m.translationJa));
+        if(m.translationEn)trlParts.push('🇬🇧 '+escHtml(m.translationEn));
+        var trl=trlParts.length?'<div style="font-size:11px;color:#888;font-style:italic;margin-top:3px;">'+trlParts.join('<br>')+'</div>':'';
+        return '<div style="display:flex;flex-direction:column;align-self:'+(isF?"flex-end":"flex-start")+';max-width:82%;gap:2px;">'
+          +(isF?'<div style="font-size:10px;color:#888;display:flex;align-items:center;gap:4px;">'+getFarmerIconHTML(18)+'Bach Manh Ha</div>':'')
+          +'<div style="background:'+(isF?"#1a6b2a":"#f2f2f2")+';color:'+(isF?"#fff":"#222")+';padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.5;">'+escHtml(m.text)+'</div>'
+          +trl+'</div>';
+      }).join('');
+      msgsEl.scrollTop=msgsEl.scrollHeight;
+    }).catch(function(e){if(msgsEl)msgsEl.innerHTML='<div style="color:red;font-size:12px;padding:12px;">エラー: '+escHtml(String(e))+'</div>';});
+}
+function adminSendChatInline(orderNo){
+  var inp=document.getElementById("adm-inline-inp");if(!inp)return;
+  var text=inp.value.trim();if(!text)return;
+  if(!fbEnabled||!fbDb){alert("Firebase未接続");return;}
+  inp.disabled=true;inp.value="";
+  var srcLang=detectMsgLang(text);
+  var custOrder=ORDERS.find(function(x){return x.no===orderNo;});
+  function _notifyCust(){
+    if(!custOrder||!custOrder.email)return;
+    if(!EJ.service||!EJ.template||!EJ.pubkey)return;
+    try{emailjs.init({publicKey:EJ.pubkey});}catch(e){}
+    var custName=custOrder.name||"";
+    var subj="NICO NICO便ハノイ - 農家より連絡があります";
+    var body2=custName+" 様\n\nNICO NICO便ハノイで、農家 Bach Manh Ha より連絡が来ました。\n\n注文番号: "+orderNo+"\n\n以下のURLよりサイトを開き、注文履歴のチャットボタンよりご確認ください。\nhttps://hanoi-order.niconicoyasai.jp/\n\nNICO NICO 便";
+    emailjs.send(EJ.service,EJ.template,{to_email:custOrder.email,to_name:custName,from_name:"NICO NICO YASAI",reply_to:"bachhasonmochi@gmail.com",subject:subj,message:body2,order_no:orderNo}).catch(function(){});
+  }
+  function _save(msg){
+    fbDb.collection("chats").doc(chatKey(orderNo)).collection("messages").add(msg)
+      .then(function(){
+        fbDb.collection("chats").doc(chatKey(orderNo)).set({lastMsg:msg.text,lastTs:Date.now(),unread:false},{merge:true});
+        _notifyCust();
+        inp.disabled=false;
+        adminChatFromOrder(orderNo);
+      }).catch(function(e){inp.disabled=false;alert("送信失敗: "+e.message);});
+  }
+  var custLang=ADMIN_CHAT_CUST_LANG||'ja';
+  translateText(text,custLang,srcLang,function(tr){_save({role:"farmer",text:text,translation:tr,lang:srcLang,ts:Date.now()});});
+}
+
+function renderAdminChat(){
+  var el=document.getElementById("admin-chat-content"); if(!el)return;
+  if(!fbEnabled||!fbDb){el.innerHTML='<p style="color:var(--muted);font-size:13px;">Firebase接続が必要です</p>';return;}
+  el.innerHTML='<p style="color:var(--muted);font-size:13px;">読み込み中...</p>';
+  fbDb.collection("chats").get().then(function(snap){
+    if(snap.empty){el.innerHTML='<p style="color:var(--muted);font-size:13px;">チャットはまだありません</p>';return;}
+    var items=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
+    items.sort(function(a,b){return (b.lastTs||0)-(a.lastTs||0);});
+    el.innerHTML='<div class="admin-chat-list">'+items.map(function(m){
+      var ts=m.lastTs?new Date(m.lastTs).toLocaleDateString():"";
+      return '<div class="admin-chat-item'+(m.unread?" unread":"")+'" onclick="adminOpenChat(\''+escHtml(m.orderNo||m.id)+'\')">'
+        +'<div class="admin-chat-item-no">'+escHtml(m.orderNo||m.id)+(m.unread?' 🔴':'')+'</div>'
+        +'<div class="admin-chat-item-preview">'+escHtml((m.lastMsg||"").slice(0,40))+'</div>'
+        +'<div style="font-size:10px;color:var(--muted)">'+ts+'</div></div>';
+    }).join('')+'</div>';
+  }).catch(function(e){el.innerHTML='<p style="color:red;font-size:12px;">エラー: '+escHtml(String(e))+'</p>';});
+}
+
+function adminOpenChat(orderNo){
+  var el=document.getElementById("admin-chat-content"); if(!el)return;
+  el.innerHTML='<button class="admin-chat-back" onclick="renderAdminChat()">← 一覧</button>'
+    +'<div style="font-weight:700;font-size:13px;margin:8px 0;">'+escHtml(orderNo)+'</div>'
+    +'<div id="admin-chat-msgs" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;background:var(--gs);border-radius:var(--r);padding:12px;margin-bottom:10px;"></div>'
+    +'<div style="display:flex;gap:8px;">'
+    +'<textarea id="admin-chat-input" rows="2" style="flex:1;border:1.5px solid var(--border);border-radius:var(--r);padding:8px;font-size:13px;font-family:inherit;resize:none;" placeholder="ベトナム語で返信..."></textarea>'
+    +'<button onclick="adminSendChat(\''+escHtml(orderNo)+'\')" style="background:var(--g1);color:#fff;border:none;border-radius:var(--r);padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;">送信</button>'
+    +'</div>'
+    +'<div style="font-size:11px;color:var(--muted);margin-top:6px;">ベトナム語で書くと日本語に自動翻訳されます</div>';
+  fbDb.collection("chats").doc(chatKey(orderNo)).set({unread:false},{merge:true});
+  var el2=document.getElementById("admin-chat-msgs");
+  fbDb.collection("chats").doc(chatKey(orderNo)).collection("messages").orderBy("ts").get()
+    .then(function(snap){
+      if(!el2)return;
+      if(snap.empty){el2.innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px;">メッセージなし</div>';return;}
+      el2.innerHTML=snap.docs.map(function(d){
+        var m=d.data(); var isMe=m.role==="farmer";
+        var trl=m.translation?'<div style="font-size:11px;color:var(--muted);font-style:italic;">→ '+escHtml(m.translation)+'</div>':'';
+        return '<div style="display:flex;flex-direction:column;align-self:'+(isMe?"flex-end":"flex-start")+';max-width:80%;gap:2px;">'
+          +'<div style="font-size:10px;color:var(--muted);">'+(isMe?"農家 🌱":"顧客")+'</div>'
+          +'<div style="background:'+(isMe?"var(--g1)":"var(--wh)")+';color:'+(isMe?"#fff":"var(--ink)")+';border:'+(isMe?"none":"1px solid var(--border)")+';padding:8px 12px;border-radius:12px;font-size:13px;">'+escHtml(m.text)+'</div>'
+          +trl+'</div>';
+      }).join('');
+      el2.scrollTop=el2.scrollHeight;
+    }).catch(function(){if(el2)el2.innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:20px;">メッセージなし</div>';});
+}
+
+function adminSendChat(orderNo){
+  var inp=document.getElementById("admin-chat-input"); if(!inp)return;
+  var text=inp.value.trim(); if(!text)return;
+  inp.value=""; inp.disabled=true;
+  translateText(text,"ja","vi",function(translated){
+    var msg={role:"farmer",text:text,translation:translated,ts:Date.now()};
+    fbDb.collection("chats").doc(chatKey(orderNo)).collection("messages").add(msg).then(function(){
+      fbDb.collection("chats").doc(chatKey(orderNo)).set({lastMsg:text,lastTs:Date.now(),unread:false},{merge:true});
+      inp.disabled=false; adminOpenChat(orderNo);
+    }).catch(function(e){console.error(e);inp.disabled=false;});
+  });
+}
