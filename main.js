@@ -538,17 +538,11 @@ document.getElementById("rgt-val").textContent=vnd(o.tot);
 document.getElementById("rpt-note-box").style.display=o.note?"":"none";
 document.getElementById("rnt-val").textContent=o.note;
 }
-function renderHistory(){
-var el=document.getElementById("hist-list-el");
-var myOrders=ORDER_HISTORY.slice().reverse();
-if(!myOrders.length){
-el.innerHTML='<div class="hist-empty"><div class="hist-empty-ico">📋</div><div>'+T("histEmpty")+'</div></div>';return;
-}
+function _buildHistHTML(myOrders, statusMap){
 var html='<div class="hist-list">';
 myOrders.forEach(function(o){
 var items=o.items.map(function(i){return i.e+" "+(lang==="ja"?i.ja:i.vi)+" ×"+i.qty;}).join("　");
-var live=ORDERS.find(function(x){return x.no===o.no;});
-var st=live?live.status:o.status;
+var st=statusMap[o.no]||o.status;
 var stCls=st==="done"?"hst-done":st==="cancelled"?"hst-cancelled":"hst-new";
 var stLbl=st==="done"?(lang==="ja"?"完了":"Xong"):st==="cancelled"?(lang==="ja"?"キャンセル済":"Đã hủy"):(lang==="ja"?"進行中":"Đang xử lý");
 html+='<div class="hist-card">';
@@ -562,8 +556,30 @@ html+='<button class="hist-act-btn" onclick="openChatFromHistory(\''+escHtml(o.n
 html+='</div>';
 html+='</div></div>';
 });
-html+='</div>';
-el.innerHTML=html;
+return html+'</div>';
+}
+function renderHistory(){
+var el=document.getElementById("hist-list-el");
+var myOrders=ORDER_HISTORY.slice().reverse();
+if(!myOrders.length){
+el.innerHTML='<div class="hist-empty"><div class="hist-empty-ico">📋</div><div>'+T("histEmpty")+'</div></div>';return;
+}
+el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px;">読み込み中...</div>';
+if(fbEnabled&&fbDb){
+var nos=myOrders.map(function(o){return o.no.replace(/[^a-zA-Z0-9]/g,"-");});
+var promises=nos.map(function(docId){return fbDb.collection("orders").doc(docId).get();});
+Promise.all(promises).then(function(docs){
+var statusMap={};
+docs.forEach(function(doc){
+if(doc.exists){var d=doc.data();if(d&&d.no&&d.status)statusMap[d.no]=d.status;}
+});
+el.innerHTML=_buildHistHTML(myOrders,statusMap);
+}).catch(function(){
+el.innerHTML=_buildHistHTML(myOrders,{});
+});
+} else {
+el.innerHTML=_buildHistHTML(myOrders,{});
+}
 }
 function openChatFromHistory(no){
 var o=ORDER_HISTORY.find(function(x){return x.no===no;});
