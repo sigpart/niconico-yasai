@@ -1829,7 +1829,7 @@ var tglBtn=o.status==="cancelled"
 :o.status==="pending_payment"
 ?'<button class="ao-btn primary" onclick="adminOrderAction(\'confirm\',\''+safeNo+'\')" style="background:#f0c040;color:#7a5c00;border-color:#f0c040;">'+(adminLang==="vi"?"✅ Xác nhận đã nhận tiền":"✅ 入金確認する")+'</button>'
 :'<button class="ao-btn'+(o.status==="done"?"":" primary")+'" onclick="adminOrderAction(\'toggle\',\''+safeNo+'\')">'+(o.status==="done"?(adminLang==="vi"?"↩ Hoàn tác":"↩ 戻す"):(adminLang==="vi"?"✅ Hoàn thành":"✅ 完了にする"))+'</button>';
-var cancelBtn=o.status!=="cancelled"?'<button class="ao-btn" onclick="adminOrderAction(\'cancel\',\''+safeNo+'\')" style="color:#c0392b;border-color:#c0392b;">❌ '+(adminLang==="vi"?"Hủy đơn":"キャンセル")+'</button>':'';
+var cancelBtn=o.status!=="cancelled"?'<button class="ao-btn" onclick="nnyConfirm(\''+(adminLang==="vi"?"本当にキャンセルしますか？ / Xác nhận hủy đơn?":"本当にキャンセルしますか？")+'\',function(){adminOrderAction(\'cancel\',\''+safeNo+'\');})" style="color:#c0392b;border-color:#c0392b;">❌ '+(adminLang==="vi"?"Hủy đơn":"キャンセル")+'</button>':'';
 var items=(o.items||[]).map(function(it){return it.e+" "+(adminLang==="vi"?it.vi:it.ja)+"×"+it.qty;}).join("、");
 var isOpen=o.status!=="done";
 var html='<div class="ao-card">';
@@ -3072,7 +3072,8 @@ applyI18n();
 renderHistory();
 loadSheetUrl();
 updateLangBtn();
-setSeason("all");
+var _autoSeasonMap={0:"winter",1:"winter",2:"spring",3:"spring",4:"spring",5:"summer",6:"summer",7:"summer",8:"autumn",9:"autumn",10:"autumn",11:"winter"};
+setSeason(_autoSeasonMap[new Date().getMonth()]||"all");
 if(typeof updatePickupAvailability==="function")updatePickupAvailability();
 if(window.__ADMIN_AUTO_OPEN){
 var us=document.getElementById("user-screen");if(us)us.style.display="none";
@@ -3144,6 +3145,14 @@ function chatKey(orderNo){
   return (orderNo||"").replace(/[^a-zA-Z0-9_-]/g,'-');
 }
 function escHtml(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function getFarmerIconHTML(size){
+  var el=document.getElementById("hero-bg");
+  var bg=el?el.style.backgroundImage:"";
+  if(bg&&bg.indexOf("url(")===0){
+    return '<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background-image:'+bg+';background-size:300% auto;background-position:15% center;flex-shrink:0;display:inline-block;vertical-align:middle;"></div>';
+  }
+  return '';
+}
 
 function openChat(){
   try{
@@ -3181,7 +3190,7 @@ function renderChatMessages(all, el){
   if(!all||!all.length){ el.innerHTML='<div class="chat-empty">まだメッセージはありません</div>'; return; }
   el.innerHTML = all.map(function(m){
     var isMe=m.role==="customer";
-    var sender=isMe?"":'<img src="https://hanoi-order.niconicoyasai.jp/farmer.jpg" onerror="this.style.display=\'none\'" style="width:20px;height:20px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:4px;">Bach Manh Ha';
+    var sender=isMe?"":getFarmerIconHTML(20)+'<span style="vertical-align:middle;margin-left:4px;">Bach Manh Ha</span>';
     var trl=m.translation?'<div class="chat-translation">→ '+escHtml(m.translation)+'</div>':'';
     var t=m.ts?new Date(m.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
     return '<div class="chat-msg '+(isMe?"me":"them")+'">'
@@ -3272,7 +3281,7 @@ function adminChatFromOrder(orderNo){
         if(m.translationEn)trlParts.push('🇬🇧 '+escHtml(m.translationEn));
         var trl=trlParts.length?'<div style="font-size:11px;color:#888;font-style:italic;margin-top:3px;">'+trlParts.join('<br>')+'</div>':'';
         return '<div style="display:flex;flex-direction:column;align-self:'+(isF?"flex-end":"flex-start")+';max-width:82%;gap:2px;">'
-          +(isF?'<div style="font-size:10px;color:#888;display:flex;align-items:center;gap:4px;"><img src="https://hanoi-order.niconicoyasai.jp/farmer.jpg" onerror="this.style.display=\'none\'" style="width:18px;height:18px;border-radius:50%;object-fit:cover;">Bach Manh Ha</div>':'')
+          +(isF?'<div style="font-size:10px;color:#888;display:flex;align-items:center;gap:4px;">'+getFarmerIconHTML(18)+'Bach Manh Ha</div>':'')
           +'<div style="background:'+(isF?"#1a6b2a":"#f2f2f2")+';color:'+(isF?"#fff":"#222")+';padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.5;">'+escHtml(m.text)+'</div>'
           +trl+'</div>';
       }).join('');
