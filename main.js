@@ -584,7 +584,8 @@ el.innerHTML=_buildHistHTML(myOrders,{});
 function openChatFromHistory(no){
 var o=ORDER_HISTORY.find(function(x){return x.no===no;});
 if(!o){alert("注文が見つかりません");return;}
-buildReceipt(o);openChat();
+CHAT_PREV_VIEW="history";
+startChat(no, o);
 }
 function showHistReceipt(no){
 var o=ORDER_HISTORY.find(function(x){return x.no===no;}); if(!o)return;
@@ -3139,6 +3140,7 @@ initApp();
 var CHAT_ORDER_NO = null;
 var CHAT_LISTENER = null;
 var CHAT_CUSTOMER_NAME = "";
+var CHAT_PREV_VIEW = "receipt";
 
 function chatKey(orderNo){
   return (orderNo||"").replace(/[^a-zA-Z0-9_-]/g,'-');
@@ -3157,6 +3159,7 @@ function openChat(){
   try{
     var o = RECEIPT_ORDER || ORDERS[ORDERS.length-1] || (ORDER_HISTORY && ORDER_HISTORY[ORDER_HISTORY.length-1]);
     if(!o){ alert("注文が見つかりません。"); return; }
+    CHAT_PREV_VIEW="receipt";
     startChat(o.no||"unknown", o);
   }catch(err){ alert("チャットエラー: "+err.message); }
 }
