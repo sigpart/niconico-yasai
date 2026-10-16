@@ -1,0 +1,51 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 商品: 誰でも読み取りOK、書き込みは認証済みユーザー（管理者）のみ
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // 注文: 認証済みユーザー（匿名含む）が作成可、読み取り・更新・削除は管理者のみ
+    match /orders/{orderId} {
+      allow create: if request.auth != null && isValidOrder(request.resource.data);
+      allow read, update, delete: if request.auth != null && isAdmin(request.auth);
+    }
+
+    // チャット: 認証済みユーザーが書き込み可、読み取りは管理者のみ
+    match /chats/{chatId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if request.auth != null && isAdmin(request.auth);
+    }
+
+    // 設定・通知リスト: 管理者のみ
+    match /settings/{docId} {
+      allow read, write: if request.auth != null && isAdmin(request.auth);
+    }
+
+    // 管理者メールリスト（ルール検証用）
+    match /admins/{email} {
+      allow read: if request.auth != null && request.auth.token.email == email;
+      allow write: if false;
+    }
+
+    // 管理者かどうかを確認（メールで識別）
+    function isAdmin(auth) {
+      return auth.token.email != null &&
+             exists(/databases/$(database)/documents/admins/$(auth.token.email));
+    }
+
+    // 注文データのバリデーション
+    function isValidOrder(data) {
+      return data.keys().hasAll(['name', 'tot']) &&
+             data.name is string &&
+             data.name.size() > 0 &&
+             data.name.size() <= 100 &&
+             data.tot is number &&
+             data.tot >= 0 &&
+             data.tot <= 50000000;
+    }
+  }
+}

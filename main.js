@@ -1176,7 +1176,7 @@ var f=document.getElementById("sq-flash-"+id);if(!f)return;
 f.classList.add("show");setTimeout(function(){f.classList.remove("show");},1200);
 }
 var FB_CFG={apiKey:"AIzaSyCE15q3KAPiXCUrzEmsVEL92HtE95eOBUk",authDomain:"nico-nico-yasai-hanoi-order.firebaseapp.com",projectId:"nico-nico-yasai-hanoi-order",storageBucket:"nico-nico-yasai-hanoi-order.firebasestorage.app",messagingSenderId:"733369514912",appId:"1:733369514912:web:cfd55f2632e32c1fba82c5"};
-var fbDb=null,fbEnabled=false;
+var fbDb=null,fbAuth=null,fbEnabled=false,fbUser=null;
 (function(){
 try{
 var r=localStorage.getItem("nny_fb");
@@ -1230,6 +1230,15 @@ appId:FB_CFG.appId
 }
 fbDb=firebase.firestore();
 try{fbDb.settings({experimentalForceLongPolling:true});}catch(se){}
+// Firebase Auth 初期化
+if(typeof firebase.auth==='function'){
+fbAuth=firebase.auth();
+fbAuth.onAuthStateChanged(function(user){
+fbUser=user;
+});
+// 匿名サインイン（顧客注文送信に必要）
+fbAuth.signInAnonymously().catch(function(e){console.warn('[NNY Auth] 匿名認証失敗:',e.message);});
+}
 fbEnabled=true;
 updateFBStatus(true,FB_CFG.projectId);
 return true;
@@ -1338,7 +1347,27 @@ try{localStorage.setItem("nny_reviews",JSON.stringify(REVIEWS));}catch(e){}
 d.p=true;chk();
 fbDb.collection("settings").doc("notify_list").get().then(function(doc){if(doc.exists&&doc.data().list)NOTIFY_LIST=doc.data().list;d.n=true;chk();}).catch(function(){d.n=true;chk();});
 }
-function fbSaveOrder(o){if(!fbEnabled||!fbDb)return;fbDb.collection("orders").doc(o.no.replace(/[^a-zA-Z0-9]/g,"-")).set(o).catch(function(e){console.error(e);});}
+function fbSaveOrder(o){
+if(!fbEnabled||!fbDb)return;
+var docRef=fbDb.collection("orders").doc(o.no.replace(/[^a-zA-Z0-9]/g,"-"));
+// 認証済みの場合はそのまま書き込み
+if(fbAuth&&fbAuth.currentUser){
+docRef.set(o).catch(function(e){console.error('[NNY] order save:',e.message);});
+return;
+}
+// 未認証の場合は匿名サインイン後に書き込み
+if(fbAuth){
+fbAuth.signInAnonymously().then(function(){
+docRef.set(o).catch(function(e){console.error('[NNY] order save after anon auth:',e.message);});
+}).catch(function(e){
+console.error('[NNY] anon auth failed:',e.message);
+// 匿名認証が失敗してもFirestoreルールが緩ければ書き込み試行
+docRef.set(o).catch(function(e2){console.error('[NNY] order save fallback:',e2.message);});
+});
+}else{
+docRef.set(o).catch(function(e){console.error('[NNY] order save no-auth:',e.message);});
+}
+}
 function fbSaveNotifyList(){if(!fbEnabled||!fbDb)return;fbDb.collection("settings").doc("notify_list").set({list:NOTIFY_LIST}).catch(function(e){console.error(e);});}
 var analyticsPeriod="month";
 function setPeriod(p,btn){analyticsPeriod=p;document.querySelectorAll(".period-tab").forEach(function(el){el.classList.remove("on");});if(btn)btn.classList.add("on");renderAnalytics();}
@@ -1604,11 +1633,13 @@ if(ownerMatch){OWNER_PIN=h;try{localStorage.setItem("nny_owner_pin",h);}catch(ex
 if(ownerMatch){
 closePinGate();
 sessionStorage.setItem('nny_owner_session','1');
-window.location.href='/owner/';
+// Firebase管理者ログイン（設定済みの場合）
+_tryFirebaseAdminLogin(function(){window.location.href='/owner/';});
 } else if(adminMatch){
 closePinGate();
 sessionStorage.setItem('nny_admin_session','1');
-window.location.href='/admin/';
+// Firebase管理者ログイン（設定済みの場合）
+_tryFirebaseAdminLogin(function(){window.location.href='/admin/';});
 } else {
 inp.value="";
 inp.style.borderColor="var(--red)";
@@ -1622,6 +1653,27 @@ document.addEventListener("keydown",function(e){
 var gate=document.getElementById("pin-gate");
 if(gate&&gate.style.display!=="none"&&gate.style.display!==""&&e.key==="Enter")checkPin();
 });
+// Firebase管理者ログイン（Email/Password認証）
+// nny_admin_emailとnny_admin_fb_pwdがlocalStorageに設定されている場合のみ実行
+function _tryFirebaseAdminLogin(cb){
+try{
+var email=localStorage.getItem("nny_admin_email")||"";
+var pwd=localStorage.getItem("nny_admin_fb_pwd")||"";
+if(email&&pwd&&fbAuth){
+fbAuth.signInWithEmailAndPassword(email,pwd).then(function(cred){
+fbUser=cred.user;
+sessionStorage.setItem('nny_fb_admin','1');
+console.log('[NNY Auth] Firebase管理者ログイン成功:',email);
+if(cb)cb();
+}).catch(function(e){
+console.warn('[NNY Auth] Firebase認証失敗（PIN認証は有効）:',e.message);
+if(cb)cb();
+});
+return;
+}
+}catch(ex){}
+if(cb)cb();
+}
 // 管理画面 開閉
 function openAdmin(){
 var us=document.getElementById("user-screen");
