@@ -1290,6 +1290,17 @@ if(done===PRODUCTS.length)showToast(adminLang==="vi"?"☁️ Đồng bộ thành
 }
 function loadFromFirebase(cb){
 if(!fbEnabled||!fbDb){if(cb)cb(false);return;}
+// Firebase Auth状態が確定してから読み込む（認証タイミング問題の回避）
+if(fbAuth&&!fbAuth.currentUser){
+var _authWait=setTimeout(function(){_doLoad();},3000); // 3秒タイムアウト
+fbAuth.onAuthStateChanged(function(user){
+clearTimeout(_authWait);
+if(user)fbUser=user;
+_doLoad();
+},{onlyOnce:true});
+return;
+}
+function _doLoad(){
 // app_config（EJ・銀行・deliveryOrigin等）をFirebaseから読み込む
 fbDb.collection("settings").doc("app_config").get().then(function(doc){
 if(doc.exists){
@@ -1346,7 +1357,8 @@ try{localStorage.setItem("nny_reviews",JSON.stringify(REVIEWS));}catch(e){}
 }).catch(function(){});}).catch(function(){d.o=true;chk();});
 d.p=true;chk();
 fbDb.collection("settings").doc("notify_list").get().then(function(doc){if(doc.exists&&doc.data().list)NOTIFY_LIST=doc.data().list;d.n=true;chk();}).catch(function(){d.n=true;chk();});
-}
+} // end _doLoad
+} // end loadFromFirebase
 function fbSaveOrder(o){
 if(!fbEnabled||!fbDb)return;
 var docRef=fbDb.collection("orders").doc(o.no.replace(/[^a-zA-Z0-9]/g,"-"));
