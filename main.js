@@ -1236,8 +1236,16 @@ fbAuth=firebase.auth();
 fbAuth.onAuthStateChanged(function(user){
 fbUser=user;
 });
-// 匿名サインイン（顧客注文送信に必要）
+// 管理者セッション中はFirebase管理者認証を自動実行（PIN省略時も含む）
+var _isAdminSession=!!(sessionStorage.getItem('nny_admin_session')||sessionStorage.getItem('nny_owner_session'));
+var _hasAdminCreds=!!(localStorage.getItem('nny_admin_email')&&localStorage.getItem('nny_admin_fb_pwd'));
+if(_isAdminSession&&_hasAdminCreds){
+var _ae=localStorage.getItem('nny_admin_email'),_ap=localStorage.getItem('nny_admin_fb_pwd');
+firebase.auth().signInWithEmailAndPassword(_ae,_ap).then(function(c){fbUser=c.user;}).catch(function(e){console.warn('[NNY Auth] 管理者自動認証失敗:',e.message);});
+}else{
+// 一般ユーザーは匿名サインイン（注文送信に必要）
 fbAuth.signInAnonymously().catch(function(e){console.warn('[NNY Auth] 匿名認証失敗:',e.message);});
+}
 }
 fbEnabled=true;
 updateFBStatus(true,FB_CFG.projectId);
