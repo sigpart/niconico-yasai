@@ -3174,7 +3174,7 @@ if(cfg.deliveryOrigin){try{var dor=JSON.parse(cfg.deliveryOrigin);var prev=JSON.
 },10000);
 }
 function initApp(){
-var _hi=document.getElementById("hero-img");if(_hi){_hi.style.objectPosition="center 25%";}
+var _hi=document.getElementById("hero-img");if(_hi){_hi.style.objectPosition="center 60%";}
 if(typeof normalizeReviews==="function")normalizeReviews();
 _needFbProductSync=true;
 applyI18n();
