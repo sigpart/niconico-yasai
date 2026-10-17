@@ -3254,10 +3254,10 @@ function chatKey(orderNo){
 }
 function escHtml(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 function getFarmerIconHTML(size){
-  var el=document.getElementById("hero-bg");
-  var bg=el?el.style.backgroundImage:"";
-  if(bg&&bg.indexOf("url(")===0){
-    return '<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background-image:'+bg+';background-size:300% auto;background-position:15% center;flex-shrink:0;display:inline-block;vertical-align:middle;"></div>';
+  var img=document.getElementById("hero-img");
+  var src=img?img.src:"";
+  if(src){
+    return '<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background-image:url(\''+src+'\');background-size:300% auto;background-position:15% center;flex-shrink:0;display:inline-block;vertical-align:middle;overflow:hidden;"></div>';
   }
   return '';
 }
