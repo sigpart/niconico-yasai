@@ -3320,6 +3320,7 @@ function renderChatMessages(all, el){
 
 var ADMIN_CHAT_CUST_LANG='ja';
 var ADMIN_BODY_SAVED_HTML="";
+var ADMIN_SAVED_SCROLL=0;
 function detectMsgLang(text){
   if(/[぀-ヿ一-鿿㐀-䶿]/.test(text)) return 'ja';
   if(/^[\x00-\x7F\s]+$/.test(text.trim())) return 'en';
@@ -3352,15 +3353,18 @@ document.addEventListener("keydown",function(e){
 function restoreAdminBody(){
   var adminBody=document.querySelector(".admin-body");
   if(!adminBody)return;
-  if(ADMIN_BODY_SAVED_HTML)adminBody.innerHTML=ADMIN_BODY_SAVED_HTML;
+  ADMIN_BODY_SAVED_HTML="";
   renderAdminAll();
+  var adminScreen=document.getElementById("admin-screen");
+  var sp=ADMIN_SAVED_SCROLL;
+  if(adminScreen){adminScreen.scrollTop=sp;requestAnimationFrame(function(){adminScreen.scrollTop=sp;});}
 }
 function adminChatFromOrder(orderNo){
   var adminBody=document.querySelector(".admin-body");
   if(!adminBody)return;
-  ADMIN_BODY_SAVED_HTML=adminBody.innerHTML;
   var adminScreen=document.getElementById("admin-screen");
-  if(adminScreen)adminScreen.scrollTo({top:0});
+  ADMIN_SAVED_SCROLL=adminScreen?adminScreen.scrollTop:0;
+  ADMIN_BODY_SAVED_HTML="";
   adminBody.innerHTML=''
     +'<div id="adm-inline-chat" style="max-width:640px;margin:0 auto;display:flex;flex-direction:column;height:calc(100dvh - 180px);">'
     +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-shrink:0;">'
@@ -3376,6 +3380,7 @@ function adminChatFromOrder(orderNo){
     +'</div>'
     +'<div id="adm-chat-hint" style="font-size:10px;color:#888;text-align:center;padding:6px 0;flex-shrink:0;">自動翻訳対応</div>'
     +'</div>';
+  if(adminScreen)adminScreen.scrollTop=0;
   var msgsEl=document.getElementById("adm-inline-msgs");
   if(!fbEnabled||!fbDb){
     msgsEl.innerHTML='<div style="color:#aaa;text-align:center;padding:20px;font-size:13px;">Firebase未接続</div>';
