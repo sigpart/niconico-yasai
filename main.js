@@ -1980,18 +1980,13 @@ if(done.length){done.forEach(function(o){htmlD+=renderCard(o);});}
 else{htmlD='<div style="text-align:center;padding:24px;color:var(--ghost);font-size:13px;">'+(adminLang==="vi"?"Chưa có đơn hoàn thành":"完了した注文はありません")+'</div>';}
 if(cancelled.length){cancelled.forEach(function(o){htmlC+=renderCard(o);});}
 else{htmlC='<div style="text-align:center;padding:24px;color:var(--ghost);font-size:13px;">'+(adminLang==="vi"?"Không có đơn đã hủy":"キャンセルされた注文はありません")+'</div>';}
-var spP=elP.scrollTop,spD=elD.scrollTop;
 var elC=document.getElementById("adm-orders-list-cancelled");
-var spC=elC?elC.scrollTop:0;
 var admS=document.getElementById("admin-screen");
 var spA=admS?admS.scrollTop:0;
 elP.innerHTML=htmlP;
 elD.innerHTML=htmlD;
 if(elC)elC.innerHTML=htmlC;
-elP.scrollTop=spP;
-elD.scrollTop=spD;
-if(elC)elC.scrollTop=spC;
-if(admS)admS.scrollTop=spA;
+if(admS){admS.scrollTop=spA;requestAnimationFrame(function(){admS.scrollTop=spA;});}
 }
 function switchOrderTab(tab){
 var lP=document.getElementById("adm-orders-list-pending");
@@ -3163,8 +3158,12 @@ if(!a.length)return;
 var lo=ORDERS;
 var merged=a.map(function(o){
 var l=lo.find(function(x){return x.no===o.no;});
-if(l&&l.screenshot&&!o.screenshotUrl)o.screenshot=l.screenshot;
-if(l&&l.screenshotUrl)o.screenshotUrl=l.screenshotUrl;
+if(l){
+// ローカルの変更（ステータス等）を優先し、Firestoreに上書きさせない
+if(l.status)o.status=l.status;
+if(l.screenshot&&!o.screenshotUrl)o.screenshot=l.screenshot;
+if(l.screenshotUrl)o.screenshotUrl=l.screenshotUrl;
+}
 return o;
 });
 lo.forEach(function(x){if(!merged.find(function(o){return o.no===x.no;}))merged.push(x);});
