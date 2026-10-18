@@ -2925,6 +2925,8 @@ if(desc)desc.value=BANK_CFG.descTemplate||"NICONICO {no}";
 }
 var _needFbProductSync=false;
 var _localProductChanges={}; // {id: timestamp} ローカルで最近変更した商品を記録
+// ページリロード後も保護を引き継ぐためlocalStorageから復元
+try{var _lpcSaved=JSON.parse(localStorage.getItem('nny_prod_changes')||'{}');var _lpcNow=Date.now();Object.keys(_lpcSaved).forEach(function(id){if(_lpcNow-_lpcSaved[id]<300000)_localProductChanges[id]=_lpcSaved[id];});}catch(e){}
 // Firebase接続後に商品データを自動同期
 function _autoSyncProducts(){
 if(!_needFbProductSync||!fbDb)return;
@@ -2976,6 +2978,7 @@ if(priceEl&&priceEl.value)p.price=Math.max(0,parseInt(priceEl.value)||0);
 var badgeEl=document.getElementById("pe-badge-"+id);
 if(badgeEl)p.badge=badgeEl.value;
 _localProductChanges[id]=Date.now();
+try{var _lpcSave=JSON.parse(localStorage.getItem('nny_prod_changes')||'{}');_lpcSave[id]=_localProductChanges[id];localStorage.setItem('nny_prod_changes',JSON.stringify(_lpcSave));}catch(e){}
 saveProducts();
 if(typeof fbSaveProduct==="function")fbSaveProduct(p);
 // ヘッダーの価格表示を再レンダリングなしで更新
