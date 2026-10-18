@@ -1980,10 +1980,18 @@ if(done.length){done.forEach(function(o){htmlD+=renderCard(o);});}
 else{htmlD='<div style="text-align:center;padding:24px;color:var(--ghost);font-size:13px;">'+(adminLang==="vi"?"Chưa có đơn hoàn thành":"完了した注文はありません")+'</div>';}
 if(cancelled.length){cancelled.forEach(function(o){htmlC+=renderCard(o);});}
 else{htmlC='<div style="text-align:center;padding:24px;color:var(--ghost);font-size:13px;">'+(adminLang==="vi"?"Không có đơn đã hủy":"キャンセルされた注文はありません")+'</div>';}
+var spP=elP.scrollTop,spD=elD.scrollTop;
+var elC=document.getElementById("adm-orders-list-cancelled");
+var spC=elC?elC.scrollTop:0;
+var admS=document.getElementById("admin-screen");
+var spA=admS?admS.scrollTop:0;
 elP.innerHTML=htmlP;
 elD.innerHTML=htmlD;
-var elC=document.getElementById("adm-orders-list-cancelled");
 if(elC)elC.innerHTML=htmlC;
+elP.scrollTop=spP;
+elD.scrollTop=spD;
+if(elC)elC.scrollTop=spC;
+if(admS)admS.scrollTop=spA;
 }
 function switchOrderTab(tab){
 var lP=document.getElementById("adm-orders-list-pending");
