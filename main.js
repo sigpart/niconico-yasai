@@ -1326,10 +1326,11 @@ var d=doc.data();
 if(!d||!d.id)return;
 var p=PRODUCTS.find(function(x){return Number(x.id)===Number(d.id);});
 if(p){
-if(d.pub!==undefined&&p.pub!==d.pub){p.pub=d.pub;changed=true;}
+var _lfChgAge=_localProductChanges[p.id]?Date.now()-_localProductChanges[p.id]:Infinity;
+if(d.pub!==undefined&&p.pub!==d.pub&&_lfChgAge>60000){p.pub=d.pub;changed=true;}
 if(d.stock!==undefined&&d.stock>=0&&p.stock!==d.stock){p.stock=d.stock;changed=true;}
 if(d.price!==undefined&&d.price>0&&p.price!==d.price){p.price=d.price;changed=true;}
-if(d.badge!==undefined&&p.badge!==d.badge){p.badge=d.badge;changed=true;}
+if(d.badge!==undefined&&p.badge!==d.badge&&_lfChgAge>60000){p.badge=d.badge;changed=true;}
 if(d.img&&!p.img){p.img=d.img;changed=true;}
 }else if(d.ja||d.vi||d.en){
 // Firebase上にある新規商品をローカルに追加
@@ -2923,6 +2924,7 @@ var desc=document.getElementById("bank-desc-template");
 if(desc)desc.value=BANK_CFG.descTemplate||"NICONICO {no}";
 }
 var _needFbProductSync=false;
+var _localProductChanges={}; // {id: timestamp} ローカルで最近変更した商品を記録
 // Firebase接続後に商品データを自動同期
 function _autoSyncProducts(){
 if(!_needFbProductSync||!fbDb)return;
@@ -2932,11 +2934,12 @@ snap.forEach(function(doc){
 var d=doc.data();
 if(!d||!d.id)return;
 var p=PRODUCTS.find(function(x){return Number(x.id)===Number(d.id);});
-if(p&&d.badge!==undefined)p.badge=d.badge;
+var _asChgAge=_localProductChanges[d.id]?Date.now()-_localProductChanges[d.id]:Infinity;
+if(p&&d.badge!==undefined&&_asChgAge>60000)p.badge=d.badge;
 if(p&&d.img)p.img=d.img;
 if(p&&d.stock!==undefined&&d.stock>=0)p.stock=d.stock;
 if(p&&d.price!==undefined&&d.price>0)p.price=d.price;
-if(p&&d.pub!==undefined)p.pub=d.pub;
+if(p&&d.pub!==undefined&&_asChgAge>60000)p.pub=d.pub;
 if(!p&&(d.ja||d.vi||d.en)){PRODUCTS.push(d);}
 });
 applyViPatches();
@@ -2972,6 +2975,7 @@ var priceEl=document.getElementById("pe-price-"+id);
 if(priceEl&&priceEl.value)p.price=Math.max(0,parseInt(priceEl.value)||0);
 var badgeEl=document.getElementById("pe-badge-"+id);
 if(badgeEl)p.badge=badgeEl.value;
+_localProductChanges[id]=Date.now();
 saveProducts();
 if(typeof fbSaveProduct==="function")fbSaveProduct(p);
 // ヘッダーの価格表示を再レンダリングなしで更新
@@ -3121,8 +3125,9 @@ var p=PRODUCTS.find(function(x){return Number(x.id)===Number(d.id);});
 if(p){
 if(d.stock!==undefined&&d.stock>=0&&p.stock!==d.stock){p.stock=d.stock;changed=true;}
 if(d.price!==undefined&&d.price>0&&p.price!==d.price){p.price=d.price;changed=true;}
-if(d.badge!==undefined&&p.badge!==d.badge){p.badge=d.badge;changed=true;}
-if(d.pub!==undefined&&p.pub!==d.pub){p.pub=d.pub;changed=true;}
+var _pChgAge=_localProductChanges[p.id]?Date.now()-_localProductChanges[p.id]:Infinity;
+if(d.badge!==undefined&&p.badge!==d.badge&&_pChgAge>60000){p.badge=d.badge;changed=true;}
+if(d.pub!==undefined&&p.pub!==d.pub&&_pChgAge>60000){p.pub=d.pub;changed=true;}
 var _defNames=["新商品","Sản phẩm mới","New Product"];
 if(d.ja&&p.ja!==d.ja&&_defNames.indexOf(d.ja)<0){p.ja=d.ja;changed=true;}
 if(d.vi&&p.vi!==d.vi){p.vi=d.vi;changed=true;}
