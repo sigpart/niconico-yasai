@@ -1195,13 +1195,20 @@ return;
 }
 var ok=initFirebase();
 if(ok){
-loadFromFirebase(function(){renderProducts();setTimeout(_autoSyncProducts,1000);startFbPolling();});
+loadFromFirebase(function(){renderProducts();setTimeout(_autoSyncProducts,1000);startFbPolling();var as=document.getElementById("admin-screen");if(as&&as.classList.contains("on")&&typeof renderAdminAll==="function")renderAdminAll();});
 } else if(_fbInitTry<30){
 setTimeout(doFirebaseInit,500);
 }
 }
-window.addEventListener('load',function(){
+// loadより早いDOMContentLoadedでFirebaseを初期化（管理画面起動時の初期データ遅延防止）
+if(document.readyState==="loading"){
+document.addEventListener("DOMContentLoaded",function(){setTimeout(doFirebaseInit,100);});
+}else{
 setTimeout(doFirebaseInit,100);
+}
+window.addEventListener('load',function(){
+// DOMContentLoadedで既に呼ばれているので二重呼び出し防止
+if(!fbEnabled)setTimeout(doFirebaseInit,100);
 });
 })();
 function initFirebase(){
@@ -2081,6 +2088,7 @@ else if(action==="confirmPay"){o.status="done";}
 else if(action==="cancel"){o.status="cancelled";}
 else if(action==="restore"){o.status="new";}
 if(o.status==="done"&&prevStatus!=="done")deleteChatData(no);
+_localOrderChanges[no]=Date.now();
 if(typeof fbSaveOrder==="function")fbSaveOrder(o);
 try{localStorage.setItem("nny_orders",JSON.stringify(ORDERS));}catch(e){}
 renderAdminOrders2();renderAdminStats();
@@ -2924,6 +2932,7 @@ var desc=document.getElementById("bank-desc-template");
 if(desc)desc.value=BANK_CFG.descTemplate||"NICONICO {no}";
 }
 var _needFbProductSync=false;
+var _localOrderChanges={}; // {no: timestamp} ローカルで最近変更した注文を記録（ポーリング上書き防止）
 var _localProductChanges={}; // {id: timestamp} ローカルで最近変更した商品を記録
 // ページリロード後も保護を引き継ぐためlocalStorageから復元
 try{var _lpcSaved=JSON.parse(localStorage.getItem('nny_prod_changes')||'{}');var _lpcNow=Date.now();Object.keys(_lpcSaved).forEach(function(id){if(_lpcNow-_lpcSaved[id]<300000)_localProductChanges[id]=_lpcSaved[id];});}catch(e){}
@@ -3167,8 +3176,9 @@ var lo=ORDERS;
 var merged=a.map(function(o){
 var l=lo.find(function(x){return x.no===o.no;});
 if(l){
-// ローカルの変更（ステータス等）を優先し、Firestoreに上書きさせない
-if(l.status)o.status=l.status;
+// 最近（2分以内）ローカルで変更したステータスのみ保護
+var _loChgAge=_localOrderChanges[o.no]?Date.now()-_localOrderChanges[o.no]:Infinity;
+if(l.status&&_loChgAge<120000)o.status=l.status;
 if(l.screenshot&&!o.screenshotUrl)o.screenshot=l.screenshot;
 if(l.screenshotUrl)o.screenshotUrl=l.screenshotUrl;
 }
