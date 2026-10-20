@@ -1352,13 +1352,18 @@ fbDb.collection("orders").get().then(function(s){var a=[];s.forEach(function(doc
 var localOrders=ORDERS;
 ORDERS=a.map(function(fbOrder){
 var local=localOrders.find(function(lo){return lo.no===fbOrder.no;});
-if(local&&local.screenshot&&!fbOrder.screenshotUrl)fbOrder.screenshot=local.screenshot;
-if(local&&local.screenshotUrl)fbOrder.screenshotUrl=local.screenshotUrl;
+if(local){
+var _lfChgAge=_localOrderChanges[fbOrder.no]?Date.now()-_localOrderChanges[fbOrder.no]:Infinity;
+if(local.status&&_lfChgAge<120000)fbOrder.status=local.status;
+if(local.screenshot&&!fbOrder.screenshotUrl)fbOrder.screenshot=local.screenshot;
+if(local.screenshotUrl)fbOrder.screenshotUrl=local.screenshotUrl;
+}
 return fbOrder;
 });
 localOrders.forEach(function(lo){
 if(!ORDERS.find(function(o){return o.no===lo.no;}))ORDERS.push(lo);
 });
+try{localStorage.setItem("nny_orders",JSON.stringify(ORDERS));}catch(e){}
 }
 d.o=true;chk();
 fbDb.collection("reviews").doc("all").get().then(function(doc){
@@ -3185,11 +3190,10 @@ if(l.screenshotUrl)o.screenshotUrl=l.screenshotUrl;
 return o;
 });
 lo.forEach(function(x){if(!merged.find(function(o){return o.no===x.no;}))merged.push(x);});
-if(JSON.stringify(merged)!==JSON.stringify(ORDERS)){
 ORDERS=merged;
+try{localStorage.setItem("nny_orders",JSON.stringify(ORDERS));}catch(e){}
 var as=document.getElementById("admin-screen");
 if(as&&as.classList.contains("on")&&typeof renderAdminOrders2==="function")renderAdminOrders2();
-}
 }).catch(function(){});
 fbDb.collection("settings").doc("app_config").get().then(function(doc){
 if(!doc.exists)return;
@@ -3234,6 +3238,15 @@ document.addEventListener("DOMContentLoaded",initApp);
 } else {
 initApp();
 }
+// タブ/ウィンドウが再表示されたとき管理画面を強制リフレッシュ
+document.addEventListener("visibilitychange",function(){
+if(document.visibilityState==="visible"&&typeof fbEnabled!=="undefined"&&fbEnabled&&typeof fbDb!=="undefined"&&fbDb){
+var as=document.getElementById("admin-screen");
+if(as&&as.classList.contains("on")&&typeof loadFromFirebase==="function"){
+loadFromFirebase(function(){if(typeof renderAdminAll==="function")renderAdminAll();});
+}
+}
+});
 // admin URL check moved to initApp
 
 (function(){
