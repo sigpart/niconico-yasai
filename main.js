@@ -1288,6 +1288,37 @@ function loadFBConfigUI(){
 var fields={"fb-apikey":"apiKey","fb-authdomain":"authDomain","fb-projectid":"projectId","fb-bucket":"storageBucket","fb-appid":"appId"};
 Object.keys(fields).forEach(function(id){var e=document.getElementById(id);if(e&&FB_CFG[fields[id]])e.value=FB_CFG[fields[id]];});
 if(fbEnabled)updateFBStatus(true,FB_CFG.projectId);
+var eE=document.getElementById("fb-admin-email"),eP=document.getElementById("fb-admin-pwd");
+var savedEmail=localStorage.getItem("nny_admin_email")||"";
+if(eE&&savedEmail)eE.value=savedEmail;
+if(eP)eP.placeholder=savedEmail?"（保存済み）":"password";
+var stat=document.getElementById("fb-auth-status");
+if(stat){
+var cu=fbAuth&&fbAuth.currentUser;
+stat.textContent=cu&&cu.email?"✅ "+cu.email+"でログイン中":savedEmail?"⚠ 未ログイン（保存済み）":"未設定";
+stat.style.color=cu&&cu.email?"var(--g1)":"var(--muted)";
+}
+}
+function saveFBAdminCreds(){
+var email=(document.getElementById("fb-admin-email")||{}).value||"";
+var pwd=(document.getElementById("fb-admin-pwd")||{}).value||"";
+if(!email){showToast("メールアドレスを入力してください");return;}
+if(!pwd){showToast("パスワードを入力してください");return;}
+localStorage.setItem("nny_admin_email",email);
+localStorage.setItem("nny_admin_fb_pwd",pwd);
+if(fbAuth){
+fbAuth.signInWithEmailAndPassword(email,pwd).then(function(cred){
+fbUser=cred.user;
+sessionStorage.setItem('nny_fb_admin','1');
+showToast("✅ Firebase管理者ログイン成功: "+email);
+loadFBConfigUI();
+loadFromFirebase(function(){if(typeof renderAdminAll==="function")renderAdminAll();});
+}).catch(function(e){
+showToast("❌ ログイン失敗: "+e.message);
+});
+}else{
+showToast("💾 保存しました。ページをリロードしてください。");
+}
 }
 function syncToFirebase(){
 if(!fbEnabled||!fbDb){showToast(adminLang==="vi"?"⚠ Firebase chưa kết nối":"⚠ Firebase未接続");return;}
@@ -1715,6 +1746,7 @@ if(us)us.style.display="none";
 if(as)as.classList.add("on");
 loadEJConfigUI();loadBankConfigUI();loadFBConfigUI();if(typeof loadDeliveryOriginUI==="function")loadDeliveryOriginUI();
 applyAdminI18n();
+function _doOpenAdminLoad(){
 if(fbEnabled){
 loadFromFirebase(function(ok){
 renderAdminAll();
@@ -1725,6 +1757,24 @@ if(ok)showToast(adminLang==="vi"?"☁️ Đã tải dữ liệu từ cloud":"☁
 renderAdminAll();
 if(typeof renderAnalytics==="function")renderAnalytics();
 }
+}
+// メール認証済みでなければ保存済み資格情報で再ログインしてからデータ読込
+if(fbEnabled&&fbAuth&&!(fbAuth.currentUser&&fbAuth.currentUser.email)){
+var _savedEmail=localStorage.getItem("nny_admin_email")||"";
+var _savedPwd=localStorage.getItem("nny_admin_fb_pwd")||"";
+if(_savedEmail&&_savedPwd){
+fbAuth.signInWithEmailAndPassword(_savedEmail,_savedPwd).then(function(cred){
+fbUser=cred.user;
+sessionStorage.setItem('nny_fb_admin','1');
+_doOpenAdminLoad();
+}).catch(function(e){
+console.warn('[NNY Auth] openAdmin自動ログイン失敗:',e.message);
+_doOpenAdminLoad();
+});
+return;
+}
+}
+_doOpenAdminLoad();
 }
 function exitAdmin(){
 if(window.__ADMIN_AUTO_OPEN){

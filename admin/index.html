@@ -512,6 +512,18 @@
 </div>
 <div id="fb-result" style="font-size:11px;margin-top:8px;display:none;padding:8px 12px;border-radius:var(--r);"></div>
 </div>
+<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--gp);">
+<div style="font-size:11.5px;font-weight:700;color:var(--g2);margin-bottom:8px;">🔐 管理者Firebase認証 / Đăng nhập Firebase</div>
+<div style="font-size:10.5px;color:var(--muted);margin-bottom:8px;">注文データの読み取りにメール認証が必要です。FirebaseコンソールのAuthenticationで作成したメール/パスワードを入力してください。</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+<div><label class="set-lbl">管理者メール / Email</label><input class="set-inp" id="fb-admin-email" type="email" placeholder="admin@example.com"></div>
+<div><label class="set-lbl">パスワード / Mật khẩu</label><input class="set-inp" id="fb-admin-pwd" type="password" placeholder="password"></div>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+<button class="set-btn" onclick="saveFBAdminCreds()" style="flex:1;">💾 保存＆ログイン</button>
+<span id="fb-auth-status" style="font-size:11px;color:var(--muted);"></span>
+</div>
+</div>
 <div class="settings-card">
 <div class="settings-card-title" id="gtrans-card-title">🌐 Google翻訳 API</div>
 <div style="font-size:10.5px;color:var(--muted);margin-bottom:10px;line-height:1.6;" id="gtrans-desc">
@@ -611,7 +623,7 @@ giữa người sản xuất và người tiêu dùng</textarea></div>
   window.__ADMIN_AUTO_OPEN = true;
 })();
 </script>
-<script src="../main.js?v=84"></script>
+<script src="../main.js?v=85"></script>
 
 <div id="qr-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;flex-direction:column;align-items:center;justify-content:center;">
 <div style="background:#fff;border-radius:16px;padding:24px;max-width:360px;width:90%;text-align:center;">
