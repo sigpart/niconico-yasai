@@ -1300,24 +1300,26 @@ stat.style.color=cu&&cu.email?"var(--g1)":"var(--muted)";
 }
 }
 function saveFBAdminCreds(){
+var stat=document.getElementById("fb-auth-status");
+function _setStatus(msg,color){if(stat){stat.textContent=msg;stat.style.color=color||"var(--muted)";}}
 var email=(document.getElementById("fb-admin-email")||{}).value||"";
 var pwd=(document.getElementById("fb-admin-pwd")||{}).value||"";
-if(!email){showToast("メールアドレスを入力してください");return;}
-if(!pwd){showToast("パスワードを入力してください");return;}
+if(!email){_setStatus("⚠ メールを入力してください","#c0392b");return;}
+if(!pwd){_setStatus("⚠ パスワードを入力してください","#c0392b");return;}
+_setStatus("🔄 ログイン中...","var(--muted)");
 localStorage.setItem("nny_admin_email",email);
 localStorage.setItem("nny_admin_fb_pwd",pwd);
 if(fbAuth){
 fbAuth.signInWithEmailAndPassword(email,pwd).then(function(cred){
 fbUser=cred.user;
 sessionStorage.setItem('nny_fb_admin','1');
-showToast("✅ Firebase管理者ログイン成功: "+email);
-loadFBConfigUI();
+_setStatus("✅ "+email+" でログイン成功","var(--g1)");
 loadFromFirebase(function(){if(typeof renderAdminAll==="function")renderAdminAll();});
 }).catch(function(e){
-showToast("❌ ログイン失敗: "+e.message);
+_setStatus("❌ "+e.message,"#c0392b");
 });
 }else{
-showToast("💾 保存しました。ページをリロードしてください。");
+_setStatus("💾 保存済み。ページをリロードしてください","#7a5c00");
 }
 }
 function syncToFirebase(){

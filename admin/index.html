@@ -520,8 +520,8 @@
 <div><label class="set-lbl">パスワード / Mật khẩu</label><input class="set-inp" id="fb-admin-pwd" type="password" placeholder="password"></div>
 </div>
 <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-<button class="set-btn" onclick="saveFBAdminCreds()" style="flex:1;">💾 保存＆ログイン</button>
-<span id="fb-auth-status" style="font-size:11px;color:var(--muted);"></span>
+<button type="button" class="set-btn" onclick="saveFBAdminCreds()" style="flex:1;">💾 保存＆ログイン</button>
+<span id="fb-auth-status" style="font-size:11px;display:block;margin-top:6px;"></span>
 </div>
 </div>
 <div class="settings-card">
@@ -623,7 +623,7 @@ giữa người sản xuất và người tiêu dùng</textarea></div>
   window.__ADMIN_AUTO_OPEN = true;
 })();
 </script>
-<script src="../main.js?v=85"></script>
+<script src="../main.js?v=86"></script>
 
 <div id="qr-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;flex-direction:column;align-items:center;justify-content:center;">
 <div style="background:#fff;border-radius:16px;padding:24px;max-width:360px;width:90%;text-align:center;">
