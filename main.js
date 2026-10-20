@@ -1242,6 +1242,12 @@ if(typeof firebase.auth==='function'){
 fbAuth=firebase.auth();
 fbAuth.onAuthStateChanged(function(user){
 fbUser=user;
+// 認証状態が変わったらUI更新
+var stat=document.getElementById("fb-auth-status");
+if(stat){
+if(user&&user.email){stat.textContent="✅ "+user.email+" でログイン済み";stat.style.color="var(--g1)";}
+else if(localStorage.getItem("nny_admin_email")){stat.textContent="🔄 自動ログイン中...";stat.style.color="var(--muted)";}
+}
 });
 // 管理者セッション中はFirebase管理者認証を自動実行（PIN省略時も含む）
 var _isAdminSession=!!(sessionStorage.getItem('nny_admin_session')||sessionStorage.getItem('nny_owner_session'));
@@ -1290,20 +1296,24 @@ Object.keys(fields).forEach(function(id){var e=document.getElementById(id);if(e&
 if(fbEnabled)updateFBStatus(true,FB_CFG.projectId);
 var eE=document.getElementById("fb-admin-email"),eP=document.getElementById("fb-admin-pwd");
 var savedEmail=localStorage.getItem("nny_admin_email")||"";
+var savedPwd=localStorage.getItem("nny_admin_fb_pwd")||"";
 if(eE&&savedEmail)eE.value=savedEmail;
-if(eP)eP.placeholder=savedEmail?"（保存済み）":"password";
+if(eP&&savedPwd)eP.value="__SAVED__"; // 保存済み表示（送信時に実値を使用）
 var stat=document.getElementById("fb-auth-status");
 if(stat){
 var cu=fbAuth&&fbAuth.currentUser;
-stat.textContent=cu&&cu.email?"✅ "+cu.email+"でログイン中":savedEmail?"⚠ 未ログイン（保存済み）":"未設定";
-stat.style.color=cu&&cu.email?"var(--g1)":"var(--muted)";
+if(cu&&cu.email){stat.textContent="✅ "+cu.email+" でログイン済み";stat.style.color="var(--g1)";}
+else if(savedEmail&&savedPwd){stat.textContent="🔄 自動ログイン中...";stat.style.color="var(--muted)";}
+else{stat.textContent="未設定";stat.style.color="var(--muted)";}
 }
 }
 function saveFBAdminCreds(){
 var stat=document.getElementById("fb-auth-status");
 function _setStatus(msg,color){if(stat){stat.textContent=msg;stat.style.color=color||"var(--muted)";}}
 var email=(document.getElementById("fb-admin-email")||{}).value||"";
-var pwd=(document.getElementById("fb-admin-pwd")||{}).value||"";
+var rawPwd=(document.getElementById("fb-admin-pwd")||{}).value||"";
+// __SAVED__ は「保存済みパスワードをそのまま使う」センチネル値
+var pwd=rawPwd==="__SAVED__"?(localStorage.getItem("nny_admin_fb_pwd")||""):rawPwd;
 if(!email){_setStatus("⚠ メールを入力してください","#c0392b");return;}
 if(!pwd){_setStatus("⚠ パスワードを入力してください","#c0392b");return;}
 _setStatus("🔄 ログイン中...","var(--muted)");
