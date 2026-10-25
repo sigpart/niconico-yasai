@@ -987,8 +987,10 @@ EJ.template=document.getElementById("ej-template").value.trim();
 EJ.pubkey=document.getElementById("ej-pubkey").value.trim();
 EJ.from=document.getElementById("ej-from").value.trim();
 try{
-localStorage.setItem("nny_ej",JSON.stringify(EJ));
+var _ejJson=JSON.stringify(EJ);
+localStorage.setItem("nny_ej",_ejJson);
 if(EJ.pubkey)emailjs.init({publicKey:EJ.pubkey});
+if(typeof fbDb!=="undefined"&&fbDb){fbDb.collection("settings").doc("app_config").set({ej:_ejJson},{merge:true}).catch(function(e){console.error("[NNY] EJ save:",e);});}
 var st2=document.getElementById("ej-status");
 if(st2){st2.style.display="block";st2.style.background="var(--gp)";st2.style.color="var(--g2)";st2.textContent=lang==="ja"?"✅ 保存しました！テスト送信で動作確認してください":"✅ Đã lưu! Hãy gửi thử để kiểm tra.";}
 }catch(e){var _ejSt=document.getElementById("ej-status");if(_ejSt)_ejSt.textContent="Error: "+e.message;}
@@ -1992,6 +1994,14 @@ setEl("aq-pub",pub);
 var periodLbl=document.getElementById("aq-period-lbl");
 if(periodLbl)periodLbl.textContent=useMonth?(yr+"年"+mo+"月"):"全期間";
 }
+function adminRefreshOrders(){
+var btn=document.querySelector("button[onclick='adminRefreshOrders()']");
+if(btn){btn.disabled=true;btn.textContent="⏳";}
+loadFromFirebase(function(){
+renderAdminOrders2();
+if(btn){btn.disabled=false;btn.textContent="🔄 更新";}
+});
+}
 // 注文一覧
 function renderAdminOrders2(){
 var elP=document.getElementById("adm-orders-list-pending");
@@ -2030,13 +2040,19 @@ var tglBtn=o.status==="cancelled"
 :'<button class="ao-btn'+(o.status==="done"?"":" primary")+'" onclick="adminOrderAction(\'toggle\',\''+safeNo+'\')">'+(o.status==="done"?(adminLang==="vi"?"↩ Hoàn tác":"↩ 戻す"):(adminLang==="vi"?"✅ Hoàn thành":"✅ 完了にする"))+'</button>';
 var cancelBtn=o.status!=="cancelled"?'<button class="ao-btn" onclick="nnyConfirm(\''+(adminLang==="vi"?"本当にキャンセルしますか？ / Xác nhận hủy đơn?":"本当にキャンセルしますか？")+'\',function(){adminOrderAction(\'cancel\',\''+safeNo+'\');})" style="color:#c0392b;border-color:#c0392b;">❌ '+(adminLang==="vi"?"Hủy đơn":"キャンセル")+'</button>':'';
 var items=(o.items||[]).map(function(it){return it.e+" "+(adminLang==="vi"?it.vi:it.ja)+"×"+it.qty;}).join("、");
+var itemsSummary=(o.items||[]).map(function(it){return it.e+(it.qty>1?"×"+it.qty:"");}).join(" ");
 var isOpen=o.status!=="done";
 var html='<div class="ao-card">';
 html+='<div class="ao-head" style="cursor:pointer;" onclick="adminToggleCard(\''+bodyId+'\',this)">';
+html+='<div style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1;">';
+html+='<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">';
 html+='<span class="ao-no">'+o.no+'</span>';
 html+='<span class="ao-date">'+o.ts+'</span>';
 html+='<span class="st-tag '+statusCls+'">'+statusTxt+'</span>';
-html+='<span style="margin-left:auto;font-size:12px;color:var(--muted);">'+(isOpen?"▲":"▼")+'</span>';
+html+='</div>';
+html+='<div style="font-size:12px;color:var(--ink);font-weight:600;">👤 '+esc(o.name||"")+(itemsSummary?' &nbsp;|&nbsp; '+escHtml(itemsSummary):"")+'</div>';
+html+='</div>';
+html+='<span style="margin-left:8px;font-size:12px;color:var(--muted);flex-shrink:0;">'+(isOpen?"▲":"▼")+'</span>';
 html+='</div>';
 html+='<div id="'+bodyId+'" style="display:'+(isOpen?"block":"none")+';">';
 html+='<div class="ao-body">';
@@ -2098,6 +2114,8 @@ if(lC)lC.style.display=tab==="cancelled"?"block":"none";
 if(bP){bP.style.background=tab==="pending"?"var(--g1)":"#f5f5f5";bP.style.color=tab==="pending"?"#fff":"var(--g2)";}
 if(bD){bD.style.background=tab==="done"?"var(--g1)":"#f5f5f5";bD.style.color=tab==="done"?"#fff":"var(--g2)";}
 if(bC){bC.style.background=tab==="cancelled"?"#c0392b":"#f5f5f5";bC.style.color=tab==="cancelled"?"#fff":"#c0392b";}
+var _lu=document.getElementById("adm-orders-lastupdated");
+if(_lu){var _now=new Date();_lu.textContent=(adminLang==="vi"?"Cập nhật: ":"更新: ")+_now.getHours()+":"+("0"+_now.getMinutes()).slice(-2)+":"+("0"+_now.getSeconds()).slice(-2);}
 }
 function toggleOrderCard(bodyId){
 var el=document.getElementById(bodyId);
