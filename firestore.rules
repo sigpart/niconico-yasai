@@ -25,6 +25,12 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.token.email != null;
     }
 
+    // スクリーンショット: 匿名含む認証済みが作成可、読み取り・削除はメール認証のみ
+    match /screenshots/{docId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if request.auth != null && request.auth.token.email != null;
+    }
+
     // adminsコレクション: 参照用に残す
     match /admins/{email} {
       allow read: if request.auth != null && request.auth.token.email == email;
