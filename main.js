@@ -932,7 +932,7 @@ wa.innerHTML=wh;
 }
 function renderPE(){/* replaced by renderAdminProducts2 */}
 function tglPE(id){var b=document.getElementById("pebody-"+id);b.classList.toggle("open");var x=document.getElementById("pex-"+id);if(x)x.style.transform=b.classList.contains("open")?"rotate(90deg)":"";}
-function tglPub(id,val){var p=PRODUCTS.find(function(x){return x.id===id;});if(!p)return;p.pub=val;var l=document.getElementById("ptl-"+id);if(l){l.textContent=val?T("pubLbl"):T("unpubLbl");l.className="pe-tgl-lbl"+(val?" on":"");}renderProducts();}
+function tglPub(id,val){var p=PRODUCTS.find(function(x){return x.id===id;});if(!p)return;p.pub=val;var l=document.getElementById("ptl-"+id);if(l){l.textContent=val?T("pubLbl"):T("unpubLbl");l.className="pe-tgl-lbl"+(val?" on":"");}if(typeof fbSaveProduct==="function")fbSaveProduct(p);renderProducts();}
 /* pubAll → see ADMIN_JS */
 /* unpubAll → see ADMIN_JS */
 /* pubSeason old removed */
@@ -956,7 +956,7 @@ renderAdminProducts2();
 renderProducts();
 showToast(adminLang==="vi"?"✅ Đã lưu":"✅ 保存しました");
 }
-function delProd(id){if(!confirm(lang==="ja"?"削除しますか？":"Xóa?"))return;PRODUCTS=PRODUCTS.filter(function(x){return x.id!==id;});if(cart[id])delete cart[id];renderProducts();renderPE();updateCartBtn();}
+function delProd(id){if(!confirm(lang==="ja"?"削除しますか？":"Xóa?"))return;PRODUCTS=PRODUCTS.filter(function(x){return x.id!==id;});if(typeof fbDb!=="undefined"&&fbDb){fbDb.collection("products").doc(String(id)).delete().catch(function(e){console.error("[NNY] delProd Firebase:",e);});}if(cart[id])delete cart[id];renderProducts();renderPE();updateCartBtn();}
 function addProduct(){
 var newId=Math.max.apply(null,PRODUCTS.map(function(p){return p.id;}).concat([0]))+1;
 PRODUCTS.push({id:newId,e:"🥗",ja:"新商品",vi:"Sản phẩm mới",en:"New Product",dja:"説明を入力",dvi:"Nhập mô tả",price:10000,unit:"個",unitvi:"cái",season:"all",badge:"",stock:10,img:null,pub:false});
@@ -1251,8 +1251,9 @@ else if(localStorage.getItem("nny_admin_email")){stat.textContent="🔄 自動�
 });
 // 管理者セッション中はFirebase管理者認証を自動実行（PIN省略時も含む）
 var _isAdminSession=!!(sessionStorage.getItem('nny_admin_session')||sessionStorage.getItem('nny_owner_session'));
+var _isAdminPage=!!(window.__ADMIN_AUTO_OPEN||window.__OWNER_AUTO_OPEN);
 var _hasAdminCreds=!!(localStorage.getItem('nny_admin_email')&&localStorage.getItem('nny_admin_fb_pwd'));
-if(_isAdminSession&&_hasAdminCreds){
+if((_isAdminSession||_isAdminPage)&&_hasAdminCreds){
 var _ae=localStorage.getItem('nny_admin_email'),_ap=localStorage.getItem('nny_admin_fb_pwd');
 firebase.auth().signInWithEmailAndPassword(_ae,_ap).then(function(c){fbUser=c.user;}).catch(function(e){console.warn('[NNY Auth] 管理者自動認証失敗:',e.message);});
 }else{
@@ -1382,6 +1383,16 @@ if(d.stock!==undefined&&d.stock>=0&&p.stock!==d.stock){p.stock=d.stock;changed=t
 if(d.price!==undefined&&d.price>0&&p.price!==d.price){p.price=d.price;changed=true;}
 if(d.badge!==undefined&&p.badge!==d.badge&&_lfChgAge>60000){p.badge=d.badge;changed=true;}
 if(d.img&&!p.img){p.img=d.img;changed=true;}
+var _defNames=["新商品","Sản phẩm mới","New Product"];
+if(d.ja&&p.ja!==d.ja&&_defNames.indexOf(d.ja)<0){p.ja=d.ja;changed=true;}
+if(d.vi&&p.vi!==d.vi){p.vi=d.vi;changed=true;}
+if(d.en&&p.en!==d.en&&_defNames.indexOf(d.en)<0){p.en=d.en;changed=true;}
+if(d.dja!==undefined&&p.dja!==d.dja&&d.dja!==""&&d.dja!=="説明を入力"){p.dja=d.dja;changed=true;}
+if(d.dvi!==undefined&&p.dvi!==d.dvi){p.dvi=d.dvi;changed=true;}
+if(d.den!==undefined&&p.den!==d.den&&d.den!==""&&d.den!=="Nhập mô tả"){p.den=d.den;changed=true;}
+if(d.unit&&p.unit!==d.unit){p.unit=d.unit;changed=true;}
+if(d.unitvi&&p.unitvi!==d.unitvi){p.unitvi=d.unitvi;changed=true;}
+if(d.season&&p.season!==d.season){p.season=d.season;changed=true;}
 }else if(d.ja||d.vi||d.en){
 // Firebase上にある新規商品をローカルに追加
 PRODUCTS.push(d);changed=true;
