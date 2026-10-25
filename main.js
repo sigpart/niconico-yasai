@@ -3471,14 +3471,18 @@ function sendChatMessage(){
   inp.value=""; inp.disabled=true;
   var srcLang=detectMsgLang(text);
   var tgtLang=srcLang==='en'?'vi':(srcLang==='ja'?'vi':'ja');
-  translateText(text,tgtLang,srcLang,function(translated){
-    var msg={role:"customer",text:text,translation:translated,lang:srcLang,ts:Date.now(),customerName:CHAT_CUSTOMER_NAME||""};
+  var _doSend=function(translated){
+    var msg={role:"customer",text:text,translation:translated||"",lang:srcLang,ts:Date.now(),customerName:CHAT_CUSTOMER_NAME||""};
     var key=chatKey(CHAT_ORDER_NO);
     fbDb.collection("chats").doc(key).collection("messages").add(msg).then(function(){
       fbDb.collection("chats").doc(key).set({orderNo:CHAT_ORDER_NO,lastMsg:text,lastTs:Date.now(),unread:true},{merge:true});
-    });
+    }).catch(function(e){console.error("[NNY] chat send:",e);});
     inp.disabled=false;
-  });
+  };
+  try{
+    translateText(text,tgtLang,srcLang,function(translated){_doSend(translated);});
+    setTimeout(function(){if(inp.disabled){_doSend("");}},5000);
+  }catch(e){_doSend("");}
 }
 
 document.addEventListener("keydown",function(e){
