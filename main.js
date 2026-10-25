@@ -1395,7 +1395,7 @@ if(d.pub!==undefined&&p.pub!==d.pub&&_lfChgAge>60000){p.pub=d.pub;changed=true;}
 if(d.stock!==undefined&&d.stock>=0&&p.stock!==d.stock){p.stock=d.stock;changed=true;}
 if(d.price!==undefined&&d.price>0&&p.price!==d.price){p.price=d.price;changed=true;}
 if(d.badge!==undefined&&p.badge!==d.badge&&_lfChgAge>60000){p.badge=d.badge;changed=true;}
-if(d.img&&!p.img){p.img=d.img;changed=true;}
+if(d.img&&p.img!==d.img){p.img=d.img;changed=true;}
 var _defNames=["新商品","Sản phẩm mới","New Product"];
 if(d.ja&&p.ja!==d.ja&&_defNames.indexOf(d.ja)<0){p.ja=d.ja;changed=true;}
 if(d.vi&&p.vi!==d.vi){p.vi=d.vi;changed=true;}
@@ -2352,7 +2352,9 @@ showToast(adminLang==="vi"?"✅ Đã lưu":"✅ 保存しました");
 function delProd(id){
 if(!confirm(adminLang==="vi"?"Xóa sản phẩm này?":"この商品を削除しますか？"))return;
 PRODUCTS=PRODUCTS.filter(function(p){return p.id!==id;});
-saveProducts();renderAdminProducts2();renderProducts();
+if(typeof fbDb!=="undefined"&&fbDb){fbDb.collection("products").doc(String(id)).delete().catch(function(e){console.error("[NNY] delProd Firebase:",e);});}
+if(cart[id])delete cart[id];
+saveProducts();renderAdminProducts2();renderProducts();updateCartBtn();
 }
 function addProduct(){
 var newId=Math.max.apply(null,PRODUCTS.map(function(p){return p.id;}))+1;
@@ -3254,7 +3256,10 @@ if(d.en&&p.en!==d.en&&_defNames.indexOf(d.en)<0){p.en=d.en;changed=true;}
 if(d.dja!==undefined&&p.dja!==d.dja&&d.dja!==""&&d.dja!=="説明を入力"){p.dja=d.dja;changed=true;}
 if(d.dvi!==undefined&&p.dvi!==d.dvi){p.dvi=d.dvi;changed=true;}
 if(d.den!==undefined&&p.den!==d.den&&d.den!==""&&d.den!=="Nhập mô tả"){p.den=d.den;changed=true;}
-if(d.img&&!p.img){p.img=d.img;changed=true;}
+if(d.img&&p.img!==d.img){p.img=d.img;changed=true;}
+if(d.unit&&p.unit!==d.unit){p.unit=d.unit;changed=true;}
+if(d.unitvi&&p.unitvi!==d.unitvi){p.unitvi=d.unitvi;changed=true;}
+if(d.season&&JSON.stringify(p.season)!==JSON.stringify(d.season)){p.season=d.season;changed=true;}
 }else if(d.vi||d.ja||d.en){
 // 農家がFirebaseに追加した新規商品をユーザー画面に反映
 PRODUCTS.push(d);changed=true;
