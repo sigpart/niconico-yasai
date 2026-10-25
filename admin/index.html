@@ -22,13 +22,9 @@
 #qr-modal-body{flex:1;overflow-y:auto}
 .ss-preview-img{max-height:160px;width:100%;object-fit:contain;display:block}
 @media(max-width:480px){.pcard-body{padding:12px 13px 14px}.pcard-add{padding:10px 12px;font-size:13px;width:100%}}
-
 </style>
-
 </head>
 <body>
-
-
 <div id="user-screen">
 <header>
 <div class="hdr">
@@ -155,7 +151,6 @@
 <div class="opts-grid">
 <div class="opt-card on" onclick="pickDel(this,'deliver')"><div class="opt-ico">🛵</div><span id="del-deliver">配達</span></div>
 <div class="opt-card" onclick="pickDel(this,'pickup')"><div class="opt-ico">🏡</div><span id="del-pickup">直接受取</span></div>
-
 </div>
 </div>
 <div class="form-card">
@@ -217,7 +212,6 @@
 </div>
 </div>
 </div>
-
 <button class="btn-primary" onclick="goConfirm()">✔ <span id="to-confirm-lbl">注文内容を確認する</span></button>
 <button class="btn-outline" onclick="goCart()" id="info-back-btn">← カートに戻る</button>
 </div>
@@ -614,7 +608,6 @@ giữa người sản xuất và người tiêu dùng</textarea></div>
 <div class="email-box"><div class="email-spin">📧</div><div class="email-txt" id="email-txt">送信中...</div></div>
 </div>
 <div class="email-toast" id="email-toast"></div>
-
 <style>#user-screen{display:none!important}</style>
 <script>
 (function(){
@@ -624,8 +617,7 @@ giữa người sản xuất và người tiêu dùng</textarea></div>
   window.__ADMIN_AUTO_OPEN = true;
 })();
 </script>
-<script src="../main.js?v=90"></script>
-
+<script src="../main.js?v=93"></script>
 <div id="qr-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;flex-direction:column;align-items:center;justify-content:center;">
 <div style="background:#fff;border-radius:16px;padding:24px;max-width:360px;width:90%;text-align:center;">
 <div id="qr-logo" style="font-size:48px;margin-bottom:8px;"></div>
@@ -658,7 +650,6 @@ giữa người sản xuất và người tiêu dùng</textarea></div>
 </div>
 </div>
 </div>
-
 </div>
 <div id="owner-screen">
 <div style="background:#1a3d1a;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;"><div style="color:#fff;font-size:14px;font-weight:800;">NICO NICO YASAI <span style="font-size:10px;opacity:0.6;">運営者管理</span></div><button onclick="closeOwnerScreen()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:8px;padding:8px 14px;font-size:12px;cursor:pointer;">← 終了</button></div>
