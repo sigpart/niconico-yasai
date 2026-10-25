@@ -987,8 +987,10 @@ EJ.template=document.getElementById("ej-template").value.trim();
 EJ.pubkey=document.getElementById("ej-pubkey").value.trim();
 EJ.from=document.getElementById("ej-from").value.trim();
 try{
-localStorage.setItem("nny_ej",JSON.stringify(EJ));
+var _ejJson=JSON.stringify(EJ);
+localStorage.setItem("nny_ej",_ejJson);
 if(EJ.pubkey)emailjs.init({publicKey:EJ.pubkey});
+if(typeof fbDb!=="undefined"&&fbDb){fbDb.collection("settings").doc("app_config").set({ej:_ejJson},{merge:true}).catch(function(e){console.error("[NNY] EJ save:",e);});}
 var st2=document.getElementById("ej-status");
 if(st2){st2.style.display="block";st2.style.background="var(--gp)";st2.style.color="var(--g2)";st2.textContent=lang==="ja"?"✅ 保存しました！テスト送信で動作確認してください":"✅ Đã lưu! Hãy gửi thử để kiểm tra.";}
 }catch(e){var _ejSt=document.getElementById("ej-status");if(_ejSt)_ejSt.textContent="Error: "+e.message;}
