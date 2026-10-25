@@ -468,6 +468,17 @@ document.getElementById("pay-lock-txt").textContent=(lang==="ja"?"🏦 銀行振
 }
 }
 function placeOrder(){
+var _nameEl=document.getElementById("inp-name"),_phoneEl=document.getElementById("inp-phone");
+var _nameVal=(_nameEl&&_nameEl.value||"").trim(),_phoneVal=(_phoneEl&&_phoneEl.value||"").trim();
+if(!_nameVal){
+if(_nameEl){_nameEl.focus();_nameEl.style.borderColor="#c0392b";}
+alert(lang==="ja"?"お名前を入力してください":"Vui lòng nhập họ tên / Please enter your name");return;
+}
+if(!_phoneVal){
+if(_phoneEl){_phoneEl.focus();_phoneEl.style.borderColor="#c0392b";}
+alert(lang==="ja"?"電話番号を入力してください":"Vui lòng nhập số điện thoại / Please enter your phone number");return;
+}
+if(_nameEl)_nameEl.style.borderColor="";if(_phoneEl)_phoneEl.style.borderColor="";
 var _ts=Date.now(),_rnd=Math.floor(Math.random()*900)+100;var no="#NNY-"+(_ts.toString(36).toUpperCase().slice(-4))+_rnd;
 var _isFarm=typeof DELIVERY_ORIGIN!=="undefined"&&DELIVERY_ORIGIN.active==="farm";
 var ts=new Date().toLocaleString("ja-JP"), tot=cartTotal()+(selDel==="deliver"?_shippingFee+(_isFarm?0:10000):0);
