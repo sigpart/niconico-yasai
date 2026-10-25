@@ -80,6 +80,7 @@ var currentNotifyProductId = null;
 var currentRating = 0;
 var QR_IMGS = {momo:null,zalopay:null,vnpay:null};
 var EJ = {service:"",template:"",pubkey:"",from:"sigpart123@gmail.com"};
+var LINE_NOTIFY_TOKEN = "";
 (function(){
 try {
 var raw = localStorage.getItem("nny_ej");
@@ -90,6 +91,7 @@ try{var r=localStorage.getItem("nny_reviews");if(r)REVIEWS=JSON.parse(r);}catch(
 try{var n=localStorage.getItem("nny_notify");if(n)NOTIFY_LIST=JSON.parse(n);}catch(e){}
 try{var oh=localStorage.getItem("nny_hist");if(oh)ORDER_HISTORY=JSON.parse(oh);}catch(e){}
 try{var qi=localStorage.getItem("nny_qr");if(qi){var q=JSON.parse(qi);QR_IMGS.momo=q.momo||null;QR_IMGS.zalopay=q.zalopay||null;QR_IMGS.vnpay=q.vnpay||null;}}catch(e){}
+try{var _lnt=localStorage.getItem("nny_line_notify_token");if(_lnt)LINE_NOTIFY_TOKEN=_lnt;}catch(e){}
 })();
 function saveReviews(){
 try{localStorage.setItem("nny_reviews",JSON.stringify(REVIEWS));}catch(e){}
@@ -489,7 +491,8 @@ var items=[];
 Object.keys(cart).forEach(function(ck){var qty=cart[ck];if(!qty)return;var meta=CART_META[ck];var pid=meta?meta.id:(ck.indexOf("_")>0?ck.split("_")[0]:ck);var p=PRODUCTS.find(function(x){return Number(x.id)===Number(pid);});if(!p)return;var price=meta?meta.price:p.price;var variant=meta?meta.variant:"";var nm_ja=p.ja+(variant?" "+variant:""),nm_vi=p.vi+(variant?" "+variant:"");var unit=p.unit,unitvi=p.unitvi;
 items.push({id:p.id,qty:qty,ja:nm_ja,vi:nm_vi,e:p.e,price:price,unit:unit,unitvi:unitvi});});
 var shipFeeVal=selDel==="deliver"?_shippingFee+((_isFarm||false)?0:10000):0;
-pendingOrder={no:no,ts:ts,tot:tot,name:name,phone:phone,zalo:zalo,addr:addr,email:email,delivery:selDel,payment:selPay,note:note,items:items,status:"new",shippingFee:shipFeeVal};
+var _lineNotify=document.getElementById("inp-line-notify");
+pendingOrder={no:no,ts:ts,tot:tot,name:name,phone:phone,zalo:zalo,addr:addr,email:email,delivery:selDel,payment:selPay,note:note,items:items,status:"new",shippingFee:shipFeeVal,lineNotify:!!(_lineNotify&&_lineNotify.checked)};
 if(selPay==="vietqr"){showPayModal();}
 else{showQR(selPay);}
 }
@@ -532,6 +535,7 @@ buildReceipt(order);
 showView("receipt");
 setTimeout(function(){sendEmail(order);},600);
 setTimeout(function(){sendToSheets(order);},1000);
+setTimeout(function(){sendLineNotifyNewOrder(order);},1200);
 }
 function buildReceipt(o){
 RECEIPT_ORDER = o;
@@ -1021,6 +1025,19 @@ if(stFl){stFl.style.display="block";stFl.style.background="var(--rp)";stFl.style
 });
 }
 function loadEJConfigUI(){if(EJ.service){var e=document.getElementById("ej-service");if(e)e.value=EJ.service;}if(EJ.template){var e=document.getElementById("ej-template");if(e)e.value=EJ.template;}if(EJ.pubkey){var e=document.getElementById("ej-pubkey");if(e)e.value=EJ.pubkey;}if(EJ.from){var e=document.getElementById("ej-from");if(e)e.value=EJ.from;}}
+function saveLineNotifyToken(){
+var inp=document.getElementById("line-notify-token");
+if(!inp)return;
+LINE_NOTIFY_TOKEN=inp.value.trim();
+try{localStorage.setItem("nny_line_notify_token",LINE_NOTIFY_TOKEN);}catch(e){}
+if(typeof fbDb!=="undefined"&&fbDb){fbDb.collection("settings").doc("app_config").set({lineNotifyToken:LINE_NOTIFY_TOKEN},{merge:true}).catch(function(e){console.error("[NNY] LINE token save:",e);});}
+var st=document.getElementById("line-notify-status");
+if(st){st.style.display="block";st.style.background="var(--gp)";st.style.color="var(--g2)";st.textContent=lang==="ja"?"✅ 保存しました！":"✅ Đã lưu!";}
+}
+function loadLineNotifyTokenUI(){
+var inp=document.getElementById("line-notify-token");
+if(inp&&LINE_NOTIFY_TOKEN)inp.value=LINE_NOTIFY_TOKEN;
+}
 function applySite(){var badge=document.getElementById("site-badge").value;var h1ja=document.getElementById("site-h1-ja").value.replace(/\n/g,"<br>");var h1vi=document.getElementById("site-h1-vi").value.replace(/\n/g,"<br>");var sja=document.getElementById("site-sub-ja").value;var svi=document.getElementById("site-sub-vi").value;I.ja.heroEyebrow=badge;I.vi.heroEyebrow=badge;I.ja.heroH1=h1ja;I.vi.heroH1=h1vi;I.ja.heroSub=sja;I.vi.heroSub=svi;applyI18n();closeAdmin();}
 var BANK_CFG={code:"970422",bankName:"MB Bank",account:"",owner:"",descTemplate:"NICONICO {no}"};
 (function(){try{var b=localStorage.getItem("nny_bank");if(b)BANK_CFG=JSON.parse(b);}catch(e){}})();
@@ -1378,6 +1395,7 @@ fbDb.collection("settings").doc("app_config").get().then(function(doc){
 if(doc.exists){
 var cfg=doc.data();
 if(cfg.ej){try{var ej=JSON.parse(cfg.ej);EJ.service=ej.service||EJ.service;EJ.template=ej.template||EJ.template;EJ.pubkey=ej.pubkey||EJ.pubkey;EJ.from=ej.from||EJ.from;EJ.admin=ej.admin||EJ.admin||"";if(EJ.pubkey)emailjs.init({publicKey:EJ.pubkey});localStorage.setItem("nny_ej",cfg.ej);if(typeof loadEJConfigUI==="function")loadEJConfigUI();}catch(e){}}
+if(cfg.lineNotifyToken){LINE_NOTIFY_TOKEN=cfg.lineNotifyToken;try{localStorage.setItem("nny_line_notify_token",LINE_NOTIFY_TOKEN);}catch(e){}if(typeof loadLineNotifyTokenUI==="function")loadLineNotifyTokenUI();}
 if(cfg.bank){try{var bk=JSON.parse(cfg.bank);BANK_CFG=Object.assign(BANK_CFG,bk);localStorage.setItem("nny_bank",cfg.bank);if(typeof loadBankConfigUI==="function")loadBankConfigUI();}catch(e){}}
 if(cfg.deliveryOrigin){try{var dor=JSON.parse(cfg.deliveryOrigin);DELIVERY_ORIGIN=Object.assign(DELIVERY_ORIGIN,dor);localStorage.setItem("nny_delivery_origin",cfg.deliveryOrigin);if(typeof loadDeliveryOriginUI==="function")loadDeliveryOriginUI();if(typeof updatePickupAvailability==="function")updatePickupAvailability();}catch(e){}}
 }
@@ -1780,7 +1798,7 @@ var us=document.getElementById("user-screen");
 var as=document.getElementById("admin-screen");
 if(us)us.style.display="none";
 if(as)as.classList.add("on");
-loadEJConfigUI();loadBankConfigUI();loadFBConfigUI();if(typeof loadDeliveryOriginUI==="function")loadDeliveryOriginUI();
+loadEJConfigUI();loadBankConfigUI();loadFBConfigUI();if(typeof loadDeliveryOriginUI==="function")loadDeliveryOriginUI();if(typeof loadLineNotifyTokenUI==="function")loadLineNotifyTokenUI();
 applyAdminI18n();
 function _doOpenAdminLoad(){
 if(fbEnabled){
@@ -2194,11 +2212,43 @@ else if(action==="confirm"){o.status="done";}
 else if(action==="confirmPay"){o.status="done";}
 else if(action==="cancel"){o.status="cancelled";}
 else if(action==="restore"){o.status="new";}
-if(o.status==="done"&&prevStatus!=="done")deleteChatData(no);
+if(o.status==="done"&&prevStatus!=="done"){deleteChatData(no);sendDeliveryNotification(o);}
 _localOrderChanges[no]=Date.now();
 if(typeof fbSaveOrder==="function")fbSaveOrder(o);
 try{localStorage.setItem("nny_orders",JSON.stringify(ORDERS));}catch(e){}
 renderAdminOrders2();renderAdminStats();
+}
+function sendDeliveryNotification(o){
+var siteUrl="https://hanoi-order.niconicoyasai.jp/";
+var chatLink=siteUrl+"?chat="+encodeURIComponent(o.no);
+var msgJa="🥦 ただいまお野菜の配達を開始しました！\n到着まで今しばらくお待ちください。\n通常は配達開始日内にお届けいたします。\n\n万が一ご不明な点がある場合は、以下のチャットボタンから農家に直接ご連絡ください👇\n"+chatLink+"\n\nNICO NICO YASAI";
+var msgVi="🥦 Chúng tôi đã bắt đầu giao hàng!\nVui lòng chờ trong giây lát.\nThông thường hàng sẽ đến trong ngày.\n\nNếu có thắc mắc, nhấn nút Chat bên dưới để liên hệ trực tiếp với nông dân 👇\n"+chatLink+"\n\nNICO NICO YASAI";
+if(o.email&&typeof emailjs!=="undefined"&&EJ.pubkey&&EJ.service&&EJ.template){
+emailjs.send(EJ.service,EJ.template,{
+to_email:o.email,to_name:o.name,from_name:"NICO NICO YASAI",
+reply_to:EJ.from||"",
+subject:"🥦 配達を開始しました / Bắt đầu giao hàng",
+message:msgJa+"\n\n---\n\n"+msgVi
+}).catch(function(e){console.error("[NNY] delivery notify email:",e);});
+}
+if(LINE_NOTIFY_TOKEN&&o.lineNotify){
+var lineMsg="\n🥦【配達開始通知】\n注文番号: "+o.no+"\nお名前: "+o.name+"\n"+msgJa;
+fetch("https://notify-api.line.me/api/notify",{
+method:"POST",
+headers:{"Content-Type":"application/x-www-form-urlencoded","Authorization":"Bearer "+LINE_NOTIFY_TOKEN},
+body:"message="+encodeURIComponent(lineMsg)
+}).catch(function(e){console.error("[NNY] LINE Notify:",e);});
+}
+}
+function sendLineNotifyNewOrder(o){
+if(!LINE_NOTIFY_TOKEN)return;
+var items=(o.items||[]).map(function(it){return it.e+(it.vi||it.ja)+"×"+it.qty;}).join("、");
+var msg="\n🛒【新規注文】\n番号: "+o.no+"\nお名前: "+o.name+"\n電話: "+o.phone+"\n商品: "+items+"\n合計: "+o.tot.toLocaleString()+"₫";
+fetch("https://notify-api.line.me/api/notify",{
+method:"POST",
+headers:{"Content-Type":"application/x-www-form-urlencoded","Authorization":"Bearer "+LINE_NOTIFY_TOKEN},
+body:"message="+encodeURIComponent(msg)
+}).catch(function(e){console.error("[NNY] LINE Notify order:",e);});
 }
 function adminLoadSS(no,imgEl){
 var o=ORDERS.find(function(x){return x.no===no;});
