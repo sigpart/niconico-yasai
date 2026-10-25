@@ -1992,6 +1992,14 @@ setEl("aq-pub",pub);
 var periodLbl=document.getElementById("aq-period-lbl");
 if(periodLbl)periodLbl.textContent=useMonth?(yr+"年"+mo+"月"):"全期間";
 }
+function adminRefreshOrders(){
+var btn=document.querySelector("button[onclick='adminRefreshOrders()']");
+if(btn){btn.disabled=true;btn.textContent="⏳";}
+loadFromFirebase(function(){
+renderAdminOrders2();
+if(btn){btn.disabled=false;btn.textContent="🔄 更新";}
+});
+}
 // 注文一覧
 function renderAdminOrders2(){
 var elP=document.getElementById("adm-orders-list-pending");
@@ -2104,6 +2112,8 @@ if(lC)lC.style.display=tab==="cancelled"?"block":"none";
 if(bP){bP.style.background=tab==="pending"?"var(--g1)":"#f5f5f5";bP.style.color=tab==="pending"?"#fff":"var(--g2)";}
 if(bD){bD.style.background=tab==="done"?"var(--g1)":"#f5f5f5";bD.style.color=tab==="done"?"#fff":"var(--g2)";}
 if(bC){bC.style.background=tab==="cancelled"?"#c0392b":"#f5f5f5";bC.style.color=tab==="cancelled"?"#fff":"#c0392b";}
+var _lu=document.getElementById("adm-orders-lastupdated");
+if(_lu){var _now=new Date();_lu.textContent=(adminLang==="vi"?"Cập nhật: ":"更新: ")+_now.getHours()+":"+("0"+_now.getMinutes()).slice(-2)+":"+("0"+_now.getSeconds()).slice(-2);}
 }
 function toggleOrderCard(bodyId){
 var el=document.getElementById(bodyId);
