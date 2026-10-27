@@ -285,6 +285,11 @@
 </div>
 </div>
 <div class="admin-body">
+<div style="display:flex;border-bottom:2px solid var(--border);background:var(--wh);position:sticky;top:56px;z-index:100;">
+<button id="adm-tab-btn-main" onclick="switchAdminTab('main')" style="flex:1;padding:12px 8px;font-size:13px;font-weight:800;border:none;cursor:pointer;background:var(--g1);color:#fff;border-radius:0;">📋 日常業務</button>
+<button id="adm-tab-btn-settings" onclick="switchAdminTab('settings')" style="flex:1;padding:12px 8px;font-size:13px;font-weight:800;border:none;cursor:pointer;background:var(--off);color:var(--muted);border-radius:0;">⚙️ 設定</button>
+</div>
+<div id="adm-tab-main">
 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px 0;">
 <select id="aq-year" onchange="renderAdminStats()" style="padding:6px 10px;border:1.5px solid var(--g3);border-radius:8px;font-size:12px;font-family:inherit;background:#fff;"></select>
 <select id="aq-month" onchange="renderAdminStats()" style="padding:6px 10px;border:1.5px solid var(--g3);border-radius:8px;font-size:12px;font-family:inherit;background:#fff;"></select>
@@ -456,6 +461,8 @@
 <div id="adm-notify-list"></div>
 </div>
  
+</div><!-- /adm-tab-main -->
+<div id="adm-tab-settings" style="display:none;">
 <div class="admin-section" id="adm-review-section">
 <div class="admin-sec-title">⭐ <span id="adm-review-ttl">レビュー管理 / Quản lý đánh giá</span></div>
 <div id="adm-reviews-wrap" style="margin-top:8px;"></div>
@@ -473,6 +480,7 @@
 <div class="set-field"><label class="set-lbl">Template ID</label><input class="set-inp" id="ej-template" placeholder="template_xxxxxxx"></div>
 <div class="set-field"><label class="set-lbl">Public Key</label><input class="set-inp" id="ej-pubkey" placeholder="xxxxxxxxxxxxxxxxxxxxxxx"></div>
 <div class="set-field"><label class="set-lbl">Email gửi (From)</label><input class="set-inp" id="ej-from" placeholder="niconicoyasai@gmail.com"></div>
+<div class="set-field"><label class="set-lbl">管理者通知メール（注文受信先）</label><input class="set-inp" id="ej-admin" type="email" placeholder="harukun@gmail.com"></div>
 <button class="set-btn" onclick="saveEJConfig()" id="ej-save-btn">💾 Lưu cài đặt</button>
 <div style="display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap;">
 <input class="set-inp" id="ej-test-to" type="email" placeholder="Email thử nghiệm..." style="flex:1;min-width:140px;">
@@ -562,8 +570,10 @@ giữa người sản xuất và người tiêu dùng</textarea></div>
 </div>
 </div>
 </div>
-</div>
-</div>
+</div><!-- /admin-section settings -->
+</div><!-- /adm-tab-settings -->
+</div><!-- /admin-body -->
+</div><!-- /admin-screen -->
 <div class="pin-gate" id="pin-gate">
 <div class="pin-box">
 <img class="pin-logo" src="NICO_LOGO_PLACEHOLDER" loading="lazy" alt="">
@@ -628,7 +638,22 @@ giữa người sản xuất và người tiêu dùng</textarea></div>
   window.__ADMIN_AUTO_OPEN = true;
 })();
 </script>
-<script src="../main.js?v=96"></script>
+<script src="../main.js?v=97"></script>
+<script>
+function switchAdminTab(tab){
+  var isMain=tab==='main';
+  document.getElementById('adm-tab-main').style.display=isMain?'block':'none';
+  document.getElementById('adm-tab-settings').style.display=isMain?'none':'block';
+  document.getElementById('adm-tab-btn-main').style.background=isMain?'var(--g1)':'var(--off)';
+  document.getElementById('adm-tab-btn-main').style.color=isMain?'#fff':'var(--muted)';
+  document.getElementById('adm-tab-btn-settings').style.background=isMain?'var(--off)':'var(--g1)';
+  document.getElementById('adm-tab-btn-settings').style.color=isMain?'var(--muted)':'#fff';
+  try{localStorage.setItem('nny_adm_tab',tab);}catch(e){}
+}
+document.addEventListener('DOMContentLoaded',function(){
+  try{var t=localStorage.getItem('nny_adm_tab');if(t)switchAdminTab(t);}catch(e){}
+});
+</script>
 <div id="qr-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;flex-direction:column;align-items:center;justify-content:center;">
 <div style="background:#fff;border-radius:16px;padding:24px;max-width:360px;width:90%;text-align:center;">
 <div id="qr-logo" style="font-size:48px;margin-bottom:8px;"></div>

@@ -536,6 +536,7 @@ showView("receipt");
 setTimeout(function(){sendEmail(order);},600);
 setTimeout(function(){sendToSheets(order);},1000);
 setTimeout(function(){sendLineNotifyNewOrder(order);},1200);
+setTimeout(function(){sendNewOrderEmailToAdmin(order);},1500);
 }
 function buildReceipt(o){
 RECEIPT_ORDER = o;
@@ -990,6 +991,7 @@ EJ.service=document.getElementById("ej-service").value.trim();
 EJ.template=document.getElementById("ej-template").value.trim();
 EJ.pubkey=document.getElementById("ej-pubkey").value.trim();
 EJ.from=document.getElementById("ej-from").value.trim();
+var _eaEl=document.getElementById("ej-admin");if(_eaEl)EJ.admin=_eaEl.value.trim();
 try{
 var _ejJson=JSON.stringify(EJ);
 localStorage.setItem("nny_ej",_ejJson);
@@ -1024,7 +1026,19 @@ var stFl=document.getElementById("ej-status");
 if(stFl){stFl.style.display="block";stFl.style.background="var(--rp)";stFl.style.color="var(--red)";stFl.textContent=T("ejTestFail");}
 });
 }
-function loadEJConfigUI(){if(EJ.service){var e=document.getElementById("ej-service");if(e)e.value=EJ.service;}if(EJ.template){var e=document.getElementById("ej-template");if(e)e.value=EJ.template;}if(EJ.pubkey){var e=document.getElementById("ej-pubkey");if(e)e.value=EJ.pubkey;}if(EJ.from){var e=document.getElementById("ej-from");if(e)e.value=EJ.from;}}
+function loadEJConfigUI(){if(EJ.service){var e=document.getElementById("ej-service");if(e)e.value=EJ.service;}if(EJ.template){var e=document.getElementById("ej-template");if(e)e.value=EJ.template;}if(EJ.pubkey){var e=document.getElementById("ej-pubkey");if(e)e.value=EJ.pubkey;}if(EJ.from){var e=document.getElementById("ej-from");if(e)e.value=EJ.from;}if(EJ.admin){var e=document.getElementById("ej-admin");if(e)e.value=EJ.admin;}}
+function sendNewOrderEmailToAdmin(o){
+if(!EJ.admin||!EJ.service||!EJ.template||!EJ.pubkey)return;
+if(typeof emailjs==="undefined")return;
+var items=(o.items||[]).map(function(it){return (it.e||"")+(it.vi||it.ja||"")+"×"+it.qty;}).join("、");
+var msg="🛒 新規注文が入りました\n\n番号: "+o.no+"\nお名前: "+o.name+"\n電話: "+o.phone+"\n商品: "+items+"\n合計: "+(o.tot||0).toLocaleString()+"₫\n\n配達先: "+(o.addr||"")+(o.note?"\n備考: "+o.note:"");
+emailjs.send(EJ.service,EJ.template,{
+to_email:EJ.admin,to_name:"管理者",from_name:"NICO NICO YASAI",
+reply_to:EJ.from||"",
+subject:"🛒 新規注文 #"+o.no+" — "+o.name,
+message:msg
+}).catch(function(e){console.error("[NNY] admin order email:",e);});
+}
 function saveLineNotifyToken(){
 var inp=document.getElementById("line-notify-token");
 if(!inp)return;
