@@ -3373,6 +3373,28 @@ if(cfg.deliveryOrigin){try{var dor=JSON.parse(cfg.deliveryOrigin);var prev=JSON.
 }).catch(function(){});
 },10000);
 }
+function showProductSkeletons(){
+var grid=document.getElementById("pgrid");
+if(!grid)return;
+var n=6,html="";
+for(var i=0;i<n;i++){
+html+='<div class="prod-skel" style="background:var(--wh);border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);">'
++'<div class="skel-anim" style="height:160px;width:100%;"></div>'
++'<div style="padding:14px 14px 12px;">'
++'<div class="skel-anim" style="height:16px;width:70%;border-radius:6px;margin-bottom:8px;"></div>'
++'<div class="skel-anim" style="height:12px;width:50%;border-radius:6px;margin-bottom:12px;"></div>'
++'<div class="skel-anim" style="height:36px;width:100%;border-radius:8px;"></div>'
++'</div></div>';
+}
+grid.innerHTML=html;
+var style=document.getElementById("skel-style");
+if(!style){
+style=document.createElement("style");
+style.id="skel-style";
+style.textContent="@keyframes skelShimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}.skel-anim{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:800px 100%;animation:skelShimmer 1.4s infinite linear;}";
+document.head.appendChild(style);
+}
+}
 function initApp(){
 var _hi=document.getElementById("hero-img");if(_hi){_hi.style.objectPosition="center 30%";}
 if(typeof normalizeReviews==="function")normalizeReviews();
@@ -3382,6 +3404,7 @@ renderHistory();
 loadSheetUrl();
 updateLangBtn();
 setSeason("all");
+if(FB_CFG&&FB_CFG.apiKey)showProductSkeletons();
 if(typeof updatePickupAvailability==="function")updatePickupAvailability();
 if(window.__ADMIN_AUTO_OPEN){
 var us=document.getElementById("user-screen");if(us)us.style.display="none";
