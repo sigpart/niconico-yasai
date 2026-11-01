@@ -956,21 +956,41 @@ function saveProd(id){
 var p=PRODUCTS.find(function(x){return x.id===id;});if(!p)return;
 function g(eid){var e=document.getElementById(eid);return e?e.value:null;}
 var emoji=g("ai-emoji-"+id);if(emoji&&emoji.trim())p.e=emoji.trim();
-var ja=g("ai-ja-"+id);if(ja&&ja.trim())p.ja=ja.trim();
-var vi=g("ai-vi-"+id);if(vi&&vi.trim())p.vi=vi.trim();
-var en=g("ai-en-"+id);if(en!==null)p.en=en.trim();
+var viVal=(g("ai-vi-"+id)||"").trim();
+var jaVal=(g("ai-ja-"+id)||"").trim();
+var enVal=(g("ai-en-"+id)||"").trim();
+var dviVal=g("ai-dvi-"+id)||"";
+var djaVal=g("ai-dja-"+id)||"";
+var denVal=g("ai-den-"+id)||"";
 var unit=g("ai-unit-"+id);if(unit&&unit.trim())p.unit=unit.trim();
 var unitvi=g("ai-unitvi-"+id);if(unitvi&&unitvi.trim())p.unitvi=unitvi.trim();
 var price=g("ai-p-"+id);if(price!==null)p.price=parseInt(price)||0;
-var dja=g("ai-dja-"+id);if(dja!==null)p.dja=dja;
-var dvi=g("ai-dvi-"+id);if(dvi!==null)p.dvi=dvi;
-var den=g("ai-den-"+id);if(den!==null)p.den=den;
 var sq=g("sq-"+id);if(sq!==null)p.stock=Math.max(0,parseInt(sq)||0);
-saveProducts();
-if(typeof fbSaveProduct==="function")fbSaveProduct(p);
-renderAdminProducts2();
-renderProducts();
-showToast(adminLang==="vi"?"✅ Đã lưu":"✅ 保存しました");
+function _commit(){
+  if(viVal)p.vi=viVal;
+  if(jaVal)p.ja=jaVal;
+  if(enVal!==null)p.en=enVal;
+  p.dvi=dviVal;p.dja=djaVal;p.den=denVal;
+  saveProducts();
+  if(typeof fbSaveProduct==="function")fbSaveProduct(p);
+  renderAdminProducts2();
+  renderProducts();
+  showToast(adminLang==="vi"?"✅ Đã lưu":"✅ 保存しました");
+}
+var needTranslate=(viVal&&(!jaVal||!enVal))||(dviVal&&(!djaVal||!denVal));
+if(!needTranslate){_commit();return;}
+showToast(adminLang==="vi"?"🔄 Đang dịch...":"🔄 翻訳して保存中...");
+var pending=0;
+function tdone(){pending--;if(pending<=0)_commit();}
+var jaEl=document.getElementById("ai-ja-"+id);
+var enEl=document.getElementById("ai-en-"+id);
+var djaEl=document.getElementById("ai-dja-"+id);
+var denEl=document.getElementById("ai-den-"+id);
+if(viVal&&!jaVal){pending++;translateText(viVal,"ja","vi",function(t){jaVal=t;if(jaEl)jaEl.value=t;tdone();});}
+if(viVal&&!enVal){pending++;translateText(viVal,"en","vi",function(t){enVal=t;if(enEl)enEl.value=t;tdone();});}
+if(dviVal&&!djaVal){pending++;translateText(dviVal,"ja","vi",function(t){djaVal=t;if(djaEl)djaEl.value=t;tdone();});}
+if(dviVal&&!denVal){pending++;translateText(dviVal,"en","vi",function(t){denVal=t;if(denEl)denEl.value=t;tdone();});}
+if(pending===0)_commit();
 }
 function delProd(id){if(!confirm(lang==="ja"?"削除しますか？":"Xóa?"))return;PRODUCTS=PRODUCTS.filter(function(x){return x.id!==id;});if(typeof fbDb!=="undefined"&&fbDb){fbDb.collection("products").doc(String(id)).delete().catch(function(e){console.error("[NNY] delProd Firebase:",e);});}if(cart[id])delete cart[id];renderProducts();renderPE();updateCartBtn();}
 function addProduct(){
