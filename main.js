@@ -1832,7 +1832,6 @@ var us=document.getElementById("user-screen");
 var as=document.getElementById("admin-screen");
 if(us)us.style.display="none";
 if(as)as.classList.add("on");
-if(typeof updateAdmTabBarTop==="function")setTimeout(updateAdmTabBarTop,50);
 loadEJConfigUI();loadBankConfigUI();loadFBConfigUI();if(typeof loadDeliveryOriginUI==="function")loadDeliveryOriginUI();if(typeof loadLineNotifyTokenUI==="function")loadLineNotifyTokenUI();
 applyAdminI18n();
 function _doOpenAdminLoad(){

@@ -274,7 +274,8 @@
 </div>
 </div>
 <div class="admin-screen" id="admin-screen">
-<div class="admin-topbar">
+<div class="admin-topbar" style="flex-direction:column;height:auto;padding:0;">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:56px;width:100%;box-sizing:border-box;">
 <div class="admin-topbar-title" id="adm-topbar-title"><img class="admin-topbar-logo" src="NICO_LOGO_PLACEHOLDER" loading="lazy" alt="">NICO NICO YASAI <span id="adm-title-sub" style="font-size:13px;opacity:.7;font-weight:500;">管理パネル</span></div>
 <div class="admin-topbar-right">
 <div class="admin-lang-sw">
@@ -284,9 +285,10 @@
 <button class="admin-exit-btn" onclick="exitAdmin()" id="adm-exit-btn">← <span id="adm-exit-lbl">Thoát</span></button>
 </div>
 </div>
-<div id="adm-tab-bar" style="display:flex;border-bottom:2px solid var(--border);background:var(--wh);position:sticky;top:56px;z-index:150;box-shadow:0 2px 6px rgba(0,0,0,.06);">
-<button id="adm-tab-btn-main" onclick="switchAdminTab('main')" style="flex:1;padding:10px 8px;font-size:13px;font-weight:800;border:none;border-bottom:3px solid var(--g1);cursor:pointer;background:var(--g1);color:#fff;border-radius:0;">📋 日常業務</button>
-<button id="adm-tab-btn-settings" onclick="switchAdminTab('settings')" style="flex:1;padding:10px 8px;font-size:13px;font-weight:800;border:none;border-bottom:3px solid transparent;cursor:pointer;background:var(--wh);color:var(--muted);border-radius:0;">⚙️ 設定</button>
+<div id="adm-tab-bar" style="display:flex;border-top:1px solid rgba(255,255,255,.15);width:100%;">
+<button id="adm-tab-btn-main" onclick="switchAdminTab('main')" style="flex:1;padding:10px 8px;font-size:13px;font-weight:800;border:none;border-bottom:3px solid #fff;cursor:pointer;background:rgba(255,255,255,.18);color:#fff;border-radius:0;">📋 日常業務</button>
+<button id="adm-tab-btn-settings" onclick="switchAdminTab('settings')" style="flex:1;padding:10px 8px;font-size:13px;font-weight:800;border:none;border-bottom:3px solid transparent;cursor:pointer;background:transparent;color:rgba(255,255,255,.65);border-radius:0;">⚙️ 設定</button>
+</div>
 </div>
 <div class="admin-body">
 <div id="adm-tab-main">
@@ -642,13 +644,8 @@ giữa người sản xuất và người tiêu dùng</textarea></div>
   window.__ADMIN_AUTO_OPEN = true;
 })();
 </script>
-<script src="../main.js?v=104"></script>
+<script src="../main.js?v=105"></script>
 <script>
-function updateAdmTabBarTop(){
-  var topbar=document.querySelector('.admin-topbar');
-  var tabbar=document.getElementById('adm-tab-bar');
-  if(topbar&&tabbar){tabbar.style.top=topbar.offsetHeight+'px';}
-}
 function switchAdminTab(tab){
   var isMain=tab==='main';
   var tm=document.getElementById('adm-tab-main');
@@ -657,15 +654,12 @@ function switchAdminTab(tab){
   var bs=document.getElementById('adm-tab-btn-settings');
   if(tm)tm.style.display=isMain?'block':'none';
   if(ts)ts.style.display=isMain?'none':'block';
-  if(bm){bm.style.background=isMain?'var(--g1)':'var(--wh)';bm.style.color=isMain?'#fff':'var(--muted)';bm.style.borderBottom=isMain?'3px solid var(--g1)':'3px solid transparent';}
-  if(bs){bs.style.background=isMain?'var(--wh)':'var(--g1)';bs.style.color=isMain?'var(--muted)':'#fff';bs.style.borderBottom=isMain?'3px solid transparent':'3px solid var(--g1)';}
+  if(bm){bm.style.background=isMain?'rgba(255,255,255,.18)':'transparent';bm.style.color=isMain?'#fff':'rgba(255,255,255,.65)';bm.style.borderBottom=isMain?'3px solid #fff':'3px solid transparent';}
+  if(bs){bs.style.background=isMain?'transparent':'rgba(255,255,255,.18)';bs.style.color=isMain?'rgba(255,255,255,.65)':'#fff';bs.style.borderBottom=isMain?'3px solid transparent':'3px solid #fff';}
   if(isMain){var el=document.getElementById('admin-screen');if(el)el.scrollTop=0;}
-  updateAdmTabBarTop();
 }
 document.addEventListener('DOMContentLoaded',function(){
   switchAdminTab('main');
-  updateAdmTabBarTop();
-  window.addEventListener('resize',updateAdmTabBarTop);
 });
 </script>
 <div id="qr-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;flex-direction:column;align-items:center;justify-content:center;">
