@@ -3321,6 +3321,10 @@ function startFbPolling(){
 if(!fbEnabled||!fbDb)return;
 if(_fbPollTimer)clearInterval(_fbPollTimer);
 _fbPollTimer=setInterval(function(){
+var _admScr2=document.getElementById("admin-screen");
+var _isAdmOpen=_admScr2&&_admScr2.classList.contains("on");
+if(_isAdmOpen){var _ts=document.getElementById("adm-orders-lastupdated");if(_ts){var _now=new Date();_ts.textContent=(_now.getHours()<10?"0":"")+_now.getHours()+":"+(_now.getMinutes()<10?"0":"")+_now.getMinutes()+":"+(_now.getSeconds()<10?"0":"")+_now.getSeconds()+" 自動更新中";}}
+
 fbDb.collection("products").get().then(function(snap){
 var changed=false;
 snap.forEach(function(doc){
@@ -3384,9 +3388,13 @@ lo.forEach(function(x){if(!merged.find(function(o){return o.no===x.no;}))merged.
 ORDERS=merged;
 try{localStorage.setItem("nny_orders",JSON.stringify(ORDERS));}catch(e){}
 }
-var as=document.getElementById("admin-screen");
-if(as&&as.classList.contains("on")&&typeof renderAdminOrders2==="function")renderAdminOrders2();
-}).catch(function(){});
+var _admScr=document.getElementById("admin-screen");
+if(_admScr&&_admScr.classList.contains("on")&&typeof renderAdminOrders2==="function")renderAdminOrders2();
+}).catch(function(){
+// Firestore読み取り失敗時もローカルデータで再描画
+var _admScr=document.getElementById("admin-screen");
+if(_admScr&&_admScr.classList.contains("on")&&typeof renderAdminOrders2==="function")renderAdminOrders2();
+});
 fbDb.collection("settings").doc("app_config").get().then(function(doc){
 if(!doc.exists)return;
 var cfg=doc.data();
