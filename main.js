@@ -1494,7 +1494,14 @@ if(!REVIEWS[pid]||REVIEWS[pid].length===0)REVIEWS[pid]=fbRv[pid];
 if(typeof normalizeReviews==="function")normalizeReviews();
 try{localStorage.setItem("nny_reviews",JSON.stringify(REVIEWS));}catch(e){}
 }
-}).catch(function(){});}).catch(function(){d.o=true;chk();});
+}).catch(function(){});}).catch(function(e){
+d.o=true;chk();
+var _code=e&&e.code||"";
+if(_code==="permission-denied"||_code==="PERMISSION_DENIED"){
+var _elP=document.getElementById("adm-orders-list-pending");
+if(_elP&&!ORDERS.length){_elP.innerHTML='<div style="text-align:center;padding:24px;color:#c0392b;font-size:13px;line-height:1.6;">🔒 Firebaseメール認証が必要です<br><span style="font-size:12px;color:var(--muted);">設定 → Firebase → 管理者Firebase認証<br>でメールとパスワードを設定してください</span></div>';}
+}
+});
 d.p=true;chk();
 fbDb.collection("settings").doc("notify_list").get().then(function(doc){if(doc.exists&&doc.data().list)NOTIFY_LIST=doc.data().list;d.n=true;chk();}).catch(function(){d.n=true;chk();});
 } // end _doLoad
@@ -3390,10 +3397,15 @@ try{localStorage.setItem("nny_orders",JSON.stringify(ORDERS));}catch(e){}
 }
 var _admScr=document.getElementById("admin-screen");
 if(_admScr&&_admScr.classList.contains("on")&&typeof renderAdminOrders2==="function")renderAdminOrders2();
-}).catch(function(){
-// Firestore読み取り失敗時もローカルデータで再描画
+}).catch(function(e){
+// Firestore読み取り失敗時 — 認証エラーの場合はメッセージ表示
 var _admScr=document.getElementById("admin-screen");
-if(_admScr&&_admScr.classList.contains("on")&&typeof renderAdminOrders2==="function")renderAdminOrders2();
+if(!_admScr||!_admScr.classList.contains("on"))return;
+var _code=e&&e.code||"";
+if(_code==="permission-denied"||_code==="PERMISSION_DENIED"){
+var _elP=document.getElementById("adm-orders-list-pending");
+if(_elP&&!ORDERS.length){_elP.innerHTML='<div style="text-align:center;padding:24px;color:#c0392b;font-size:13px;line-height:1.6;">🔒 Firebaseメール認証が必要です<br><span style="font-size:12px;color:var(--muted);">設定 → Firebase → 管理者Firebase認証<br>でメールとパスワードを設定してください</span></div>';}
+}else if(typeof renderAdminOrders2==="function"){renderAdminOrders2();}
 });
 fbDb.collection("settings").doc("app_config").get().then(function(doc){
 if(!doc.exists)return;
