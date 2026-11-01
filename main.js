@@ -1505,6 +1505,7 @@ if(_elP&&!ORDERS.length){_elP.innerHTML='<div style="text-align:center;padding:2
 d.p=true;chk();
 fbDb.collection("settings").doc("notify_list").get().then(function(doc){if(doc.exists&&doc.data().list)NOTIFY_LIST=doc.data().list;d.n=true;chk();}).catch(function(){d.n=true;chk();});
 } // end _doLoad
+_doLoad();
 } // end loadFromFirebase
 function fbSaveOrder(o){
 if(!fbEnabled||!fbDb)return;
