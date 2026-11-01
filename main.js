@@ -3367,7 +3367,7 @@ renderProducts();
 }).catch(function(){});
 fbDb.collection("orders").get().then(function(snap){
 var a=[];snap.forEach(function(doc){a.push(doc.data());});
-if(!a.length)return;
+if(a.length){
 var lo=ORDERS;
 var merged=a.map(function(o){
 var l=lo.find(function(x){return x.no===o.no;});
@@ -3383,6 +3383,7 @@ return o;
 lo.forEach(function(x){if(!merged.find(function(o){return o.no===x.no;}))merged.push(x);});
 ORDERS=merged;
 try{localStorage.setItem("nny_orders",JSON.stringify(ORDERS));}catch(e){}
+}
 var as=document.getElementById("admin-screen");
 if(as&&as.classList.contains("on")&&typeof renderAdminOrders2==="function")renderAdminOrders2();
 }).catch(function(){});

@@ -305,7 +305,7 @@
 <div class="aq-card"><div class="aq-val" id="aq-pub">0</div><div class="aq-lbl" id="aq-pub-lbl">Đang bán</div></div>
 </div>
 <div class="admin-section">
-<div class="admin-sec-title">📋 <span id="adm-orders-ttl">Đơn hàng</span></div>
+<div class="admin-sec-title" style="display:flex;align-items:center;justify-content:space-between;">📋 <span id="adm-orders-ttl">Đơn hàng</span><button onclick="adminRefreshOrders()" style="font-size:12px;padding:4px 10px;border:1.5px solid var(--g1);border-radius:6px;background:#fff;color:var(--g1);cursor:pointer;font-weight:700;">🔄 更新</button></div>
 <div style="display:flex;gap:0;margin-bottom:12px;border-radius:8px;overflow:hidden;border:1.5px solid var(--g3);">
 <button id="ord-tab-btn-pending" onclick="switchOrderTab('pending')" style="flex:1;padding:10px;font-size:13px;font-weight:800;background:var(--g1);color:#fff;border:none;cursor:pointer;">
 <span id="ord-tab-lbl-pending">⏳ 入金待ち</span> <span id="ord-tab-cnt-pending" style="background:#fff;color:var(--g1);border-radius:99px;padding:1px 8px;font-size:11px;margin-left:4px;">0</span>
@@ -644,7 +644,7 @@ giữa người sản xuất và người tiêu dùng</textarea></div>
   window.__ADMIN_AUTO_OPEN = true;
 })();
 </script>
-<script src="../main.js?v=105"></script>
+<script src="../main.js?v=106"></script>
 <script>
 function switchAdminTab(tab){
   var isMain=tab==='main';
