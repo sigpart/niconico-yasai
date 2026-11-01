@@ -84,7 +84,7 @@ var LINE_NOTIFY_TOKEN = "";
 (function(){
 try {
 var raw = localStorage.getItem("nny_ej");
-if(raw){var c=JSON.parse(raw);EJ.service=c.service||"";EJ.template=c.template||"";EJ.pubkey=c.pubkey||"";EJ.from=c.from||EJ.from;}
+if(raw){var c=JSON.parse(raw);EJ.service=c.service||"";EJ.template=c.template||"";EJ.pubkey=c.pubkey||"";EJ.from=c.from||EJ.from;EJ.admin=c.admin||"";}
 if(EJ.pubkey){try{emailjs.init({publicKey:EJ.pubkey});}catch(e){}}
 }catch(e){}
 try{var r=localStorage.getItem("nny_reviews");if(r)REVIEWS=JSON.parse(r);}catch(e){}
