@@ -1473,7 +1473,7 @@ ORDERS=a.map(function(fbOrder){
 var local=localOrders.find(function(lo){return lo.no===fbOrder.no;});
 if(local){
 var _lfChgAge=_localOrderChanges[fbOrder.no]?Date.now()-_localOrderChanges[fbOrder.no]:Infinity;
-if(local.status&&_lfChgAge<120000)fbOrder.status=local.status;
+if(local.status&&(_pendingOrderSaves[fbOrder.no]||_lfChgAge<3600000))fbOrder.status=local.status;
 if(local.screenshot&&!fbOrder.screenshotUrl)fbOrder.screenshot=local.screenshot;
 if(local.screenshotUrl)fbOrder.screenshotUrl=local.screenshotUrl;
 }
@@ -1510,22 +1510,33 @@ _doLoad();
 function fbSaveOrder(o){
 if(!fbEnabled||!fbDb)return;
 var docRef=fbDb.collection("orders").doc(o.no.replace(/[^a-zA-Z0-9]/g,"-"));
-// 認証済みの場合はそのまま書き込み
+function _doSave(retry){
+docRef.set(o).then(function(){
+// 保存成功 → 保護フラグ削除・保留キューから削除
+delete _localOrderChanges[o.no];
+delete _pendingOrderSaves[o.no];
+}).catch(function(e){
+console.error('[NNY] order save:',e.message);
+var _ec=e&&e.code||"";
+if((_ec==="permission-denied"||_ec==="PERMISSION_DENIED")&&!retry){
+// 権限エラー → 保留キューに積んでおく
+_pendingOrderSaves[o.no]=o;
+// メール認証が取れたら自動リトライ
+if(fbAuth){fbAuth.onAuthStateChanged(function(user){if(user&&user.email){delete _pendingOrderSaves[o.no];docRef.set(o).then(function(){delete _localOrderChanges[o.no];}).catch(function(){});}});}
+}
+});
+}
 if(fbAuth&&fbAuth.currentUser){
-docRef.set(o).catch(function(e){console.error('[NNY] order save:',e.message);});
+_doSave(false);
 return;
 }
-// 未認証の場合は匿名サインイン後に書き込み
 if(fbAuth){
-fbAuth.signInAnonymously().then(function(){
-docRef.set(o).catch(function(e){console.error('[NNY] order save after anon auth:',e.message);});
-}).catch(function(e){
+fbAuth.signInAnonymously().then(function(){_doSave(false);}).catch(function(e){
 console.error('[NNY] anon auth failed:',e.message);
-// 匿名認証が失敗してもFirestoreルールが緩ければ書き込み試行
-docRef.set(o).catch(function(e2){console.error('[NNY] order save fallback:',e2.message);});
+_doSave(true);
 });
 }else{
-docRef.set(o).catch(function(e){console.error('[NNY] order save no-auth:',e.message);});
+_doSave(true);
 }
 }
 function fbSaveNotifyList(){if(!fbEnabled||!fbDb)return;fbDb.collection("settings").doc("notify_list").set({list:NOTIFY_LIST}).catch(function(e){console.error(e);});}
@@ -2256,6 +2267,7 @@ else if(action==="cancel"){o.status="cancelled";}
 else if(action==="restore"){o.status="new";}
 if(o.status==="done"&&prevStatus!=="done"){deleteChatData(no);sendDeliveryNotification(o);}
 _localOrderChanges[no]=Date.now();
+_pendingOrderSaves[no]=Object.assign({},o); // 保存成功まで保護
 if(typeof fbSaveOrder==="function")fbSaveOrder(o);
 try{localStorage.setItem("nny_orders",JSON.stringify(ORDERS));}catch(e){}
 renderAdminOrders2();renderAdminStats();
@@ -3134,6 +3146,7 @@ if(desc)desc.value=BANK_CFG.descTemplate||"NICONICO {no}";
 }
 var _needFbProductSync=false;
 var _localOrderChanges={}; // {no: timestamp} ローカルで最近変更した注文を記録（ポーリング上書き防止）
+var _pendingOrderSaves={}; // {no: orderObj} Firestoreへの保存待ち注文
 var _localProductChanges={}; // {id: timestamp} ローカルで最近変更した商品を記録
 // ページリロード後も保護を引き継ぐためlocalStorageから復元
 try{var _lpcSaved=JSON.parse(localStorage.getItem('nny_prod_changes')||'{}');var _lpcNow=Date.now();Object.keys(_lpcSaved).forEach(function(id){if(_lpcNow-_lpcSaved[id]<300000)_localProductChanges[id]=_lpcSaved[id];});}catch(e){}
@@ -3384,9 +3397,9 @@ var lo=ORDERS;
 var merged=a.map(function(o){
 var l=lo.find(function(x){return x.no===o.no;});
 if(l){
-// 最近（2分以内）ローカルで変更したステータスのみ保護
+// 保存未確認(pending)または直近60分のローカル変更を保護
 var _loChgAge=_localOrderChanges[o.no]?Date.now()-_localOrderChanges[o.no]:Infinity;
-if(l.status&&_loChgAge<120000)o.status=l.status;
+if(l.status&&(_pendingOrderSaves[o.no]||_loChgAge<3600000))o.status=l.status;
 if(l.screenshot&&!o.screenshotUrl)o.screenshot=l.screenshot;
 if(l.screenshotUrl)o.screenshotUrl=l.screenshotUrl;
 }
