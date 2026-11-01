@@ -284,11 +284,11 @@
 <button class="admin-exit-btn" onclick="exitAdmin()" id="adm-exit-btn">← <span id="adm-exit-lbl">Thoát</span></button>
 </div>
 </div>
-<div class="admin-body">
-<div id="adm-tab-bar" style="display:flex;border-bottom:2px solid var(--border);background:var(--wh);position:sticky;top:56px;z-index:100;box-shadow:0 2px 6px rgba(0,0,0,.06);">
+<div id="adm-tab-bar" style="display:flex;border-bottom:2px solid var(--border);background:var(--wh);position:sticky;top:56px;z-index:150;box-shadow:0 2px 6px rgba(0,0,0,.06);">
 <button id="adm-tab-btn-main" onclick="switchAdminTab('main')" style="flex:1;padding:10px 8px;font-size:13px;font-weight:800;border:none;border-bottom:3px solid var(--g1);cursor:pointer;background:var(--g1);color:#fff;border-radius:0;">📋 日常業務</button>
 <button id="adm-tab-btn-settings" onclick="switchAdminTab('settings')" style="flex:1;padding:10px 8px;font-size:13px;font-weight:800;border:none;border-bottom:3px solid transparent;cursor:pointer;background:var(--wh);color:var(--muted);border-radius:0;">⚙️ 設定</button>
 </div>
+<div class="admin-body">
 <div id="adm-tab-main">
 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px 0;">
 <select id="aq-year" onchange="renderAdminStats()" style="padding:6px 10px;border:1.5px solid var(--g3);border-radius:8px;font-size:12px;font-family:inherit;background:#fff;"></select>
@@ -638,7 +638,7 @@ giữa người sản xuất và người tiêu dùng</textarea></div>
   window.__ADMIN_AUTO_OPEN = true;
 })();
 </script>
-<script src="../main.js?v=102"></script>
+<script src="../main.js?v=103"></script>
 <script>
 function updateAdmTabBarTop(){
   var topbar=document.querySelector('.admin-topbar');
