@@ -1556,6 +1556,11 @@ fbDb.collection("settings").doc("notify_list").get().then(function(doc){if(doc.e
 } // end _doLoad
 _doLoad();
 } // end loadFromFirebase
+function fbDeleteOrder(no){
+if(!fbEnabled||!fbDb)return;
+var docRef=fbDb.collection("orders").doc(no.replace(/[^a-zA-Z0-9]/g,"-"));
+docRef.delete().catch(function(e){console.error("[NNY] order delete:",e.message);});
+}
 function fbSaveOrder(o){
 if(!fbEnabled||!fbDb)return;
 var docRef=fbDb.collection("orders").doc(o.no.replace(/[^a-zA-Z0-9]/g,"-"));
@@ -2320,8 +2325,12 @@ else if(action==="cancel"){o.status="cancelled";}
 else if(action==="restore"){o.status="new";}
 if(o.status==="done"&&prevStatus!=="done"){deleteChatData(no);sendDeliveryNotification(o);}
 _localOrderChanges[no]=Date.now();
-_pendingOrderSaves[no]=Object.assign({},o); // 保存成功まで保護
+if(action==="cancel"){
+if(typeof fbDeleteOrder==="function")fbDeleteOrder(o.no);
+}else{
+_pendingOrderSaves[no]=Object.assign({},o);
 if(typeof fbSaveOrder==="function")fbSaveOrder(o);
+}
 try{localStorage.setItem("nny_orders",JSON.stringify(ORDERS));}catch(e){}
 renderAdminOrders2();renderAdminStats();
 }
@@ -3471,13 +3480,13 @@ var l=lo.find(function(x){return x.no===o.no;});
 if(l){
 // 保存未確認(pending)または直近60分のローカル変更を保護
 var _loChgAge=_localOrderChanges[o.no]?Date.now()-_localOrderChanges[o.no]:Infinity;
-if(l.status&&(_pendingOrderSaves[o.no]||_loChgAge<3600000))o.status=l.status;
+if(l.status&&(_pendingOrderSaves[o.no]||_loChgAge<120000))o.status=l.status;
 if(l.screenshot&&!o.screenshotUrl)o.screenshot=l.screenshot;
 if(l.screenshotUrl)o.screenshotUrl=l.screenshotUrl;
 }
 return o;
 });
-lo.forEach(function(x){if(!merged.find(function(o){return o.no===x.no;}))merged.push(x);});
+lo.forEach(function(x){if(!merged.find(function(o){return o.no===x.no;})&&x.status!=="cancelled")merged.push(x);});
 ORDERS=merged;
 try{localStorage.setItem("nny_orders",JSON.stringify(ORDERS));}catch(e){}
 }
