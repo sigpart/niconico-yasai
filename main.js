@@ -2167,7 +2167,7 @@ var tglBtn=o.status==="cancelled"
 :o.status==="pending_payment"
 ?'<button class="ao-btn primary" onclick="adminOrderAction(\'confirm\',\''+safeNo+'\')" style="background:#f0c040;color:#7a5c00;border-color:#f0c040;">'+(adminLang==="vi"?"✅ Xác nhận đã nhận tiền":"✅ 入金確認する")+'</button>'
 :'<button class="ao-btn'+(o.status==="done"?"":" primary")+'" onclick="adminOrderAction(\'toggle\',\''+safeNo+'\')">'+(o.status==="done"?(adminLang==="vi"?"↩ Hoàn tác":"↩ 戻す"):(adminLang==="vi"?"✅ Hoàn thành":"✅ 完了にする"))+'</button>';
-var cancelBtn=o.status!=="cancelled"?'<button class="ao-btn" onclick="nnyConfirm(\''+(adminLang==="vi"?"本当にキャンセルしますか？ / Xác nhận hủy đơn?":"本当にキャンセルしますか？")+'\',function(){adminOrderAction(\'cancel\',\''+safeNo+'\');})" style="color:#c0392b;border-color:#c0392b;">❌ '+(adminLang==="vi"?"Hủy đơn":"キャンセル")+'</button>':'';
+var cancelBtn=o.status!=="cancelled"?'<button class="ao-btn" onclick="nnyConfirm(\''+(adminLang==="vi"?"本当にキャンセルしますか？ / Xác nhận hủy đơn?":"本当にキャンセルしますか？")+'\',function(){adminOrderAction(\'cancel\',\''+safeNo+'\');})" style="color:#c0392b;border-color:#c0392b;">❌ '+(adminLang==="vi"?"Hủy đơn":"キャンセル")+'</button>':'<button class="ao-btn" onclick="nnyConfirm(\''+(adminLang==="vi"?"この注文を完全に削除しますか？ / Xóa đơn hàng?":"この注文を完全に削除しますか？")+'\',function(){adminOrderAction(\'delete\',\''+safeNo+'\');})" style="color:#888;border-color:#ccc;">🗑 '+(adminLang==="vi"?"Xóa":"削除")+'</button>';
 var items=(o.items||[]).map(function(it){return it.e+" "+(adminLang==="vi"?it.vi:it.ja)+"×"+it.qty;}).join("、");
 var itemsSummary=(o.items||[]).map(function(it){return it.e+(it.qty>1?"×"+it.qty:"");}).join(" ");
 var isOpen=o.status!=="done";
@@ -2323,6 +2323,13 @@ else if(action==="confirm"){o.status="done";}
 else if(action==="confirmPay"){o.status="done";}
 else if(action==="cancel"){o.status="cancelled";}
 else if(action==="restore"){o.status="new";}
+else if(action==="delete"){
+ORDERS=ORDERS.filter(function(x){return x.no!==no;});
+if(typeof fbDeleteOrder==="function")fbDeleteOrder(no);
+try{localStorage.setItem("nny_orders",JSON.stringify(ORDERS));}catch(e){}
+renderAdminOrders2();renderAdminStats();
+return;
+}
 if(o.status==="done"&&prevStatus!=="done"){deleteChatData(no);sendDeliveryNotification(o);}
 _localOrderChanges[no]=Date.now();
 if(action==="cancel"){
