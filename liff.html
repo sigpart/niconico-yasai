@@ -9,7 +9,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:#e6f4e8;display:flex;align
 .card{background:#fff;border-radius:16px;padding:32px 24px;text-align:center;box-shadow:0 4px 24px rgba(26,107,42,.12);max-width:320px;width:90%;}
 .ico{font-size:52px;margin-bottom:12px;}
 h2{color:#1a6b2a;margin:0 0 8px;font-size:18px;}
-p{color:#5a7060;font-size:13px;margin:0;line-height:1.6;}
+p{color:#5a7060;font-size:13px;margin:0 0 16px;line-height:1.6;}
+.add-btn{display:inline-block;background:#00c300;color:#fff;border-radius:10px;padding:12px 28px;text-decoration:none;font-weight:700;font-size:15px;margin-top:4px;}
 </style>
 </head>
 <body>
@@ -17,20 +18,36 @@ p{color:#5a7060;font-size:13px;margin:0;line-height:1.6;}
   <div class="ico" id="ico">⏳</div>
   <h2 id="ttl">LINE認証中...</h2>
   <p id="msg">しばらくお待ちください</p>
+  <a id="add-btn" href="https://lin.ee/Ybvi1Bf" style="display:none;" class="add-btn">📲 友だち追加する</a>
 </div>
 <script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
 <script>
 var LIFF_ID="2012327298-k4OuH8dt";
+var FRIEND_URL="https://lin.ee/Ybvi1Bf";
 liff.init({liffId:LIFF_ID}).then(function(){
   if(!liff.isLoggedIn()){liff.login({redirectUri:location.href});return;}
   var idToken=liff.getDecodedIDToken();
   var userId=idToken&&idToken.sub;
   if(!userId){throw new Error("User ID取得失敗");}
   try{localStorage.setItem("nny_line_uid",userId);}catch(e){}
-  document.getElementById("ico").textContent="✅";
-  document.getElementById("ttl").textContent="LINE認証完了！";
-  document.getElementById("msg").textContent="注文画面に戻ってください";
-  if(liff.isInClient()){setTimeout(function(){liff.closeWindow();},1500);}
+  return liff.getFriendship().then(function(data){
+    if(data&&data.friendFlag){
+      document.getElementById("ico").textContent="✅";
+      document.getElementById("ttl").textContent="LINE認証完了！";
+      document.getElementById("msg").textContent="注文画面に戻ってください";
+      if(liff.isInClient()){setTimeout(function(){liff.closeWindow();},1500);}
+    }else{
+      document.getElementById("ico").textContent="📲";
+      document.getElementById("ttl").textContent="友だち追加してください";
+      document.getElementById("msg").textContent="NICO NICO YASAIのLINE公式アカウントを友だち追加すると注文・配達通知が届きます。";
+      document.getElementById("add-btn").style.display="inline-block";
+    }
+  }).catch(function(){
+    document.getElementById("ico").textContent="✅";
+    document.getElementById("ttl").textContent="LINE認証完了！";
+    document.getElementById("msg").textContent="注文画面に戻ってください";
+    if(liff.isInClient()){setTimeout(function(){liff.closeWindow();},1500);}
+  });
 }).catch(function(e){
   document.getElementById("ico").textContent="❌";
   document.getElementById("ttl").textContent="エラーが発生しました";
