@@ -1598,7 +1598,7 @@ var PAL=["#1a6b2a","#2b8a3e","#3da84f","#72c47f","#c9960a","#a8ddb0","#e8c060","
 function renderBarChart(cid,data){
 var el=document.getElementById(cid);if(!el)return;
 if(!data.length){el.innerHTML='<div class="no-data-msg"><div class="no-data-ico">📊</div>'+(adminLang==="vi"?"Chưa có dữ liệu":"データなし")+'</div>';return;}
-var mv=data[0].val||1,html="";
+var mv=Math.max.apply(null,data.map(function(d){return d.val;}))||1,html="";
 data.forEach(function(d,i){var pct=Math.round(d.val/mv*100),col=PAL[i%PAL.length];
 html+='<div class="bar-row"><div class="bar-label" title="'+d.label+'">'+d.label+'</div><div class="bar-track"><div class="bar-fill" style="width:'+pct+'%;background:'+col+';">'+(pct>18?'<span class="bar-val">'+d.display+'</span>':"")+'</div>'+(pct<=18&&d.val>0?'<span class="bar-val outside">'+d.display+'</span>':"")+'</div></div>';
 });
