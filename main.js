@@ -82,6 +82,7 @@ var QR_IMGS = {momo:null,zalopay:null,vnpay:null};
 var EJ = {service:"",template:"",pubkey:"",from:"sigpart123@gmail.com"};
 var LINE_CHANNEL_TOKEN = "";
 var LINE_ADMIN_USERID = "";
+var LIFF_ID = "2012327298-k4OuH8dt";
 (function(){
 try {
 var raw = localStorage.getItem("nny_ej");
@@ -493,7 +494,8 @@ Object.keys(cart).forEach(function(ck){var qty=cart[ck];if(!qty)return;var meta=
 items.push({id:p.id,qty:qty,ja:nm_ja,vi:nm_vi,e:p.e,price:price,unit:unit,unitvi:unitvi});});
 var shipFeeVal=selDel==="deliver"?_shippingFee+((_isFarm||false)?0:10000):0;
 var _lineNotify=document.getElementById("inp-line-notify");
-pendingOrder={no:no,ts:ts,tot:tot,name:name,phone:phone,zalo:zalo,addr:addr,email:email,delivery:selDel,payment:selPay,note:note,items:items,status:"new",shippingFee:shipFeeVal,lineNotify:!!(_lineNotify&&_lineNotify.checked)};
+var _lineUid="";try{_lineUid=localStorage.getItem("nny_line_uid")||"";}catch(e){}
+pendingOrder={no:no,ts:ts,tot:tot,name:name,phone:phone,zalo:zalo,addr:addr,email:email,delivery:selDel,payment:selPay,note:note,items:items,status:"new",shippingFee:shipFeeVal,lineNotify:!!(_lineNotify&&_lineNotify.checked),lineUserId:_lineUid};
 if(selPay==="vietqr"){showPayModal();}
 else{showQR(selPay);}
 }
@@ -536,7 +538,8 @@ buildReceipt(order);
 showView("receipt");
 setTimeout(function(){sendEmail(order);},600);
 setTimeout(function(){sendToSheets(order);},1000);
-setTimeout(function(){sendLineNotifyNewOrder(order);},1200);
+setTimeout(function(){sendLineOrderConfirm(order);},1200);
+try{if(order.lineUserId)localStorage.removeItem("nny_line_uid");}catch(e){}
 setTimeout(function(){sendNewOrderEmailToAdmin(order);},1500);
 }
 function buildReceipt(o){
@@ -816,6 +819,41 @@ function fallbackMail(email,subject,body){var a=document.createElement("a");a.hr
 function showToast(msg){var t=document.getElementById("email-toast");t.textContent=msg;t.classList.add("show");setTimeout(function(){t.classList.remove("show");},4000);}
 var SAVED_KEY="nny_cust_v2";
 var _PII_TTL=30*24*60*60*1000; // 30日
+function onLineNotifyCheck(cb){
+var area=document.getElementById("line-auth-area");
+if(!area)return;
+if(cb.checked){
+area.style.display="block";
+var uid="";try{uid=localStorage.getItem("nny_line_uid")||"";}catch(e){}
+if(uid)_updateLineAuthUI(true);
+}else{area.style.display="none";}
+}
+function _updateLineAuthUI(authed){
+var st=document.getElementById("line-auth-status");
+var btn=document.getElementById("line-auth-btn");
+if(authed){
+if(st){st.textContent="✅ LINE認証済み";st.style.color="#1a6b2a";}
+if(btn)btn.style.display="none";
+}else{
+if(st){st.textContent="📲 LINEで認証するとご注文・配達通知が届きます";st.style.color="#1a6b2a";}
+if(btn)btn.style.display="inline-block";
+}
+}
+var _lineAuthCheckTimer=null;
+function scheduleLineAuthCheck(){
+if(_lineAuthCheckTimer)clearInterval(_lineAuthCheckTimer);
+_lineAuthCheckTimer=setInterval(function(){
+var uid="";try{uid=localStorage.getItem("nny_line_uid")||"";}catch(e){}
+if(uid){clearInterval(_lineAuthCheckTimer);_lineAuthCheckTimer=null;_updateLineAuthUI(true);}
+},1000);
+setTimeout(function(){if(_lineAuthCheckTimer){clearInterval(_lineAuthCheckTimer);_lineAuthCheckTimer=null;}},120000);
+}
+window.addEventListener("focus",function(){
+var cb=document.getElementById("inp-line-notify");
+if(!cb||!cb.checked)return;
+var uid="";try{uid=localStorage.getItem("nny_line_uid")||"";}catch(e){}
+if(uid)_updateLineAuthUI(true);
+});
 function saveCust(){
 var e=document.getElementById("inp-email");
 try{localStorage.setItem(SAVED_KEY,JSON.stringify({name:document.getElementById("inp-name").value,phone:document.getElementById("inp-phone").value,zalo:document.getElementById("inp-zalo").value,addr:document.getElementById("inp-addr").value,email:e?e.value:"",delivery:selDel,payment:selPay,_ts:Date.now()}));}catch(err){}
@@ -2295,10 +2333,21 @@ subject:"🥦 配達を開始しました / Bắt đầu giao hàng",
 message:msgJa+"\n\n---\n\n"+msgVi
 }).catch(function(e){console.error("[NNY] delivery notify email:",e);});
 }
-if(LINE_CHANNEL_TOKEN&&LINE_ADMIN_USERID){
-var lineDelivMsg="🥦【配達開始通知】\n注文番号: "+o.no+"\nお名前: "+o.name+"\n"+msgJa;
-_sendLineMsg(LINE_ADMIN_USERID,lineDelivMsg);
+if(LINE_CHANNEL_TOKEN&&o.lineUserId){
+var _siteUrl="https://hanoi-order.niconicoyasai.jp/";
+var lineDelivMsg="🥦 配達を開始しました。\n到着まで今しばらくお待ちください。\n24時間以内に配達します。\n\n農家との直接やり取りはこちらのチャットより:\n"+_siteUrl+"?chat="+encodeURIComponent(o.no);
+_sendLineMsg(o.lineUserId,lineDelivMsg);
 }
+}
+function sendLineOrderConfirm(o){
+if(!LINE_CHANNEL_TOKEN||!o.lineUserId)return;
+var items=(o.items||[]).map(function(it){return it.e+" "+it.ja+" ×"+it.qty;}).join("\n");
+var msg="🥦 ご注文ありがとうございます！\n\n"
++"注文番号: "+o.no+"\n"
++"ご注文内容:\n"+items+"\n"
++"合計: "+(o.tot||0).toLocaleString()+"₫\n\n"
++"配達準備が整いましたらLINEにてお知らせします。";
+_sendLineMsg(o.lineUserId,msg);
 }
 function _sendLineMsg(userId,text){
 if(!LINE_CHANNEL_TOKEN||!userId)return;
@@ -2307,12 +2356,6 @@ method:"POST",
 headers:{"Content-Type":"application/json","Authorization":"Bearer "+LINE_CHANNEL_TOKEN},
 body:JSON.stringify({to:userId,messages:[{type:"text",text:text}]})
 }).catch(function(e){console.error("[NNY] LINE push:",e);});
-}
-function sendLineNotifyNewOrder(o){
-if(!LINE_CHANNEL_TOKEN||!LINE_ADMIN_USERID)return;
-var items=(o.items||[]).map(function(it){return it.e+(it.vi||it.ja)+"×"+it.qty;}).join("、");
-var msg="🛒【新規注文】\n番号: "+o.no+"\nお名前: "+o.name+"\n電話: "+o.phone+"\n商品: "+items+"\n合計: "+(o.tot||0).toLocaleString()+"₫";
-_sendLineMsg(LINE_ADMIN_USERID,msg);
 }
 function adminLoadSS(no,imgEl){
 var o=ORDERS.find(function(x){return x.no===no;});

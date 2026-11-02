@@ -178,9 +178,13 @@
 <div class="frow"><label class="flabel" id="fl-email">メールアドレス <span class="req">必須</span></label><input class="finput" id="inp-email" type="email" placeholder="you@example.com"></div>
 <div class="frow" style="margin-top:10px;">
 <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;color:var(--ink);line-height:1.5;">
-<input type="checkbox" id="inp-line-notify" style="width:18px;height:18px;margin-top:2px;accent-color:var(--g1);flex-shrink:0;">
+<input type="checkbox" id="inp-line-notify" onchange="onLineNotifyCheck(this)" style="width:18px;height:18px;margin-top:2px;accent-color:var(--g1);flex-shrink:0;">
 <span id="fl-line-notify">📲 公式LINEで注文情報・配達通知を受け取る<br><span style="font-size:11px;color:var(--muted);">NICONICOYASAI LINEから自動通知が届きます</span></span>
 </label>
+</div>
+<div id="line-auth-area" style="display:none;margin-top:8px;padding:10px 12px;background:#e6f4e8;border-radius:10px;font-size:12px;">
+<div id="line-auth-status" style="color:#1a6b2a;margin-bottom:6px;">📲 LINEで認証するとご注文・配達通知が届きます</div>
+<a id="line-auth-btn" href="https://liff.line.me/2012327298-k4OuH8dt" target="_blank" onclick="scheduleLineAuthCheck()" style="display:inline-block;background:#00c300;color:#fff;border-radius:8px;padding:7px 20px;text-decoration:none;font-weight:700;font-size:13px;">LINEで認証する 🔗</a>
 </div>
 </div>
 </div>
@@ -692,7 +696,7 @@ giữa người sản xuất và người tiêu dùng</textarea></div>
 </div>
 <div class="email-toast" id="email-toast"></div>
 <script src=""></script>
-<script src="main.js?v=116"></script>
+<script src="main.js?v=117"></script>
 <div id="qr-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;flex-direction:column;align-items:center;justify-content:center;">
 <div style="background:#fff;border-radius:16px;padding:24px;max-width:360px;width:90%;text-align:center;">
 <div id="qr-logo" style="font-size:48px;margin-bottom:8px;"></div>
