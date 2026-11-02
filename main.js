@@ -2374,13 +2374,12 @@ function _sendLineMsg(userId,text){
 if(!LINE_CHANNEL_TOKEN){console.warn("[NNY] LINE: トークン未設定");return;}
 if(!userId){console.warn("[NNY] LINE: userId未取得");return;}
 console.log("[NNY] LINE push →",userId.slice(0,8)+"...");
-var _gasUrl="https://script.google.com/macros/s/AKfycbz0CzO3ofVcQSRVX3V0igvR3WxDJJ-VBB6ysW6lrQAcb0Urr5GyqxwIufo-7AWOQ77E/exec";
-fetch(_gasUrl,{
-method:"POST",
-mode:"no-cors",
-body:JSON.stringify({token:LINE_CHANNEL_TOKEN,userId:userId,text:text})
-});
-console.log("[NNY] LINE push → GAS送信");
+var _gasUrl="https://script.google.com/macros/s/AKfycbz0CzO3ofVcQSRVX3V0igvR3WxDJJ-VBB6ysW6lrQAcb0Urr5GyqxwIufo-7AWOQ77E/exec"
++"?token="+encodeURIComponent(LINE_CHANNEL_TOKEN)
++"&userId="+encodeURIComponent(userId)
++"&text="+encodeURIComponent(text);
+fetch(_gasUrl,{mode:"no-cors"});
+console.log("[NNY] LINE push → GAS GET送信");
 }
 function adminLoadSS(no,imgEl){
 var o=ORDERS.find(function(x){return x.no===no;});
