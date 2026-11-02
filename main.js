@@ -495,6 +495,7 @@ items.push({id:p.id,qty:qty,ja:nm_ja,vi:nm_vi,e:p.e,price:price,unit:unit,unitvi
 var shipFeeVal=selDel==="deliver"?_shippingFee+((_isFarm||false)?0:10000):0;
 var _lineNotify=document.getElementById("inp-line-notify");
 var _lineUid="";try{_lineUid=localStorage.getItem("nny_line_uid")||"";}catch(e){}
+console.log("[NNY] order lineUserId:",_lineUid||"(なし)","token:",LINE_CHANNEL_TOKEN?"あり":"(なし)");
 pendingOrder={no:no,ts:ts,tot:tot,name:name,phone:phone,zalo:zalo,addr:addr,email:email,delivery:selDel,payment:selPay,note:note,items:items,status:"new",shippingFee:shipFeeVal,lineNotify:!!(_lineNotify&&_lineNotify.checked),lineUserId:_lineUid};
 if(selPay==="vietqr"){showPayModal();}
 else{showQR(selPay);}
