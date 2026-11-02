@@ -1571,7 +1571,7 @@ var now=new Date();
 var nd,start;
 if(analyticsPeriod==="month"){
 start=new Date(now.getFullYear(),now.getMonth(),1);
-nd=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+nd=now.getDate();
 }else if(analyticsPeriod==="3months"){
 var _t3=new Date(now.getFullYear(),now.getMonth()-3,now.getDate());_t3.setHours(0,0,0,0);
 start=_t3;nd=Math.ceil((now-start)/86400000)+1;
