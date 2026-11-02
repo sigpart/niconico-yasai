@@ -80,7 +80,8 @@ var currentNotifyProductId = null;
 var currentRating = 0;
 var QR_IMGS = {momo:null,zalopay:null,vnpay:null};
 var EJ = {service:"",template:"",pubkey:"",from:"sigpart123@gmail.com"};
-var LINE_NOTIFY_TOKEN = "";
+var LINE_CHANNEL_TOKEN = "";
+var LINE_ADMIN_USERID = "";
 (function(){
 try {
 var raw = localStorage.getItem("nny_ej");
@@ -91,7 +92,7 @@ try{var r=localStorage.getItem("nny_reviews");if(r)REVIEWS=JSON.parse(r);}catch(
 try{var n=localStorage.getItem("nny_notify");if(n)NOTIFY_LIST=JSON.parse(n);}catch(e){}
 try{var oh=localStorage.getItem("nny_hist");if(oh)ORDER_HISTORY=JSON.parse(oh);}catch(e){}
 try{var qi=localStorage.getItem("nny_qr");if(qi){var q=JSON.parse(qi);QR_IMGS.momo=q.momo||null;QR_IMGS.zalopay=q.zalopay||null;QR_IMGS.vnpay=q.vnpay||null;}}catch(e){}
-try{var _lnt=localStorage.getItem("nny_line_notify_token");if(_lnt)LINE_NOTIFY_TOKEN=_lnt;}catch(e){}
+try{var _lnc=localStorage.getItem("nny_line_cfg");if(_lnc){var _lncj=JSON.parse(_lnc);LINE_CHANNEL_TOKEN=_lncj.token||"";LINE_ADMIN_USERID=_lncj.adminId||"";}}catch(e){}
 })();
 function saveReviews(){
 try{localStorage.setItem("nny_reviews",JSON.stringify(REVIEWS));}catch(e){}
@@ -1059,18 +1060,23 @@ subject:"🛒 新規注文 #"+o.no+" — "+o.name,
 message:msg
 }).catch(function(e){console.error("[NNY] admin order email:",e);});
 }
-function saveLineNotifyToken(){
-var inp=document.getElementById("line-notify-token");
-if(!inp)return;
-LINE_NOTIFY_TOKEN=inp.value.trim();
-try{localStorage.setItem("nny_line_notify_token",LINE_NOTIFY_TOKEN);}catch(e){}
-if(typeof fbDb!=="undefined"&&fbDb){fbDb.collection("settings").doc("app_config").set({lineNotifyToken:LINE_NOTIFY_TOKEN},{merge:true}).catch(function(e){console.error("[NNY] LINE token save:",e);});}
+function saveLineCfg(){
+var tok=document.getElementById("line-channel-token");
+var uid=document.getElementById("line-admin-userid");
+if(!tok)return;
+LINE_CHANNEL_TOKEN=(tok.value||"").trim();
+LINE_ADMIN_USERID=uid?(uid.value||"").trim():"";
+var cfg={token:LINE_CHANNEL_TOKEN,adminId:LINE_ADMIN_USERID};
+try{localStorage.setItem("nny_line_cfg",JSON.stringify(cfg));}catch(e){}
+if(typeof fbDb!=="undefined"&&fbDb){fbDb.collection("settings").doc("app_config").set({lineCfg:JSON.stringify(cfg)},{merge:true}).catch(function(e){console.error("[NNY] LINE cfg save:",e);});}
 var st=document.getElementById("line-notify-status");
-if(st){st.style.display="block";st.style.background="var(--gp)";st.style.color="var(--g2)";st.textContent=lang==="ja"?"✅ 保存しました！":"✅ Đã lưu!";}
+if(st){st.style.display="block";st.style.background="var(--gp)";st.style.color="var(--g2)";st.textContent="✅ 保存しました！";}
 }
-function loadLineNotifyTokenUI(){
-var inp=document.getElementById("line-notify-token");
-if(inp&&LINE_NOTIFY_TOKEN)inp.value=LINE_NOTIFY_TOKEN;
+function loadLineCfgUI(){
+var tok=document.getElementById("line-channel-token");
+var uid=document.getElementById("line-admin-userid");
+if(tok)tok.value=LINE_CHANNEL_TOKEN;
+if(uid)uid.value=LINE_ADMIN_USERID;
 }
 function applySite(){var badge=document.getElementById("site-badge").value;var h1ja=document.getElementById("site-h1-ja").value.replace(/\n/g,"<br>");var h1vi=document.getElementById("site-h1-vi").value.replace(/\n/g,"<br>");var sja=document.getElementById("site-sub-ja").value;var svi=document.getElementById("site-sub-vi").value;I.ja.heroEyebrow=badge;I.vi.heroEyebrow=badge;I.ja.heroH1=h1ja;I.vi.heroH1=h1vi;I.ja.heroSub=sja;I.vi.heroSub=svi;applyI18n();closeAdmin();}
 var BANK_CFG={code:"970422",bankName:"MB Bank",account:"",owner:"",descTemplate:"NICONICO {no}"};
@@ -1429,7 +1435,7 @@ fbDb.collection("settings").doc("app_config").get().then(function(doc){
 if(doc.exists){
 var cfg=doc.data();
 if(cfg.ej){try{var ej=JSON.parse(cfg.ej);EJ.service=ej.service||EJ.service;EJ.template=ej.template||EJ.template;EJ.pubkey=ej.pubkey||EJ.pubkey;EJ.from=ej.from||EJ.from;EJ.admin=ej.admin||EJ.admin||"";if(EJ.pubkey)emailjs.init({publicKey:EJ.pubkey});localStorage.setItem("nny_ej",cfg.ej);if(typeof loadEJConfigUI==="function")loadEJConfigUI();}catch(e){}}
-if(cfg.lineNotifyToken){LINE_NOTIFY_TOKEN=cfg.lineNotifyToken;try{localStorage.setItem("nny_line_notify_token",LINE_NOTIFY_TOKEN);}catch(e){}if(typeof loadLineNotifyTokenUI==="function")loadLineNotifyTokenUI();}
+if(cfg.lineCfg){try{var _lc=JSON.parse(cfg.lineCfg);LINE_CHANNEL_TOKEN=_lc.token||LINE_CHANNEL_TOKEN;LINE_ADMIN_USERID=_lc.adminId||LINE_ADMIN_USERID;localStorage.setItem("nny_line_cfg",cfg.lineCfg);if(typeof loadLineCfgUI==="function")loadLineCfgUI();}catch(e){}}
 if(cfg.bank){try{var bk=JSON.parse(cfg.bank);BANK_CFG=Object.assign(BANK_CFG,bk);localStorage.setItem("nny_bank",cfg.bank);if(typeof loadBankConfigUI==="function")loadBankConfigUI();}catch(e){}}
 if(cfg.deliveryOrigin){try{var dor=JSON.parse(cfg.deliveryOrigin);DELIVERY_ORIGIN=Object.assign(DELIVERY_ORIGIN,dor);localStorage.setItem("nny_delivery_origin",cfg.deliveryOrigin);if(typeof loadDeliveryOriginUI==="function")loadDeliveryOriginUI();if(typeof updatePickupAvailability==="function")updatePickupAvailability();}catch(e){}}
 }
@@ -1855,7 +1861,7 @@ var us=document.getElementById("user-screen");
 var as=document.getElementById("admin-screen");
 if(us)us.style.display="none";
 if(as)as.classList.add("on");
-loadEJConfigUI();loadBankConfigUI();loadFBConfigUI();if(typeof loadDeliveryOriginUI==="function")loadDeliveryOriginUI();if(typeof loadLineNotifyTokenUI==="function")loadLineNotifyTokenUI();
+loadEJConfigUI();loadBankConfigUI();loadFBConfigUI();if(typeof loadDeliveryOriginUI==="function")loadDeliveryOriginUI();if(typeof loadLineCfgUI==="function")loadLineCfgUI();
 applyAdminI18n();
 function _doOpenAdminLoad(){
 if(fbEnabled){
@@ -2289,24 +2295,24 @@ subject:"🥦 配達を開始しました / Bắt đầu giao hàng",
 message:msgJa+"\n\n---\n\n"+msgVi
 }).catch(function(e){console.error("[NNY] delivery notify email:",e);});
 }
-if(LINE_NOTIFY_TOKEN&&o.lineNotify){
-var lineMsg="\n🥦【配達開始通知】\n注文番号: "+o.no+"\nお名前: "+o.name+"\n"+msgJa;
-fetch("https://notify-api.line.me/api/notify",{
-method:"POST",
-headers:{"Content-Type":"application/x-www-form-urlencoded","Authorization":"Bearer "+LINE_NOTIFY_TOKEN},
-body:"message="+encodeURIComponent(lineMsg)
-}).catch(function(e){console.error("[NNY] LINE Notify:",e);});
+if(LINE_CHANNEL_TOKEN&&LINE_ADMIN_USERID){
+var lineDelivMsg="🥦【配達開始通知】\n注文番号: "+o.no+"\nお名前: "+o.name+"\n"+msgJa;
+_sendLineMsg(LINE_ADMIN_USERID,lineDelivMsg);
 }
+}
+function _sendLineMsg(userId,text){
+if(!LINE_CHANNEL_TOKEN||!userId)return;
+fetch("https://api.line.me/v2/bot/message/push",{
+method:"POST",
+headers:{"Content-Type":"application/json","Authorization":"Bearer "+LINE_CHANNEL_TOKEN},
+body:JSON.stringify({to:userId,messages:[{type:"text",text:text}]})
+}).catch(function(e){console.error("[NNY] LINE push:",e);});
 }
 function sendLineNotifyNewOrder(o){
-if(!LINE_NOTIFY_TOKEN)return;
+if(!LINE_CHANNEL_TOKEN||!LINE_ADMIN_USERID)return;
 var items=(o.items||[]).map(function(it){return it.e+(it.vi||it.ja)+"×"+it.qty;}).join("、");
-var msg="\n🛒【新規注文】\n番号: "+o.no+"\nお名前: "+o.name+"\n電話: "+o.phone+"\n商品: "+items+"\n合計: "+o.tot.toLocaleString()+"₫";
-fetch("https://notify-api.line.me/api/notify",{
-method:"POST",
-headers:{"Content-Type":"application/x-www-form-urlencoded","Authorization":"Bearer "+LINE_NOTIFY_TOKEN},
-body:"message="+encodeURIComponent(msg)
-}).catch(function(e){console.error("[NNY] LINE Notify order:",e);});
+var msg="🛒【新規注文】\n番号: "+o.no+"\nお名前: "+o.name+"\n電話: "+o.phone+"\n商品: "+items+"\n合計: "+(o.tot||0).toLocaleString()+"₫";
+_sendLineMsg(LINE_ADMIN_USERID,msg);
 }
 function adminLoadSS(no,imgEl){
 var o=ORDERS.find(function(x){return x.no===no;});
