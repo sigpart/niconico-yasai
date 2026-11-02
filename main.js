@@ -2378,8 +2378,8 @@ var _gasUrl="https://script.google.com/macros/s/AKfycbz0CzO3ofVcQSRVX3V0igvR3WxD
 +"?token="+encodeURIComponent(LINE_CHANNEL_TOKEN)
 +"&userId="+encodeURIComponent(userId)
 +"&text="+encodeURIComponent(text);
-fetch(_gasUrl,{mode:"no-cors"});
-console.log("[NNY] LINE push → GAS GET送信");
+var _img=new Image();_img.src=_gasUrl;
+console.log("[NNY] LINE push → GAS img送信");
 }
 function adminLoadSS(no,imgEl){
 var o=ORDERS.find(function(x){return x.no===no;});
