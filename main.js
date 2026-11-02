@@ -2379,9 +2379,14 @@ console.log("[NNY] LINE push →",userId.slice(0,8)+"...");
 var _gasUrl="https://script.google.com/macros/s/AKfycbz0CzO3ofVcQSRVX3V0igvR3WxDJJ-VBB6ysW6lrQAcb0Urr5GyqxwIufo-7AWOQ77E/exec"
 +"?token="+encodeURIComponent(LINE_CHANNEL_TOKEN)
 +"&userId="+encodeURIComponent(userId)
-+"&text="+encodeURIComponent(text);
++"&text="+encodeURIComponent(text)
++"&_t="+Date.now();
+if(typeof fetch==="function"){
+fetch(_gasUrl,{mode:"no-cors"}).catch(function(){});
+}else{
 var _img=new Image();_img.src=_gasUrl;
-console.log("[NNY] LINE push → GAS img送信");
+}
+console.log("[NNY] LINE push → GAS fetch送信");
 }
 function adminLoadSS(no,imgEl){
 var o=ORDERS.find(function(x){return x.no===no;});
