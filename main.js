@@ -3303,17 +3303,25 @@ var coords=document.getElementById("dorigin-farm-coords");
 var btn=document.getElementById("dorigin-save-btn");
 if(coords)coords.textContent="📍 ジオコーディング中...";
 if(btn)btn.disabled=true;
+var _geoTimer=setTimeout(function(){
+if(btn)btn.disabled=false;
+if(coords)coords.textContent="⚠ タイムアウト。現在の座標で保存します。";
+DELIVERY_ORIGIN.farm={name:name,addr:addr,lat:DELIVERY_ORIGIN.farm.lat||0,lng:DELIVERY_ORIGIN.farm.lng||0,fixedFee:fixedFee};
+_persistDeliveryOrigin();
+},5000);
 fetch("https://nominatim.openstreetmap.org/search?q="+encodeURIComponent(addr)+"&format=json&limit=1").then(function(r){return r.json();}).then(function(d){
+clearTimeout(_geoTimer);
 if(!d||!d.length)throw new Error("not found");
 var lat=parseFloat(d[0].lat),lng=parseFloat(d[0].lon);
 DELIVERY_ORIGIN.farm={name:name,addr:addr,lat:lat,lng:lng,fixedFee:fixedFee};
 if(coords)coords.textContent="✅ "+lat.toFixed(5)+", "+lng.toFixed(5);
 _persistDeliveryOrigin();
 }).catch(function(){
-if(coords)coords.textContent="⚠ 住所が見つかりません。デフォルト座標で保存します。";
+clearTimeout(_geoTimer);
+if(coords)coords.textContent="⚠ 住所が見つかりません。現在の座標で保存します。";
 DELIVERY_ORIGIN.farm={name:name,addr:addr,lat:DELIVERY_ORIGIN.farm.lat||0,lng:DELIVERY_ORIGIN.farm.lng||0,fixedFee:fixedFee};
 _persistDeliveryOrigin();
-}).finally(function(){if(btn)btn.disabled=false;});
+}).then(function(){if(btn)btn.disabled=false;},function(){if(btn)btn.disabled=false;});
 }else{
 _persistDeliveryOrigin();
 }
