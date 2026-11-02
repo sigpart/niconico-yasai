@@ -2167,7 +2167,7 @@ var tglBtn=o.status==="cancelled"
 :o.status==="pending_payment"
 ?'<button class="ao-btn primary" onclick="adminOrderAction(\'confirm\',\''+safeNo+'\')" style="background:#f0c040;color:#7a5c00;border-color:#f0c040;">'+(adminLang==="vi"?"✅ Xác nhận đã nhận tiền":"✅ 入金確認する")+'</button>'
 :'<button class="ao-btn'+(o.status==="done"?"":" primary")+'" onclick="adminOrderAction(\'toggle\',\''+safeNo+'\')">'+(o.status==="done"?(adminLang==="vi"?"↩ Hoàn tác":"↩ 戻す"):(adminLang==="vi"?"✅ Hoàn thành":"✅ 完了にする"))+'</button>';
-var cancelBtn=o.status!=="cancelled"?'<button class="ao-btn" onclick="nnyConfirm(\''+(adminLang==="vi"?"本当にキャンセルしますか？ / Xác nhận hủy đơn?":"本当にキャンセルしますか？")+'\',function(){adminOrderAction(\'cancel\',\''+safeNo+'\');})" style="color:#c0392b;border-color:#c0392b;">❌ '+(adminLang==="vi"?"Hủy đơn":"キャンセル")+'</button>':'<button class="ao-btn" onclick="nnyConfirm(\''+(adminLang==="vi"?"この注文を完全に削除しますか？ / Xóa đơn hàng?":"この注文を完全に削除しますか？")+'\',function(){adminOrderAction(\'delete\',\''+safeNo+'\');})" style="color:#888;border-color:#ccc;">🗑 '+(adminLang==="vi"?"Xóa":"削除")+'</button>';
+var cancelBtn=o.status!=="cancelled"?'<button class="ao-btn" onclick="nnyConfirm(\''+(adminLang==="vi"?"本当にキャンセルしますか？ / Xác nhận hủy đơn?":"本当にキャンセルしますか？")+'\',function(){adminOrderAction(\'cancel\',\''+safeNo+'\');})" style="color:#c0392b;border-color:#c0392b;">❌ '+(adminLang==="vi"?"Hủy đơn":"キャンセル")+'</button>':'';
 var items=(o.items||[]).map(function(it){return it.e+" "+(adminLang==="vi"?it.vi:it.ja)+"×"+it.qty;}).join("、");
 var itemsSummary=(o.items||[]).map(function(it){return it.e+(it.qty>1?"×"+it.qty:"");}).join(" ");
 var isOpen=o.status!=="done";
@@ -2212,7 +2212,9 @@ html+='<div class="ao-tot">'+vnd(o.tot)+'</div>';
 html+='<div class="ao-btns">'+tglBtn+cancelBtn;
 html+='<button class="ao-btn" onclick="adminViewReceiptByNo(\''+safeNo+'\')">'+(adminLang==="vi"?"📄 Hóa đơn":"📄 領収証")+'</button>';
 html+='<button class="ao-btn" onclick="adminChatFromOrder(\''+safeNo+'\')" style="color:var(--g1);border-color:var(--g1);">💬 '+(adminLang==="vi"?"Chat":"チャット")+'</button>';
-html+='</div></div></div></div>';
+html+='</div>';
+if(o.status==="cancelled"){html+='<div style="padding:8px 12px 12px;"><button onclick="nnyConfirm(\''+(adminLang==="vi"?"この注文を完全に削除しますか？ / Xóa đơn hàng?":"この注文を完全に削除しますか？")+'\',function(){adminOrderAction(\'delete\',\''+safeNo+'\');})" style="width:100%;background:#f8d7da;color:#c0392b;border:1.5px solid #c0392b;border-radius:8px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;">🗑 '+(adminLang==="vi"?"Xóa hoàn toàn":"完全に削除する（DB・一覧から削除）")+'</button></div>';}
+html+='</div></div></div>';
 return html;
 }
 var htmlP="",htmlD="",htmlC="";
