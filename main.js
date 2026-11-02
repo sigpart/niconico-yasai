@@ -825,18 +825,22 @@ if(!area)return;
 if(cb.checked){
 area.style.display="block";
 var uid="";try{uid=localStorage.getItem("nny_line_uid")||"";}catch(e){}
-if(uid)_updateLineAuthUI(true);
+if(uid){_updateLineAuthUI(true);}else{
+_updateLineAuthUI(false);
+window.open("https://liff.line.me/"+LIFF_ID,"_blank");
+scheduleLineAuthCheck();
+}
 }else{area.style.display="none";}
 }
 function _updateLineAuthUI(authed){
 var st=document.getElementById("line-auth-status");
 var btn=document.getElementById("line-auth-btn");
 if(authed){
-if(st){st.textContent="✅ LINE認証済み";st.style.color="#1a6b2a";}
+if(st){st.textContent="✅ LINE通知が有効になりました";st.style.color="#1a6b2a";}
 if(btn)btn.style.display="none";
 }else{
-if(st){st.textContent="📲 LINEで認証するとご注文・配達通知が届きます";st.style.color="#1a6b2a";}
-if(btn)btn.style.display="inline-block";
+if(st){st.textContent="⏳ LINEアプリで認証中...";st.style.color="#7a5c00";}
+if(btn)btn.style.display="none";
 }
 }
 var _lineAuthCheckTimer=null;
