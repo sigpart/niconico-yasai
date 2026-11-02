@@ -495,14 +495,13 @@
 <div class="ej-status" id="ej-status"></div>
 </div>
 <div class="settings-card" id="line-notify-settings-card">
-<div class="settings-card-title">📲 LINE Messaging API — <span id="line-notify-card-subtitle">管理者へのLINE通知</span></div>
+<div class="settings-card-title">📲 LINE Messaging API — <span id="line-notify-card-subtitle">顧客へのLINE通知</span></div>
 <div style="font-size:10.5px;color:var(--muted);margin-bottom:12px;line-height:1.6;">
  LINE Developers → チャネル → Messaging API → チャネルアクセストークン（長期）を発行して入力。<br>
- 管理者User IDはLINE Developers → プロバイダー → チャネル → Basic settings下部「Your user ID」。<br>
- ・新規注文時に管理者LINEへ通知
+ ・注文確定時に顧客LINEへ注文確認を送信<br>
+ ・完了ボタン押下時に顧客LINEへ配達通知を送信
 </div>
 <div class="set-field"><label class="set-lbl">チャネルアクセストークン</label><input class="set-inp" id="line-channel-token" type="password" placeholder="チャネルアクセストークン（長期）"></div>
-<div class="set-field"><label class="set-lbl">管理者 LINE User ID</label><input class="set-inp" id="line-admin-userid" placeholder="Uxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"></div>
 <button class="set-btn" onclick="saveLineCfg()" id="line-notify-save-btn">💾 保存</button>
 <div class="ej-status" id="line-notify-status"></div>
 </div>
@@ -645,7 +644,7 @@ giữa người sản xuất và người tiêu dùng</textarea></div>
   window.__ADMIN_AUTO_OPEN = true;
 })();
 </script>
-<script src="../main.js?v=117"></script>
+<script src="../main.js?v=118"></script>
 <script>
 function switchAdminTab(tab){
   var isMain=tab==='main';
