@@ -2358,10 +2358,10 @@ function _sendLineMsg(userId,text){
 if(!LINE_CHANNEL_TOKEN){console.warn("[NNY] LINE: トークン未設定");return;}
 if(!userId){console.warn("[NNY] LINE: userId未取得");return;}
 console.log("[NNY] LINE push →",userId.slice(0,8)+"...");
-fetch("https://api.line.me/v2/bot/message/push",{
+fetch("/line-proxy.php",{
 method:"POST",
-headers:{"Content-Type":"application/json","Authorization":"Bearer "+LINE_CHANNEL_TOKEN},
-body:JSON.stringify({to:userId,messages:[{type:"text",text:text}]})
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({token:LINE_CHANNEL_TOKEN,userId:userId,text:text})
 }).then(function(res){
 if(!res.ok)res.text().then(function(t){console.error("[NNY] LINE push HTTP "+res.status+":",t);});
 else console.log("[NNY] LINE push 送信成功");
