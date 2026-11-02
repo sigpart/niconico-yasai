@@ -23,30 +23,33 @@ p{color:#5a7060;font-size:13px;margin:0 0 16px;line-height:1.6;}
 <script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
 <script>
 var LIFF_ID="2012327298-k4OuH8dt";
-var FRIEND_URL="https://lin.ee/Ybvi1Bf";
+function showFriendBtn(){
+  document.getElementById("ico").textContent="📲";
+  document.getElementById("ttl").textContent="友だち追加してください";
+  document.getElementById("msg").textContent="NICO NICO YASAIのLINE公式アカウントを友だち追加すると注文・配達通知が届きます。";
+  document.getElementById("add-btn").style.display="inline-block";
+}
+function showDone(){
+  document.getElementById("ico").textContent="✅";
+  document.getElementById("ttl").textContent="LINE認証完了！";
+  document.getElementById("msg").textContent="注文画面に戻ってください";
+  if(liff.isInClient()){setTimeout(function(){liff.closeWindow();},1500);}
+}
+function afterUserId(userId){
+  try{localStorage.setItem("nny_line_uid",userId);}catch(e){}
+  liff.getFriendship().then(function(data){
+    if(data&&data.friendFlag){showDone();}
+    else{showFriendBtn();}
+  }).catch(function(){showDone();});
+}
 liff.init({liffId:LIFF_ID}).then(function(){
   if(!liff.isLoggedIn()){liff.login({redirectUri:location.href});return;}
   var idToken=liff.getDecodedIDToken();
   var userId=idToken&&idToken.sub;
-  if(!userId){throw new Error("User ID取得失敗");}
-  try{localStorage.setItem("nny_line_uid",userId);}catch(e){}
-  return liff.getFriendship().then(function(data){
-    if(data&&data.friendFlag){
-      document.getElementById("ico").textContent="✅";
-      document.getElementById("ttl").textContent="LINE認証完了！";
-      document.getElementById("msg").textContent="注文画面に戻ってください";
-      if(liff.isInClient()){setTimeout(function(){liff.closeWindow();},1500);}
-    }else{
-      document.getElementById("ico").textContent="📲";
-      document.getElementById("ttl").textContent="友だち追加してください";
-      document.getElementById("msg").textContent="NICO NICO YASAIのLINE公式アカウントを友だち追加すると注文・配達通知が届きます。";
-      document.getElementById("add-btn").style.display="inline-block";
-    }
-  }).catch(function(){
-    document.getElementById("ico").textContent="✅";
-    document.getElementById("ttl").textContent="LINE認証完了！";
-    document.getElementById("msg").textContent="注文画面に戻ってください";
-    if(liff.isInClient()){setTimeout(function(){liff.closeWindow();},1500);}
+  if(userId){afterUserId(userId);return;}
+  return liff.getProfile().then(function(p){
+    if(p&&p.userId){afterUserId(p.userId);}
+    else{throw new Error("User ID取得失敗");}
   });
 }).catch(function(e){
   document.getElementById("ico").textContent="❌";
