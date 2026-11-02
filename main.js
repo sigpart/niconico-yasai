@@ -539,7 +539,6 @@ showView("receipt");
 setTimeout(function(){sendEmail(order);},600);
 setTimeout(function(){sendToSheets(order);},1000);
 setTimeout(function(){sendLineOrderConfirm(order);},1200);
-setTimeout(function(){sendLineAdminNotify(order);},1400);
 try{if(order.lineUserId)localStorage.removeItem("nny_line_uid");}catch(e){}
 setTimeout(function(){sendNewOrderEmailToAdmin(order);},1500);
 }
@@ -2339,17 +2338,6 @@ var _siteUrl="https://hanoi-order.niconicoyasai.jp/";
 var lineDelivMsg="🥦 配達を開始しました。\n到着まで今しばらくお待ちください。\n24時間以内に配達します。\n\n農家との直接やり取りはこちらのチャットより:\n"+_siteUrl+"?chat="+encodeURIComponent(o.no);
 _sendLineMsg(o.lineUserId,lineDelivMsg);
 }
-}
-function sendLineAdminNotify(o){
-if(!LINE_CHANNEL_TOKEN||!LINE_ADMIN_USERID)return;
-var items=(o.items||[]).map(function(it){return it.e+" "+it.ja+" ×"+it.qty;}).join("\n");
-var msg="🛒 新規注文が入りました！\n\n"
-+"注文番号: "+o.no+"\n"
-+"お名前: "+o.name+"\n"
-+"ご注文内容:\n"+items+"\n"
-+"合計: "+(o.tot||0).toLocaleString()+"₫\n"
-+"住所: "+(o.addr||"未入力");
-_sendLineMsg(LINE_ADMIN_USERID,msg);
 }
 function sendLineOrderConfirm(o){
 if(!LINE_CHANNEL_TOKEN||!o.lineUserId)return;
