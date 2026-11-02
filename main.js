@@ -1573,12 +1573,16 @@ if(analyticsPeriod==="month"){
 start=new Date(now.getFullYear(),now.getMonth(),1);
 nd=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
 }else if(analyticsPeriod==="3months"){
-nd=90;start=new Date();start.setDate(start.getDate()-nd+1);start.setHours(0,0,0,0);
+var _t3=new Date(now.getFullYear(),now.getMonth()-3,now.getDate());_t3.setHours(0,0,0,0);
+start=_t3;nd=Math.ceil((now-start)/86400000)+1;
 }else{
-nd=60;start=new Date();start.setDate(start.getDate()-nd+1);start.setHours(0,0,0,0);
+var _earliest=now;
+orders.forEach(function(o){var _od=new Date(o.ts);if(isNaN(_od.getTime())){var _om=(o.ts||"").match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);if(_om)_od=new Date(_om[1],_om[2]-1,_om[3]);}if(!isNaN(_od.getTime())&&_od<_earliest)_earliest=_od;});
+start=new Date(_earliest.getFullYear(),_earliest.getMonth(),_earliest.getDate());
+nd=Math.ceil((now-start)/86400000)+1;if(nd<7)nd=7;if(nd>365)nd=365;
 }
 var dm={};for(var i=0;i<nd;i++){var d=new Date(start);d.setDate(start.getDate()+i);var lbl=(d.getMonth()+1)+"/"+d.getDate();dm[lbl]=0;}
-orders.forEach(function(o){var d=new Date(o.ts);if(isNaN(d.getTime())){var m=(o.ts||"").match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);if(m)d=new Date(m[1],m[2]-1,m[3]);}var k=(d.getMonth()+1)+"/"+d.getDate();if(dm.hasOwnProperty(k))dm[k]+=o.tot;});
+orders.forEach(function(o){var d=new Date(o.ts);if(isNaN(d.getTime())){var m=(o.ts||"").match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);if(m)d=new Date(m[1],m[2]-1,m[3]);}var k=(d.getMonth()+1)+"/"+d.getDate();if(dm.hasOwnProperty(k))dm[k]+=(Number(o.tot)||0);});
 var vals=Object.values(dm),keys=Object.keys(dm),mx=Math.max.apply(null,vals)||1;
 var W=600,H=150,PL=40,PR=10,PT=10,PB=30,iW=W-PL-PR,iH=H-PT-PB,n=vals.length;
 var pts=vals.map(function(v,i){return(PL+i/(n-1||1)*iW).toFixed(1)+","+(PT+iH*(1-v/mx)).toFixed(1);});
@@ -1649,7 +1653,7 @@ var d=new Date(o.ts);
 if(isNaN(d.getTime())){var mt=(o.ts||"").match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);if(mt)d=new Date(mt[1],mt[2]-1,mt[3]);}
 if(isNaN(d.getTime()))return;
 var key=d.getFullYear()+"/"+(("0")+(d.getMonth()+1)).slice(-2);
-m[key]=(m[key]||0)+o.tot;
+m[key]=(m[key]||0)+(Number(o.tot)||0);
 });
 var sorted=Object.keys(m).sort();
 var el=document.getElementById("bar-monthly");if(!el)return;
@@ -3279,6 +3283,7 @@ var btnEm=document.getElementById("dorigin-btn-emhanoi");
 var btnFarm=document.getElementById("dorigin-btn-farm");
 var farmFields=document.getElementById("dorigin-farm-fields");
 var emInfo=document.getElementById("dorigin-emhanoi-info");
+var _saveBtn=document.getElementById("dorigin-save-btn");if(_saveBtn)_saveBtn.disabled=false;
 if(mode==="farm"){
 if(btnEm){btnEm.style.background="#fff";btnEm.style.color="var(--g2)";btnEm.style.borderColor="var(--g3)";}
 if(btnFarm){btnFarm.style.background="var(--g1)";btnFarm.style.color="#fff";btnFarm.style.borderColor="var(--g1)";}
