@@ -23,10 +23,10 @@ p{color:#5a7060;font-size:13px;margin:0;line-height:1.6;}
 var LIFF_ID="2012327298-k4OuH8dt";
 liff.init({liffId:LIFF_ID}).then(function(){
   if(!liff.isLoggedIn()){liff.login({redirectUri:location.href});return;}
-  return liff.getProfile();
-}).then(function(profile){
-  if(!profile)return;
-  try{localStorage.setItem("nny_line_uid",profile.userId);}catch(e){}
+  var idToken=liff.getDecodedIDToken();
+  var userId=idToken&&idToken.sub;
+  if(!userId){throw new Error("User ID取得失敗");}
+  try{localStorage.setItem("nny_line_uid",userId);}catch(e){}
   document.getElementById("ico").textContent="✅";
   document.getElementById("ttl").textContent="LINE認証完了！";
   document.getElementById("msg").textContent="注文画面に戻ってください";
