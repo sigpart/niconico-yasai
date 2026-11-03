@@ -3871,7 +3871,7 @@ function restoreAdminBody(){
   Array.prototype.forEach.call(adminBody.children,function(c){
     if(c.getAttribute("data-adm-hidden")){c.removeAttribute("data-adm-hidden");c.style.display="";}
   });
-  renderAdminAll();
+  if(typeof switchAdminTab==="function"){switchAdminTab("main");}else{renderAdminAll();}
   var adminScreen=document.getElementById("admin-screen");
   var sp=ADMIN_SAVED_SCROLL;
   if(adminScreen){adminScreen.scrollTop=sp;requestAnimationFrame(function(){adminScreen.scrollTop=sp;});}
