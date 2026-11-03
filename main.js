@@ -511,6 +511,7 @@ Object.keys(cart).forEach(function(id){var p=PRODUCTS.find(function(x){return x.
 ORDERS.push(order);
 ORDER_HISTORY.unshift(order);
 saveOrderHistory();
+try{localStorage.setItem("nny_last_phone",order.phone);}catch(e){}
 try{localStorage.setItem("nny_orders",JSON.stringify(ORDERS));}catch(e){}
 saveProducts();
 Object.keys(cart).forEach(function(id){
@@ -591,11 +592,31 @@ html+='</div></div>';
 });
 return html+'</div>';
 }
+function searchHistByPhone(){
+var ph=(prompt(lang==="ja"?"電話番号を入力してください":"Nhập số điện thoại của bạn")||"").trim();
+if(!ph)return;
+try{localStorage.setItem("nny_last_phone",ph);}catch(e){}
+if(!fbEnabled||!fbDb){renderHistory();return;}
+var el=document.getElementById("hist-list-el");
+el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px;">'+(lang==="ja"?"検索中...":"Đang tìm kiếm...")+'</div>';
+fbDb.collection("orders").get().then(function(snap){
+var found=[];
+snap.forEach(function(doc){var d=doc.data();if(d&&d.phone===ph)found.push(d);});
+found.sort(function(a,b){return (b.no||"").localeCompare(a.no||"");});
+var myNos=ORDER_HISTORY.map(function(x){return x.no;});
+found.forEach(function(fo){if(myNos.indexOf(fo.no)<0){ORDER_HISTORY.push(fo);}});
+ORDER_HISTORY.sort(function(a,b){return (b.no||"").localeCompare(a.no||"");});
+saveOrderHistory();
+renderHistory();
+}).catch(function(e){
+el.innerHTML='<div style="text-align:center;padding:20px;color:#c0392b;font-size:12px;">❌ '+(e&&e.message||"エラー")+'</div>';
+});
+}
 function renderHistory(){
 var el=document.getElementById("hist-list-el");
 var myOrders=ORDER_HISTORY.slice().reverse();
 if(!myOrders.length){
-el.innerHTML='<div class="hist-empty"><div class="hist-empty-ico">📋</div><div>'+T("histEmpty")+'</div></div>';return;
+el.innerHTML='<div class="hist-empty"><div class="hist-empty-ico">📋</div><div>'+T("histEmpty")+'</div>'+'<br><button onclick="searchHistByPhone()" style="margin-top:12px;padding:10px 20px;background:var(--g1);color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer;">'+(lang==="ja"?"📞 電話番号で注文を探す":"📞 Tìm đơn hàng bằng số điện thoại")+'</button></div>';return;
 }
 el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px;">読み込み中...</div>';
 if(fbEnabled&&fbDb){
@@ -1543,6 +1564,22 @@ localOrders.forEach(function(lo){
 if(!ORDERS.find(function(o){return o.no===lo.no;}))ORDERS.push(lo);
 });
 try{localStorage.setItem("nny_orders",JSON.stringify(ORDERS));}catch(e){}
+// 電話番号が一致する注文をORDER_HISTORYに反映（デバイス変更対応）
+(function(){
+try{
+var _lp=localStorage.getItem("nny_last_phone");
+if(!_lp)return;
+var _myNos=ORDER_HISTORY.map(function(x){return x.no;});
+ORDERS.forEach(function(fo){
+if(fo.phone===_lp&&_myNos.indexOf(fo.no)<0){
+ORDER_HISTORY.push(fo);
+}
+});
+ORDER_HISTORY.sort(function(a,b){return (b.no||"").localeCompare(a.no||"");});
+saveOrderHistory();
+if(typeof renderHistory==="function")renderHistory();
+}catch(ex){}
+})();
 }
 d.o=true;chk();
 fbDb.collection("reviews").doc("all").get().then(function(doc){
