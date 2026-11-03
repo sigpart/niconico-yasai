@@ -2170,7 +2170,7 @@ var statusTxt=o.status==="done"?(adminLang==="vi"?"✅ Hoàn thành":"✅ 完了
 var tglBtn=o.status==="cancelled"
 ?'<button class="ao-btn" onclick="adminOrderAction(\'restore\',\''+safeNo+'\')" style="color:#c0392b;border-color:#c0392b;">'+(adminLang==="vi"?"↩ Khôi phục":"↩ キャンセル取り消し")+'</button>'
 :o.status==="pending_payment"
-?'<button class="ao-btn primary" onclick="adminOrderAction(\'confirm\',\''+safeNo+'\')" style="background:#f0c040;color:#7a5c00;border-color:#f0c040;">'+(adminLang==="vi"?"✅ Xác nhận đã nhận tiền":"✅ 入金確認する")+'</button>'
+?'<button class="ao-btn primary" onclick="nnyConfirm(\''+(adminLang==="vi"?"Xác nhận đã nhận tiền và hoàn thành đơn?":"入金を確認して完了にしますか？配達通知が送信されます。")+'\',function(){adminOrderAction(\'confirm\',\''+safeNo+'\');})" style="background:#f0c040;color:#7a5c00;border-color:#f0c040;">'+(adminLang==="vi"?"✅ Xác nhận đã nhận tiền":"✅ 入金確認する")+'</button>'
 :o.status==="done"
 ?'<button class="ao-btn" onclick="adminOrderAction(\'toggle\',\''+safeNo+'\')">'+(adminLang==="vi"?"↩ Hoàn tác":"↩ 戻す")+'</button>'
 :'<button class="ao-btn primary" onclick="nnyConfirm(\''+(adminLang==="vi"?"Xác nhận hoàn thành? Thông báo giao hàng sẽ được gửi tới khách qua LINE. / 完了にしますか？顧客へ配達開始の通知が送信されます。":"完了にしますか？顧客へ配達開始の通知が送信されます。")+'\',function(){adminOrderAction(\'confirm\',\''+safeNo+'\');})">'+(adminLang==="vi"?"✅ Hoàn thành":"✅ 完了にする")+'</button>';
@@ -2205,7 +2205,7 @@ setTimeout(function(bid,did){if(!fbDb)return;fbDb.collection('screenshots').doc(
 html+='<div style="display:flex;flex-direction:column;gap:3px;margin-left:4px;">';
 html+='<span style="font-size:10px;font-weight:800;color:var(--muted);">'+(adminLang==="vi"?"Ảnh CK: ✅":"送金証明: ✅")+'</span>';
 html+='<span style="font-size:14px;font-weight:900;color:var(--g1);">'+vnd(o.tot)+'</span>';
-if(o.status!=="done"){html+='<button onclick="adminOrderAction(\'confirmPay\',\''+safeNo+'\')" style="margin-top:4px;background:var(--g1);color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:800;cursor:pointer;">✅ '+(adminLang==="vi"?"Xác nhận nhận tiền":"入金確認→完了")+'</button>';}
+if(o.status!=="done"){html+='<button onclick="nnyConfirm(\''+(adminLang==="vi"?"Xác nhận đã nhận tiền và hoàn thành đơn?":"入金を確認して完了にしますか？配達通知が送信されます。")+'\',function(){adminOrderAction(\'confirmPay\',\''+safeNo+'\');})" style="margin-top:4px;background:var(--g1);color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:800;cursor:pointer;">✅ '+(adminLang==="vi"?"Xác nhận nhận tiền":"入金確認→完了")+'</button>';}
 html+='</div>';
 }else{
 html+='<div style="display:flex;flex-direction:column;gap:3px;">';
