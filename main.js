@@ -1096,7 +1096,7 @@ if(!EJ.service||!EJ.template||!EJ.pubkey)return;
 if(typeof emailjs==="undefined")return;
 var items=(o.items||[]).map(function(it){return (it.e||"")+(it.vi||it.ja||"")+"×"+it.qty;}).join("、");
 var chatLink="https://hanoi-order.niconicoyasai.jp/?chat="+encodeURIComponent(o.no);
-var msg="🛒 Có đơn hàng mới!\n\nMã đơn: "+o.no+"\nHọ tên: "+o.name+"\nSố điện thoại: "+o.phone+"\nSản phẩm: "+items+"\nTổng cộng: "+(o.tot||0).toLocaleString()+"₫\n\nĐịa chỉ giao hàng: "+(o.addr||"")+(o.note?"\nGhi chú: "+o.note:"")+"\n\n💬 Chat với khách hàng:\n"+chatLink;
+var msg="Anh Ha, cảm ơn anh đã làm việc chăm chỉ!\n\nCó đơn hàng mới vừa vào. Khi giao hàng xong, anh vui lòng nhấn nút \"Hoàn thành\" để thông báo giao hàng được gửi tới khách.\nVui lòng giao hàng trong vòng 24 giờ.\nAnh kiểm tra lại địa chỉ và nội dung đơn hàng trước khi giao nhé.\n\n━━━━━━━━━━━━━━━━\n🛒 Có đơn hàng mới!\n\nMã đơn: "+o.no+"\nHọ tên: "+o.name+"\nSố điện thoại: "+o.phone+"\nSản phẩm: "+items+"\nTổng cộng: "+(o.tot||0).toLocaleString()+"₫\n\nĐịa chỉ giao hàng: "+(o.addr||"")+(o.note?"\nGhi chú: "+o.note:"")+"\n\n💬 Chat với khách hàng:\n"+chatLink;
 var targets=["bachhasonmochi@gmail.com"];
 if(EJ.admin&&EJ.admin!=="bachhasonmochi@gmail.com")targets.push(EJ.admin);
 targets.forEach(function(toEmail){
