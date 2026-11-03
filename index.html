@@ -545,6 +545,7 @@
 <div class="set-field"><label class="set-lbl">Template ID</label><input class="set-inp" id="ej-template" placeholder="template_xxxxxxx"></div>
 <div class="set-field"><label class="set-lbl">Public Key</label><input class="set-inp" id="ej-pubkey" placeholder="xxxxxxxxxxxxxxxxxxxxxxx"></div>
 <div class="set-field"><label class="set-lbl">Email gửi (From)</label><input class="set-inp" id="ej-from" placeholder="niconicoyasai@gmail.com"></div>
+<div class="set-field"><label class="set-lbl">管理者メール (Admin Email)</label><input class="set-inp" id="ej-admin" placeholder="admin@example.com" type="email"></div>
 <button class="set-btn" onclick="saveEJConfig()" id="ej-save-btn">💾 Lưu cài đặt</button>
 <div style="display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap;">
 <input class="set-inp" id="ej-test-to" type="email" placeholder="Email thử nghiệm..." style="flex:1;min-width:140px;">
@@ -553,15 +554,22 @@
 <div class="ej-status" id="ej-status"></div>
 </div>
 <div class="settings-card" id="line-notify-settings-card">
-<div class="settings-card-title">📲 LINE Notify — <span id="line-notify-card-subtitle">顧客・管理者へのLINE通知</span></div>
+<div class="settings-card-title">📲 LINE Messaging API — <span id="line-notify-card-subtitle">顧客へのLINE通知</span></div>
 <div style="font-size:10.5px;color:var(--muted);margin-bottom:12px;line-height:1.6;">
- <a href="https://notify-bot.line.me/my/" target="_blank" style="color:var(--g1);font-weight:700;">notify-bot.line.me</a> でトークン取得 → 「NICONICOYASAIの公式LINE」を選択<br>
- ・新規注文時に管理者LINEへ通知<br>
- ・配達開始時に顧客LINEへ通知（購入時に同意した場合）
+ LINE Developers → チャネル → Messaging API → チャネルアクセストークン（長期）を発行して入力。<br>
+ ・注文確定時に顧客LINEへ注文確認を送信<br>
+ ・完了ボタン押下時に顧客LINEへ配達通知を送信
 </div>
-<div class="set-field"><label class="set-lbl">LINE Notify Token</label><input class="set-inp" id="line-notify-token" type="password" placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"></div>
-<button class="set-btn" onclick="saveLineNotifyToken()" id="line-notify-save-btn">💾 保存</button>
+<div class="set-field"><label class="set-lbl">チャネルアクセストークン</label><input class="set-inp" id="line-channel-token" type="password" placeholder="チャネルアクセストークン（長期）"></div>
+<div class="set-field"><label class="set-lbl">管理者 LINE User ID (任意)</label><input class="set-inp" id="line-admin-userid" placeholder="Uxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"></div>
+<button class="set-btn" onclick="saveLineCfg()" id="line-notify-save-btn">💾 保存</button>
 <div class="ej-status" id="line-notify-status"></div>
+</div>
+<div class="settings-card" id="notif-diag-card" style="grid-column:1/-1;">
+<div class="settings-card-title">🔔 通知設定の確認 / Kiểm tra cài đặt thông báo</div>
+<div id="notif-diag-body" style="font-size:12px;line-height:2;">
+<button class="set-btn" onclick="showNotifDiag()" style="background:var(--g1);color:#fff;margin-bottom:10px;">🔍 診断を実行 / Kiểm tra ngay</button>
+</div>
 </div>
 <div class="settings-card" id="fb-settings-card" style="grid-column:1/-1;">
 <div class="settings-card-title" id="fb-card-title">🔥 Firebase — <span id="fb-card-subtitle">Lưu trữ dữ liệu đám mây</span></div>
@@ -693,7 +701,7 @@ giữa người sản xuất và người tiêu dùng</textarea></div>
 </div>
 <div class="email-toast" id="email-toast"></div>
 <script src=""></script>
-<script src="main.js?v=142"></script>
+<script src="main.js?v=143"></script>
 <div id="qr-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;flex-direction:column;align-items:center;justify-content:center;">
 <div style="background:#fff;border-radius:16px;padding:24px;max-width:360px;width:90%;text-align:center;">
 <div id="qr-logo" style="font-size:48px;margin-bottom:8px;"></div>

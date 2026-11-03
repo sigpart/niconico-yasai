@@ -1157,6 +1157,38 @@ var uid=document.getElementById("line-admin-userid");
 if(tok)tok.value=LINE_CHANNEL_TOKEN;
 if(uid)uid.value=LINE_ADMIN_USERID;
 }
+function saveLineNotifyToken(){saveLineCfg();}
+function showNotifDiag(){
+var el=document.getElementById("notif-diag-body");
+if(!el)return;
+var rows=[];
+function row(label,ok,note){
+var ico=ok?"✅":"❌";
+var col=ok?"var(--g2)":"var(--red)";
+return "<div style='margin:2px 0;'><span style='color:"+col+";'>"+ico+"</span> <b>"+label+"</b>"+(note?" — <span style='color:var(--muted);'>"+note+"</span>":"")+"</div>";
+}
+var ejOk=!!(EJ.service&&EJ.template&&EJ.pubkey);
+rows.push(row("EmailJS Service ID",!!EJ.service,EJ.service||"未設定"));
+rows.push(row("EmailJS Template ID",!!EJ.template,EJ.template||"未設定"));
+rows.push(row("EmailJS Public Key",!!EJ.pubkey,EJ.pubkey?"設定済み":"未設定"));
+rows.push(row("管理者メール (ej-admin)",!!EJ.admin,EJ.admin||"未設定 (bachhasonmochi@gmail.comへ送信)"));
+rows.push(row("LINE チャネルトークン",!!LINE_CHANNEL_TOKEN,LINE_CHANNEL_TOKEN?"設定済み":"未設定"));
+rows.push(row("LINE 管理者UserID",!!LINE_ADMIN_USERID,LINE_ADMIN_USERID||"未設定"));
+if(typeof emailjs!=="undefined"){rows.push(row("EmailJS SDK",true,"読み込み済み"));}
+else{rows.push(row("EmailJS SDK",false,"未読み込み — index.htmlのscriptタグを確認"));}
+var summary="";
+if(!ejOk){summary="<div style='margin-top:8px;padding:8px 12px;background:#fff3cd;border-radius:6px;font-size:11px;color:#856404;'>⚠️ EmailJSの設定が不完全です。Service ID・Template ID・Public Keyを入力して保存してください。</div>";}
+if(!LINE_CHANNEL_TOKEN){summary+="<div style='margin-top:6px;padding:8px 12px;background:#fff3cd;border-radius:6px;font-size:11px;color:#856404;'>⚠️ LINEチャネルトークンが未設定です。顧客へのLINE通知が機能しません。</div>";}
+if(ejOk&&LINE_CHANNEL_TOKEN){summary="<div style='margin-top:8px;padding:8px 12px;background:var(--gp);border-radius:6px;font-size:11px;color:var(--g2);'>✅ メール・LINE通知ともに設定済みです。</div>";}
+var queueInfo="";
+if(typeof fbDb!=="undefined"&&fbDb){
+fbDb.collection("line_queue").where("sent","==",false).get().then(function(snap){
+var qel=document.getElementById("notif-diag-queue");
+if(qel)qel.innerHTML="<div style='margin-top:6px;font-size:11px;color:var(--muted);'>📥 LINE送信待ちキュー: <b>"+snap.size+"件</b></div>";
+}).catch(function(){});}
+else{queueInfo="<div style='margin-top:6px;font-size:11px;color:var(--muted);'>Firebase未接続のためキュー確認不可</div>";}
+el.innerHTML="<button class='set-btn' onclick='showNotifDiag()' style='background:var(--g1);color:#fff;margin-bottom:10px;'>🔍 再診断 / Kiểm tra lại</button>"+rows.join("")+summary+queueInfo+"<div id='notif-diag-queue'></div>";
+}
 function applySite(){var badge=document.getElementById("site-badge").value;var h1ja=document.getElementById("site-h1-ja").value.replace(/\n/g,"<br>");var h1vi=document.getElementById("site-h1-vi").value.replace(/\n/g,"<br>");var sja=document.getElementById("site-sub-ja").value;var svi=document.getElementById("site-sub-vi").value;I.ja.heroEyebrow=badge;I.vi.heroEyebrow=badge;I.ja.heroH1=h1ja;I.vi.heroH1=h1vi;I.ja.heroSub=sja;I.vi.heroSub=svi;applyI18n();closeAdmin();}
 var BANK_CFG={code:"970422",bankName:"MB Bank",account:"",owner:"",descTemplate:"NICONICO {no}"};
 (function(){try{var b=localStorage.getItem("nny_bank");if(b)BANK_CFG=JSON.parse(b);}catch(e){}})();
