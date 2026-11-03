@@ -2272,7 +2272,7 @@ html+='<div class="ao-meta">👤 '+esc(o.name)+' · 📞 '+esc(o.phone)+(o.email
 html+='<div class="ao-meta">🏠 '+esc(o.addr||"")+'</div>';
 html+='<div class="ao-items">'+items+'</div>';
 if(o.payment==="vietqr"){
-var ssDocId=o.screenshotUrl||null;
+var ssDocId=o.screenshotUrl||o.no.replace(/[^a-zA-Z0-9]/g,"-");
 html+='<div style="display:flex;align-items:center;gap:8px;margin-top:6px;padding-top:6px;border-top:1px solid var(--gp);">';
 html+='<span style="font-size:10px;font-weight:800;color:var(--muted);">'+(adminLang==="vi"?"Ảnh CK:":"送金証明:")+'</span>';
 if(ssDocId){
@@ -2467,8 +2467,9 @@ else if(fbAuth){fbAuth.signInAnonymously().then(_doWrite).catch(function(e){cons
 }
 function adminLoadSS(no,imgEl){
 var o=ORDERS.find(function(x){return x.no===no;});
-if(!o||!o.screenshotUrl||!fbDb)return;
-fbDb.collection('screenshots').doc(o.screenshotUrl).get().then(function(doc){
+if(!o||!fbDb)return;
+var docId=o.screenshotUrl||o.no.replace(/[^a-zA-Z0-9]/g,"-");
+fbDb.collection('screenshots').doc(docId).get().then(function(doc){
 if(doc.exists&&imgEl)imgEl.src=doc.data().data;
 }).catch(function(){});
 }

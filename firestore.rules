@@ -9,10 +9,15 @@ service cloud.firestore {
     }
 
     // 注文: 匿名を含む認証済みユーザーが作成・読み取り可、更新・削除はメール認証ユーザーのみ
+    // screenshotUrlフィールドのみ匿名ユーザーも更新可（スクショURL保存のため）
     match /orders/{orderId} {
       allow create: if request.auth != null;
       allow read: if request.auth != null;
-      allow update, delete: if request.auth != null && request.auth.token.email != null;
+      allow update: if request.auth != null && (
+        request.auth.token.email != null ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['screenshotUrl'])
+      );
+      allow delete: if request.auth != null && request.auth.token.email != null;
     }
 
     // チャット: 匿名を含む認証済みユーザーが書き込み可、読み取りはメール認証ユーザーのみ
