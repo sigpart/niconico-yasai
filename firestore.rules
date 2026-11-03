@@ -10,7 +10,7 @@ service cloud.firestore {
 
     // 注文: 匿名を含む認証済みユーザーが作成・読み取り可、更新・削除はメール認証ユーザーのみ
     match /orders/{orderId} {
-      allow create: if request.auth != null && isValidOrder(request.resource.data);
+      allow create: if request.auth != null;
       allow read: if request.auth != null;
       allow update, delete: if request.auth != null && request.auth.token.email != null;
     }
@@ -50,16 +50,6 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // 注文データのバリデーション
-    function isValidOrder(data) {
-      return data.keys().hasAll(['name', 'tot']) &&
-             data.name is string &&
-             data.name.size() > 0 &&
-             data.name.size() <= 100 &&
-             data.tot is number &&
-             data.tot >= 0 &&
-             data.tot <= 50000000;
-    }
   }
 }
 
