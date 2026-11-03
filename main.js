@@ -2373,20 +2373,11 @@ var msg="🥦 ご注文ありがとうございます！\n\n"
 _sendLineMsg(o.lineUserId,msg);
 }
 function _sendLineMsg(userId,text){
-if(!LINE_CHANNEL_TOKEN){console.warn("[NNY] LINE: トークン未設定");return;}
 if(!userId){console.warn("[NNY] LINE: userId未取得");return;}
-console.log("[NNY] LINE push →",userId.slice(0,8)+"...");
-var _gasUrl="https://script.google.com/macros/s/AKfycbz0CzO3ofVcQSRVX3V0igvR3WxDJJ-VBB6ysW6lrQAcb0Urr5GyqxwIufo-7AWOQ77E/exec"
-+"?token="+encodeURIComponent(LINE_CHANNEL_TOKEN)
-+"&userId="+encodeURIComponent(userId)
-+"&text="+encodeURIComponent(text)
-+"&_t="+Date.now();
-if(typeof fetch==="function"){
-fetch(_gasUrl,{mode:"no-cors"}).catch(function(){});
-}else{
-var _img=new Image();_img.src=_gasUrl;
-}
-console.log("[NNY] LINE push → GAS fetch送信");
+if(!fbDb){console.warn("[NNY] LINE: Firestore未初期化");return;}
+fbDb.collection("line_queue").add({userId:userId,text:text,sent:false,ts:Date.now()}).then(function(){
+console.log("[NNY] LINE queue書き込み完了");
+}).catch(function(e){console.error("[NNY] LINE queue書き込みエラー:",e.message);});
 }
 function adminLoadSS(no,imgEl){
 var o=ORDERS.find(function(x){return x.no===no;});
