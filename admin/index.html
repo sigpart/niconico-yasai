@@ -644,12 +644,14 @@ giữa người sản xuất và người tiêu dùng</textarea></div>
   window.__ADMIN_AUTO_OPEN = true;
 })();
 </script>
-<script src="../main.js?v=148"></script>
+<script src="../main.js?v=149"></script>
 <script>
 function switchAdminTab(tab){
   var isMain=tab==='main';
   var tm=document.getElementById('adm-tab-main');
   var ts=document.getElementById('adm-tab-settings');
+  // インラインチャット表示中はadmin-bodyを復元してからタブ切り替え
+  if(!tm&&!ts&&typeof restoreAdminBody==='function'){restoreAdminBody();tm=document.getElementById('adm-tab-main');ts=document.getElementById('adm-tab-settings');}
   var bm=document.getElementById('adm-tab-btn-main');
   var bs=document.getElementById('adm-tab-btn-settings');
   if(tm)tm.style.display=isMain?'block':'none';

@@ -3584,7 +3584,15 @@ if(l.screenshotUrl)o.screenshotUrl=l.screenshotUrl;
 }
 return o;
 });
-lo.forEach(function(x){if(!merged.find(function(o){return o.no===x.no;})&&x.status!=="cancelled")merged.push(x);});
+// ローカルのみの注文は直近2分以内に作成されたもののみ追加（古いものはFirestoreで削除済みとみなす）
+var _now=Date.now();
+lo.forEach(function(x){
+if(merged.find(function(o){return o.no===x.no;}))return;
+if(x.status==="cancelled")return;
+var _age=Infinity;try{var _d=new Date((x.ts||"").replace(/(\d{4})\/(\d{2})\/(\d{2})/,"$1-$2-$3"));if(!isNaN(_d))_age=_now-_d.getTime();}catch(e){}
+if(_age>120000)return; // 2分以上前の注文はFirestore削除済みとみなし復活させない
+merged.push(x);
+});
 ORDERS=merged;
 try{localStorage.setItem("nny_orders",JSON.stringify(ORDERS));}catch(e){}
 }
