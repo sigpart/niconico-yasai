@@ -1095,14 +1095,15 @@ function sendNewOrderEmailToAdmin(o){
 if(!EJ.service||!EJ.template||!EJ.pubkey)return;
 if(typeof emailjs==="undefined")return;
 var items=(o.items||[]).map(function(it){return (it.e||"")+(it.vi||it.ja||"")+"×"+it.qty;}).join("、");
-var msg="🛒 新規注文が入りました\n\n番号: "+o.no+"\nお名前: "+o.name+"\n電話: "+o.phone+"\n商品: "+items+"\n合計: "+(o.tot||0).toLocaleString()+"₫\n\n配達先: "+(o.addr||"")+(o.note?"\n備考: "+o.note:"");
+var chatLink="https://hanoi-order.niconicoyasai.jp/?chat="+encodeURIComponent(o.no);
+var msg="🛒 Có đơn hàng mới!\n\nMã đơn: "+o.no+"\nHọ tên: "+o.name+"\nSố điện thoại: "+o.phone+"\nSản phẩm: "+items+"\nTổng cộng: "+(o.tot||0).toLocaleString()+"₫\n\nĐịa chỉ giao hàng: "+(o.addr||"")+(o.note?"\nGhi chú: "+o.note:"")+"\n\n💬 Chat với khách hàng:\n"+chatLink;
 var targets=["bachhasonmochi@gmail.com"];
-if(EJ.admin)targets.push(EJ.admin);
+if(EJ.admin&&EJ.admin!=="bachhasonmochi@gmail.com")targets.push(EJ.admin);
 targets.forEach(function(toEmail){
 emailjs.send(EJ.service,EJ.template,{
-to_email:toEmail,to_name:"農家・管理者",from_name:"NICO NICO YASAI",
+to_email:toEmail,to_name:"Nông dân / 管理者",from_name:"NICO NICO YASAI",
 reply_to:EJ.from||"",
-subject:"🛒 新規注文 #"+o.no+" — "+o.name,
+subject:"🛒 Đơn hàng mới #"+o.no+" — "+o.name,
 message:msg
 }).catch(function(e){console.error("[NNY] order notify email:",e);});
 });
