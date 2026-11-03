@@ -622,7 +622,8 @@ var myOrders=ORDER_HISTORY.slice().reverse();
 if(!myOrders.length){
 el.innerHTML='<div class="hist-empty"><div class="hist-empty-ico">📋</div><div>'+T("histEmpty")+'</div>'+'<br><button onclick="searchHistByPhone()" style="margin-top:12px;padding:10px 20px;background:var(--g1);color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer;">'+(lang==="ja"?"📞 電話番号で注文を探す":"📞 Tìm đơn hàng bằng số điện thoại")+'</button></div>';return;
 }
-el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px;">読み込み中...</div>';
+// 先にローカルデータで描画し、Firebaseでステータスだけ非同期更新
+el.innerHTML=_buildHistHTML(myOrders,{});
 if(fbEnabled&&fbDb){
 var nos=myOrders.map(function(o){return o.no.replace(/[^a-zA-Z0-9]/g,"-");});
 var promises=nos.map(function(docId){return fbDb.collection("orders").doc(docId).get();});
@@ -632,11 +633,7 @@ docs.forEach(function(doc){
 if(doc.exists){var d=doc.data();if(d&&d.no&&d.status)statusMap[d.no]=d.status;}
 });
 el.innerHTML=_buildHistHTML(myOrders,statusMap);
-}).catch(function(){
-el.innerHTML=_buildHistHTML(myOrders,{});
-});
-} else {
-el.innerHTML=_buildHistHTML(myOrders,{});
+}).catch(function(){});
 }
 }
 function openChatFromHistory(no){
@@ -2413,6 +2410,7 @@ else if(action==="cancel"){o.status="cancelled";}
 else if(action==="restore"){o.status="new";}
 else if(action==="delete"){
 ORDERS=ORDERS.filter(function(x){return x.no!==no;});
+_deletedOrderNos[no]=Date.now();
 if(typeof fbDeleteOrder==="function")fbDeleteOrder(no);
 try{localStorage.setItem("nny_orders",JSON.stringify(ORDERS));}catch(e){}
 renderAdminOrders2();renderAdminStats();
@@ -3312,6 +3310,7 @@ if(desc)desc.value=BANK_CFG.descTemplate||"NICONICO {no}";
 var _needFbProductSync=false;
 var _localOrderChanges={}; // {no: timestamp} ローカルで最近変更した注文を記録（ポーリング上書き防止）
 var _pendingOrderSaves={}; // {no: orderObj} Firestoreへの保存待ち注文
+var _deletedOrderNos={}; // {no: timestamp} 削除済み注文番号（ポーリング復活防止）
 var _localProductChanges={}; // {id: timestamp} ローカルで最近変更した商品を記録
 // ページリロード後も保護を引き継ぐためlocalStorageから復元
 try{var _lpcSaved=JSON.parse(localStorage.getItem('nny_prod_changes')||'{}');var _lpcNow=Date.now();Object.keys(_lpcSaved).forEach(function(id){if(_lpcNow-_lpcSaved[id]<300000)_localProductChanges[id]=_lpcSaved[id];});}catch(e){}
@@ -3568,6 +3567,8 @@ renderProducts();
 }).catch(function(){});
 fbDb.collection("orders").get().then(function(snap){
 var a=[];snap.forEach(function(doc){a.push(doc.data());});
+// 削除済み注文をFirestoreデータから除外（削除完了前のポーリング復活防止）
+a=a.filter(function(o){return !_deletedOrderNos[o.no];});
 if(a.length){
 var lo=ORDERS;
 var merged=a.map(function(o){
@@ -3823,7 +3824,9 @@ function sendChatMessage(){
     inp.disabled=false;
   };
   try{
-    translateText(text,tgtLang,srcLang,function(translated){_doSend(translated);});
+    translateText(text,tgtLang,srcLang,function(translated){
+      _doSend(translated===text?"":translated);
+    });
     setTimeout(function(){if(inp.disabled){_doSend("");}},5000);
   }catch(e){_doSend("");}
 }
@@ -3924,13 +3927,13 @@ function adminSendChatInline(orderNo){
     fbDb.collection("chats").doc(chatKey(orderNo)).collection("messages").add(msg)
       .then(function(){
         fbDb.collection("chats").doc(chatKey(orderNo)).set({lastMsg:msg.text,lastTs:Date.now(),unread:false},{merge:true});
-        _notifyCust(msg.text);
+        _notifyCust(msg.translation||msg.text);
         inp.disabled=false;
         adminChatFromOrder(orderNo);
       }).catch(function(e){inp.disabled=false;alert("送信失敗: "+e.message);});
   }
   var custLang=ADMIN_CHAT_CUST_LANG||'ja';
-  translateText(text,custLang,srcLang,function(tr){_save({role:"farmer",text:text,translation:tr,lang:srcLang,ts:Date.now()});});
+  translateText(text,custLang,srcLang,function(tr){_save({role:"farmer",text:text,translation:(tr===text?"":tr),lang:srcLang,ts:Date.now()});});
 }
 
 function renderAdminChat(){
@@ -3992,8 +3995,9 @@ function adminSendChat(orderNo){
       var _co=ORDERS.find(function(x){return x.no===orderNo;});
       if(_co){
         var chatLink="https://hanoi-order.niconicoyasai.jp/?chat="+encodeURIComponent(orderNo);
+        var _notifText=translated||text;
         if(_co.lineUserId){
-          _sendLineMsg(_co.lineUserId,"農家より連絡が届きました🌿\n\n「"+text+"」\n\n以下のリンクから直接チャットを開けます:\n"+chatLink);
+          _sendLineMsg(_co.lineUserId,"農家より連絡が届きました🌿\n\n「"+_notifText+"」\n\n以下のリンクから直接チャットを開けます:\n"+chatLink);
         }else if(_co.email&&EJ.service&&EJ.template&&EJ.pubkey&&typeof emailjs!=="undefined"){
           var subj2="NICO NICO便ハノイ - 農家より連絡があります / Nông dân có tin nhắn cho bạn";
           var bodyJa2=(_co.name||"")+" 様\n\n農家 Bach Manh Ha より連絡が届きました。\n\n注文番号: "+orderNo+"\n\n以下のリンクから直接チャット画面を開けます:\n"+chatLink+"\n\nNICO NICO YASAI";
