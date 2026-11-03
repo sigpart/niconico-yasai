@@ -2445,7 +2445,7 @@ message:msgJa+"\n\n---\n\n"+msgVi
 }
 }
 function sendLineOrderConfirm(o){
-if(!LINE_CHANNEL_TOKEN||!o.lineUserId)return;
+if(!o.lineUserId)return;
 var items=(o.items||[]).map(function(it){return it.e+" "+it.ja+" ×"+it.qty;}).join("\n");
 var msg="ご注文ありがとうございます！🛍️\n\n"
 +"注文番号: "+o.no+"\n"
