@@ -2171,7 +2171,9 @@ var tglBtn=o.status==="cancelled"
 ?'<button class="ao-btn" onclick="adminOrderAction(\'restore\',\''+safeNo+'\')" style="color:#c0392b;border-color:#c0392b;">'+(adminLang==="vi"?"↩ Khôi phục":"↩ キャンセル取り消し")+'</button>'
 :o.status==="pending_payment"
 ?'<button class="ao-btn primary" onclick="adminOrderAction(\'confirm\',\''+safeNo+'\')" style="background:#f0c040;color:#7a5c00;border-color:#f0c040;">'+(adminLang==="vi"?"✅ Xác nhận đã nhận tiền":"✅ 入金確認する")+'</button>'
-:'<button class="ao-btn'+(o.status==="done"?"":" primary")+'" onclick="adminOrderAction(\'toggle\',\''+safeNo+'\')">'+(o.status==="done"?(adminLang==="vi"?"↩ Hoàn tác":"↩ 戻す"):(adminLang==="vi"?"✅ Hoàn thành":"✅ 完了にする"))+'</button>';
+:o.status==="done"
+?'<button class="ao-btn" onclick="adminOrderAction(\'toggle\',\''+safeNo+'\')">'+(adminLang==="vi"?"↩ Hoàn tác":"↩ 戻す")+'</button>'
+:'<button class="ao-btn primary" onclick="nnyConfirm(\''+(adminLang==="vi"?"Xác nhận hoàn thành? Thông báo giao hàng sẽ được gửi tới khách qua LINE. / 完了にしますか？顧客へ配達開始の通知が送信されます。":"完了にしますか？顧客へ配達開始の通知が送信されます。")+'\',function(){adminOrderAction(\'confirm\',\''+safeNo+'\');})">'+(adminLang==="vi"?"✅ Hoàn thành":"✅ 完了にする")+'</button>';
 var cancelBtn=o.status!=="cancelled"?'<button class="ao-btn" onclick="nnyConfirm(\''+(adminLang==="vi"?"本当にキャンセルしますか？ / Xác nhận hủy đơn?":"本当にキャンセルしますか？")+'\',function(){adminOrderAction(\'cancel\',\''+safeNo+'\');})" style="color:#c0392b;border-color:#c0392b;">❌ '+(adminLang==="vi"?"Hủy đơn":"キャンセル")+'</button>':'';
 var items=(o.items||[]).map(function(it){return it.e+" "+(adminLang==="vi"?it.vi:it.ja)+"×"+it.qty;}).join("、");
 var itemsSummary=(o.items||[]).map(function(it){return it.e+(it.qty>1?"×"+it.qty:"");}).join(" ");
@@ -2340,7 +2342,7 @@ return;
 if(o.status==="done"&&prevStatus!=="done"){deleteChatData(no);sendDeliveryNotification(o);}
 _localOrderChanges[no]=Date.now();
 if(action==="cancel"){
-if(typeof fbDeleteOrder==="function")fbDeleteOrder(o.no);
+if(typeof fbSaveOrder==="function")fbSaveOrder(o);
 }else{
 _pendingOrderSaves[no]=Object.assign({},o);
 if(typeof fbSaveOrder==="function")fbSaveOrder(o);
