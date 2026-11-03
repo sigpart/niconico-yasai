@@ -1144,7 +1144,7 @@ LINE_CHANNEL_TOKEN=(tok.value||"").trim();
 LINE_ADMIN_USERID=uid?(uid.value||"").trim():"";
 var cfg={token:LINE_CHANNEL_TOKEN,adminId:LINE_ADMIN_USERID};
 try{localStorage.setItem("nny_line_cfg",JSON.stringify(cfg));}catch(e){}
-if(typeof fbDb!=="undefined"&&fbDb){fbDb.collection("settings").doc("app_config").set({lineCfg:JSON.stringify(cfg)},{merge:true}).catch(function(e){console.error("[NNY] LINE cfg save:",e);});}
+if(typeof fbDb!=="undefined"&&fbDb){fbDb.collection("settings").doc("app_config").set({lineCfg:JSON.stringify(cfg)},{merge:true}).catch(function(e){console.error("[NNY] LINE cfg save:",e);});fbDb.collection("pub_config").doc("line").set({token:LINE_CHANNEL_TOKEN},{merge:true}).catch(function(e){console.error("[NNY] pub_config save:",e);});}
 var st=document.getElementById("line-notify-status");
 if(st){st.style.display="block";st.style.background="var(--gp)";st.style.color="var(--g2)";st.textContent="✅ 保存しました！";}
 }
@@ -2456,14 +2456,15 @@ _sendLineMsg(o.lineUserId,msg);
 }
 function _sendLineMsg(userId,text){
 if(!userId){console.warn("[NNY] LINE: userId未取得");return;}
-if(!fbDb){console.warn("[NNY] LINE: Firestore未初期化");return;}
-function _doWrite(){
-fbDb.collection("line_queue").add({userId:userId,text:text,sent:false,ts:Date.now()}).then(function(){
-console.log("[NNY] LINE queue書き込み完了");
-}).catch(function(e){console.error("[NNY] LINE queue書き込みエラー:",e.message);});
-}
-if(fbAuth&&fbAuth.currentUser){_doWrite();}
-else if(fbAuth){fbAuth.signInAnonymously().then(_doWrite).catch(function(e){console.error("[NNY] LINE anon auth:",e.message);});}
+fetch("https://hanoi-order.niconicoyasai.jp/line-proxy.php",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({userId:userId,text:text})
+}).then(function(r){
+r.text().then(function(t){console.log("[NNY] LINE送信 status:"+r.status,t.slice(0,100));});
+}).catch(function(e){
+console.error("[NNY] LINE proxy error:",e.message);
+});
 }
 function adminLoadSS(no,imgEl){
 var o=ORDERS.find(function(x){return x.no===no;});
