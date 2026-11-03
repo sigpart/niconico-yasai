@@ -516,10 +516,11 @@ Object.keys(cart).forEach(function(id){
 var p=PRODUCTS.find(function(x){return x.id==id;});
 if(p&&typeof fbSaveProduct==="function")fbSaveProduct(p);
 });
-if(order.screenshot&&typeof uploadScreenshot==="function"&&fbDb){
+if(order.screenshot&&typeof uploadScreenshot==="function"){
 var _ssData=order.screenshot;
 order.screenshot=null;
 if(typeof fbSaveOrder==="function")fbSaveOrder(order);
+function _doUpload(){
 uploadScreenshot(order.no,_ssData,function(data){
 if(data){
 order.screenshotUrl=order.no.replace(/[^a-zA-Z0-9]/g,'-');
@@ -529,6 +530,10 @@ try{localStorage.setItem("nny_orders",JSON.stringify(ORDERS));}catch(e){}
 if(typeof fbSaveOrder==="function")fbSaveOrder(Object.assign({},order));
 }
 });
+}
+if(fbDb&&fbAuth&&fbAuth.currentUser){_doUpload();}
+else if(fbAuth){fbAuth.signInAnonymously().then(function(){_doUpload();}).catch(function(){_doUpload();});}
+else{setTimeout(_doUpload,2000);}
 } else {
 if(typeof fbSaveOrder==="function")fbSaveOrder(Object.assign({},order,{screenshot:null}));
 }
