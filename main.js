@@ -3769,6 +3769,17 @@ function sendChatMessage(){
     var key=chatKey(CHAT_ORDER_NO);
     fbDb.collection("chats").doc(key).collection("messages").add(msg).then(function(){
       fbDb.collection("chats").doc(key).set({orderNo:CHAT_ORDER_NO,lastMsg:text,lastTs:Date.now(),unread:true},{merge:true});
+      // 農家にメール通知
+      var _farmTargets=["bachhasonmochi@gmail.com"];
+      if(EJ.admin&&EJ.admin!=="bachhasonmochi@gmail.com")_farmTargets.push(EJ.admin);
+      if(EJ.service&&EJ.template&&EJ.pubkey&&typeof emailjs!=="undefined"){
+        var _chatLink="https://hanoi-order.niconicoyasai.jp/admin/?chat="+encodeURIComponent(CHAT_ORDER_NO);
+        var _custName=CHAT_CUSTOMER_NAME||CHAT_ORDER_NO;
+        var _body="お客様("+_custName+")からチャットメッセージが届きました。\n\n注文番号: "+CHAT_ORDER_NO+"\nメッセージ: "+text+"\n\n以下のリンクから直接チャット画面を開けます:\n"+_chatLink;
+        _farmTargets.forEach(function(toEmail){
+          emailjs.send(EJ.service,EJ.template,{to_email:toEmail,to_name:"農家",from_name:"NICO NICO YASAI",reply_to:EJ.from||"",subject:"💬 チャットメッセージ - "+CHAT_ORDER_NO,message:_body}).catch(function(){});
+        });
+      }
     }).catch(function(e){console.error("[NNY] chat send:",e);});
     inp.disabled=false;
   };
@@ -3852,20 +3863,29 @@ function adminSendChatInline(orderNo){
   inp.disabled=true;inp.value="";
   var srcLang=detectMsgLang(text);
   var custOrder=ORDERS.find(function(x){return x.no===orderNo;});
-  function _notifyCust(){
-    if(!custOrder||!custOrder.email)return;
-    if(!EJ.service||!EJ.template||!EJ.pubkey)return;
-    try{emailjs.init({publicKey:EJ.pubkey});}catch(e){}
+  function _notifyCust(msgText){
+    if(!custOrder)return;
     var custName=custOrder.name||"";
-    var subj="NICO NICO便ハノイ - 農家より連絡があります";
-    var body2=custName+" 様\n\nNICO NICO便ハノイで、農家 Bach Manh Ha より連絡が来ました。\n\n注文番号: "+orderNo+"\n\n以下のURLよりサイトを開き、注文履歴のチャットボタンよりご確認ください。\nhttps://hanoi-order.niconicoyasai.jp/\n\nNICO NICO 便";
-    emailjs.send(EJ.service,EJ.template,{to_email:custOrder.email,to_name:custName,from_name:"NICO NICO YASAI",reply_to:"bachhasonmochi@gmail.com",subject:subj,message:body2,order_no:orderNo}).catch(function(){});
+    var chatLink="https://hanoi-order.niconicoyasai.jp/?chat="+encodeURIComponent(orderNo);
+    // LINEがある場合はLINEのみ通知
+    if(custOrder.lineUserId){
+      var lineMsg="農家より連絡が届きました🌿\n\n「"+msgText+"」\n\n以下のリンクから直接チャットを開けます:\n"+chatLink;
+      _sendLineMsg(custOrder.lineUserId,lineMsg);
+      return;
+    }
+    // LINEなし → メールで通知
+    if(!custOrder.email||!EJ.service||!EJ.template||!EJ.pubkey)return;
+    try{emailjs.init({publicKey:EJ.pubkey});}catch(e){}
+    var subj="NICO NICO便ハノイ - 農家より連絡があります / Nông dân có tin nhắn cho bạn";
+    var bodyJa=custName+" 様\n\n農家 Bach Manh Ha より連絡が届きました。\n\n注文番号: "+orderNo+"\n\n以下のリンクから直接チャット画面を開けます:\n"+chatLink+"\n\nNICO NICO YASAI";
+    var bodyVi=custName+" ơi,\n\nNông dân Bach Manh Ha có tin nhắn cho bạn về đơn hàng "+orderNo+".\n\nNhấn vào link dưới đây để mở chat trực tiếp:\n"+chatLink+"\n\nNICO NICO YASAI";
+    emailjs.send(EJ.service,EJ.template,{to_email:custOrder.email,to_name:custName,from_name:"NICO NICO YASAI",reply_to:"bachhasonmochi@gmail.com",subject:subj,message:bodyJa+"\n\n---\n\n"+bodyVi,order_no:orderNo}).catch(function(){});
   }
   function _save(msg){
     fbDb.collection("chats").doc(chatKey(orderNo)).collection("messages").add(msg)
       .then(function(){
         fbDb.collection("chats").doc(chatKey(orderNo)).set({lastMsg:msg.text,lastTs:Date.now(),unread:false},{merge:true});
-        _notifyCust();
+        _notifyCust(msg.text);
         inp.disabled=false;
         adminChatFromOrder(orderNo);
       }).catch(function(e){inp.disabled=false;alert("送信失敗: "+e.message);});
@@ -3929,6 +3949,19 @@ function adminSendChat(orderNo){
     fbDb.collection("chats").doc(chatKey(orderNo)).collection("messages").add(msg).then(function(){
       fbDb.collection("chats").doc(chatKey(orderNo)).set({lastMsg:text,lastTs:Date.now(),unread:false},{merge:true});
       inp.disabled=false; adminOpenChat(orderNo);
+      // 顧客通知（LINE優先、なければメール）
+      var _co=ORDERS.find(function(x){return x.no===orderNo;});
+      if(_co){
+        var chatLink="https://hanoi-order.niconicoyasai.jp/?chat="+encodeURIComponent(orderNo);
+        if(_co.lineUserId){
+          _sendLineMsg(_co.lineUserId,"農家より連絡が届きました🌿\n\n「"+text+"」\n\n以下のリンクから直接チャットを開けます:\n"+chatLink);
+        }else if(_co.email&&EJ.service&&EJ.template&&EJ.pubkey&&typeof emailjs!=="undefined"){
+          var subj2="NICO NICO便ハノイ - 農家より連絡があります / Nông dân có tin nhắn cho bạn";
+          var bodyJa2=(_co.name||"")+" 様\n\n農家 Bach Manh Ha より連絡が届きました。\n\n注文番号: "+orderNo+"\n\n以下のリンクから直接チャット画面を開けます:\n"+chatLink+"\n\nNICO NICO YASAI";
+          var bodyVi2=(_co.name||"")+" ơi,\n\nNông dân Bach Manh Ha có tin nhắn cho bạn về đơn hàng "+orderNo+".\n\nNhấn vào link dưới đây để mở chat trực tiếp:\n"+chatLink+"\n\nNICO NICO YASAI";
+          emailjs.send(EJ.service,EJ.template,{to_email:_co.email,to_name:_co.name||"",from_name:"NICO NICO YASAI",reply_to:"bachhasonmochi@gmail.com",subject:subj2,message:bodyJa2+"\n\n---\n\n"+bodyVi2}).catch(function(){});
+        }
+      }
     }).catch(function(e){console.error(e);inp.disabled=false;});
   });
 }
