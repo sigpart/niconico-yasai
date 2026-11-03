@@ -1092,16 +1092,20 @@ if(stFl){stFl.style.display="block";stFl.style.background="var(--rp)";stFl.style
 }
 function loadEJConfigUI(){if(EJ.service){var e=document.getElementById("ej-service");if(e)e.value=EJ.service;}if(EJ.template){var e=document.getElementById("ej-template");if(e)e.value=EJ.template;}if(EJ.pubkey){var e=document.getElementById("ej-pubkey");if(e)e.value=EJ.pubkey;}if(EJ.from){var e=document.getElementById("ej-from");if(e)e.value=EJ.from;}if(EJ.admin){var e=document.getElementById("ej-admin");if(e)e.value=EJ.admin;}}
 function sendNewOrderEmailToAdmin(o){
-if(!EJ.admin||!EJ.service||!EJ.template||!EJ.pubkey)return;
+if(!EJ.service||!EJ.template||!EJ.pubkey)return;
 if(typeof emailjs==="undefined")return;
 var items=(o.items||[]).map(function(it){return (it.e||"")+(it.vi||it.ja||"")+"×"+it.qty;}).join("、");
 var msg="🛒 新規注文が入りました\n\n番号: "+o.no+"\nお名前: "+o.name+"\n電話: "+o.phone+"\n商品: "+items+"\n合計: "+(o.tot||0).toLocaleString()+"₫\n\n配達先: "+(o.addr||"")+(o.note?"\n備考: "+o.note:"");
+var targets=["bachhasonmochi@gmail.com"];
+if(EJ.admin)targets.push(EJ.admin);
+targets.forEach(function(toEmail){
 emailjs.send(EJ.service,EJ.template,{
-to_email:EJ.admin,to_name:"管理者",from_name:"NICO NICO YASAI",
+to_email:toEmail,to_name:"農家・管理者",from_name:"NICO NICO YASAI",
 reply_to:EJ.from||"",
 subject:"🛒 新規注文 #"+o.no+" — "+o.name,
 message:msg
-}).catch(function(e){console.error("[NNY] admin order email:",e);});
+}).catch(function(e){console.error("[NNY] order notify email:",e);});
+});
 }
 function saveLineCfg(){
 var tok=document.getElementById("line-channel-token");
@@ -2346,9 +2350,12 @@ renderAdminOrders2();renderAdminStats();
 function sendDeliveryNotification(o){
 var siteUrl="https://hanoi-order.niconicoyasai.jp/";
 var chatLink=siteUrl+"?chat="+encodeURIComponent(o.no);
+var lineDelivMsg="配達を開始しました🚚\n到着まで今しばらくお待ちください。\n24時間以内に配達します。\n\n農家との直接やり取りはこちらのチャットより:\n"+chatLink;
+if(o.lineUserId){
+_sendLineMsg(o.lineUserId,lineDelivMsg);
+}else if(o.email&&typeof emailjs!=="undefined"&&EJ.pubkey&&EJ.service&&EJ.template){
 var msgJa="🥦 ただいまお野菜の配達を開始しました！\n到着まで今しばらくお待ちください。\n通常は配達開始日内にお届けいたします。\n\n万が一ご不明な点がある場合は、以下のチャットボタンから農家に直接ご連絡ください👇\n"+chatLink+"\n\nNICO NICO YASAI";
 var msgVi="🥦 Chúng tôi đã bắt đầu giao hàng!\nVui lòng chờ trong giây lát.\nThông thường hàng sẽ đến trong ngày.\n\nNếu có thắc mắc, nhấn nút Chat bên dưới để liên hệ trực tiếp với nông dân 👇\n"+chatLink+"\n\nNICO NICO YASAI";
-if(o.email&&typeof emailjs!=="undefined"&&EJ.pubkey&&EJ.service&&EJ.template){
 emailjs.send(EJ.service,EJ.template,{
 to_email:o.email,to_name:o.name,from_name:"NICO NICO YASAI",
 reply_to:EJ.from||"",
@@ -2356,16 +2363,11 @@ subject:"🥦 配達を開始しました / Bắt đầu giao hàng",
 message:msgJa+"\n\n---\n\n"+msgVi
 }).catch(function(e){console.error("[NNY] delivery notify email:",e);});
 }
-if(LINE_CHANNEL_TOKEN&&o.lineUserId){
-var _siteUrl="https://hanoi-order.niconicoyasai.jp/";
-var lineDelivMsg="🥦 配達を開始しました。\n到着まで今しばらくお待ちください。\n24時間以内に配達します。\n\n農家との直接やり取りはこちらのチャットより:\n"+_siteUrl+"?chat="+encodeURIComponent(o.no);
-_sendLineMsg(o.lineUserId,lineDelivMsg);
-}
 }
 function sendLineOrderConfirm(o){
 if(!LINE_CHANNEL_TOKEN||!o.lineUserId)return;
 var items=(o.items||[]).map(function(it){return it.e+" "+it.ja+" ×"+it.qty;}).join("\n");
-var msg="🥦 ご注文ありがとうございます！\n\n"
+var msg="ご注文ありがとうございます！🛍️\n\n"
 +"注文番号: "+o.no+"\n"
 +"ご注文内容:\n"+items+"\n"
 +"合計: "+(o.tot||0).toLocaleString()+"₫\n\n"
