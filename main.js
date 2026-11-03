@@ -3644,13 +3644,26 @@ if(typeof updatePickupAvailability==="function")updatePickupAvailability();
 try{
 var _p=new URLSearchParams(window.location.search);
 var _cn=_p.get("chat");
-if(_cn){
-var _co=ORDER_HISTORY.find(function(x){return x.no===_cn;});
-setTimeout(function(){
-if(_co){startChat(_cn,_co);}
-else{goHistory();showView("history");}
-},500);
+if(!_cn)return;
+function _openChat(order){
+try{localStorage.setItem("nny_last_phone",order.phone||"");}catch(e){}
+if(ORDER_HISTORY.findIndex(function(x){return x.no===order.no;})<0){
+ORDER_HISTORY.unshift(order);saveOrderHistory();
 }
+startChat(_cn,order);
+}
+var _co=ORDER_HISTORY.find(function(x){return x.no===_cn;});
+if(_co){setTimeout(function(){_openChat(_co);},500);return;}
+// localStorageにない → Firestoreから取得
+setTimeout(function(){
+if(fbEnabled&&fbDb){
+var _docId=_cn.replace(/[^a-zA-Z0-9]/g,"-");
+fbDb.collection("orders").doc(_docId).get().then(function(doc){
+if(doc.exists){_openChat(doc.data());}
+else{goHistory();showView("history");}
+}).catch(function(){goHistory();showView("history");});
+}else{goHistory();showView("history");}
+},800);
 }catch(e){}
 })();
 if(window.__ADMIN_AUTO_OPEN){
