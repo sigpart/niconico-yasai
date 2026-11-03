@@ -20,6 +20,11 @@ service cloud.firestore {
       allow create: if request.auth != null;
       allow read, update, delete: if request.auth != null && request.auth.token.email != null;
     }
+    // チャットメッセージ: 匿名含む認証済みユーザーが読み書き可
+    match /chats/{chatId}/messages/{msgId} {
+      allow read, create: if request.auth != null;
+      allow update, delete: if request.auth != null && request.auth.token.email != null;
+    }
 
     // 設定・通知リスト: メール認証ユーザーのみ
     match /settings/{docId} {
@@ -32,10 +37,11 @@ service cloud.firestore {
       allow read, update, delete: if request.auth != null && request.auth.token.email != null;
     }
 
-    // LINE送信キュー: 匿名含む認証済みが書き込み可、読み取り・更新はメール認証のみ
+    // LINE送信キュー: 匿名含む認証済みが書き込み可、GASのため読み取り・更新は全員OK
     match /line_queue/{docId} {
       allow create: if request.auth != null;
-      allow read, update, delete: if request.auth != null && request.auth.token.email != null;
+      allow read, update: if true;
+      allow delete: if request.auth != null && request.auth.token.email != null;
     }
 
     // adminsコレクション: 参照用に残す

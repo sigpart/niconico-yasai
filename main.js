@@ -2380,9 +2380,13 @@ _sendLineMsg(o.lineUserId,msg);
 function _sendLineMsg(userId,text){
 if(!userId){console.warn("[NNY] LINE: userId未取得");return;}
 if(!fbDb){console.warn("[NNY] LINE: Firestore未初期化");return;}
+function _doWrite(){
 fbDb.collection("line_queue").add({userId:userId,text:text,sent:false,ts:Date.now()}).then(function(){
 console.log("[NNY] LINE queue書き込み完了");
 }).catch(function(e){console.error("[NNY] LINE queue書き込みエラー:",e.message);});
+}
+if(fbAuth&&fbAuth.currentUser){_doWrite();}
+else if(fbAuth){fbAuth.signInAnonymously().then(_doWrite).catch(function(e){console.error("[NNY] LINE anon auth:",e.message);});}
 }
 function adminLoadSS(no,imgEl){
 var o=ORDERS.find(function(x){return x.no===no;});
@@ -3550,6 +3554,20 @@ updateLangBtn();
 setSeason("all");
 if(FB_CFG&&FB_CFG.apiKey)showProductSkeletons();
 if(typeof updatePickupAvailability==="function")updatePickupAvailability();
+// ?chat=注文番号 でチャット画面を直接開く（農家返信メールリンク対応）
+(function(){
+try{
+var _p=new URLSearchParams(window.location.search);
+var _cn=_p.get("chat");
+if(_cn){
+var _co=ORDER_HISTORY.find(function(x){return x.no===_cn;});
+setTimeout(function(){
+if(_co){startChat(_cn,_co);}
+else{goHistory();showView("history");}
+},500);
+}
+}catch(e){}
+})();
 if(window.__ADMIN_AUTO_OPEN){
 var us=document.getElementById("user-screen");if(us)us.style.display="none";
 setTimeout(function(){openAdmin();},100);
