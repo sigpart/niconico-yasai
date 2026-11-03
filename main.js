@@ -537,7 +537,7 @@ saveCust();
 renderProducts(); updateCartBtn();
 buildReceipt(order);
 showView("receipt");
-setTimeout(function(){sendEmail(order);},600);
+if(!order.lineUserId){setTimeout(function(){sendEmail(order);},600);}
 setTimeout(function(){sendToSheets(order);},1000);
 setTimeout(function(){sendLineOrderConfirm(order);},1200);
 try{if(order.lineUserId)localStorage.removeItem("nny_line_uid");}catch(e){}
