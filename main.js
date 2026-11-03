@@ -3862,48 +3862,36 @@ document.addEventListener("keydown",function(e){
 });
 
 function restoreAdminBody(){
-  var adminBody=document.querySelector(".admin-body");
-  if(!adminBody)return;
-  ADMIN_BODY_SAVED_HTML="";
-  // チャットオーバーレイを削除し、隠していた既存コンテンツを再表示
   var chatDiv=document.getElementById("adm-inline-chat");
   if(chatDiv)chatDiv.remove();
-  Array.prototype.forEach.call(adminBody.children,function(c){
-    if(c.getAttribute("data-adm-hidden")){c.removeAttribute("data-adm-hidden");c.style.display="";}
-  });
-  if(typeof switchAdminTab==="function"){switchAdminTab("main");}else{renderAdminAll();}
   var adminScreen=document.getElementById("admin-screen");
   var sp=ADMIN_SAVED_SCROLL;
   if(adminScreen){adminScreen.scrollTop=sp;requestAnimationFrame(function(){adminScreen.scrollTop=sp;});}
 }
 function adminChatFromOrder(orderNo){
-  var adminBody=document.querySelector(".admin-body");
-  if(!adminBody)return;
+  var existing=document.getElementById("adm-inline-chat");
+  if(existing)existing.remove();
   var adminScreen=document.getElementById("admin-screen");
   ADMIN_SAVED_SCROLL=adminScreen?adminScreen.scrollTop:0;
-  ADMIN_BODY_SAVED_HTML="";
-  // 既存コンテンツを隠す（置き換えではなく非表示）
-  Array.prototype.forEach.call(adminBody.children,function(c){
-    c.setAttribute("data-adm-hidden","1");c.style.display="none";
-  });
   var chatDiv=document.createElement("div");
   chatDiv.id="adm-inline-chat";
-  chatDiv.style.cssText="max-width:640px;margin:0 auto;display:flex;flex-direction:column;height:calc(100dvh - 180px);";
+  chatDiv.style.cssText="position:fixed;inset:0;z-index:800;background:#f0f4f0;overflow-y:auto;-webkit-overflow-scrolling:touch;";
   chatDiv.innerHTML=''
-    +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-shrink:0;">'
-    +'<button onclick="restoreAdminBody()" style="background:#fff;border:2px solid #1a6b2a;color:#1a6b2a;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">← 戻る</button>'
-    +'<div style="font-family:\'Shippori Mincho B1\',serif;font-size:17px;font-weight:800;color:#1a6b2a;">💬 '+escHtml(orderNo)+'</div>'
+    +'<div style="background:var(--g1);padding:0 20px;height:56px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;flex-shrink:0;">'
+    +'<button onclick="restoreAdminBody()" style="background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.6);color:#fff;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">← 戻る</button>'
+    +'<div style="font-family:\'Shippori Mincho B1\',serif;font-size:16px;font-weight:800;color:#fff;">💬 '+escHtml(orderNo)+'</div>'
     +'</div>'
-    +'<div id="adm-inline-msgs" style="flex:1;background:#fff;border:1px solid #c4dcc8;border-radius:12px;padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:10px;margin-bottom:12px;">'
+    +'<div style="max-width:640px;margin:0 auto;padding:16px 16px 8px;display:flex;flex-direction:column;min-height:calc(100dvh - 56px);">'
+    +'<div id="adm-inline-msgs" style="flex:1;background:#fff;border:1px solid #c4dcc8;border-radius:12px;padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:10px;margin-bottom:12px;min-height:200px;">'
     +'<div style="color:#aaa;text-align:center;padding:20px;font-size:13px;">読み込み中...</div>'
     +'</div>'
-    +'<div style="background:#fff;border:1px solid #c4dcc8;border-radius:12px;padding:12px;display:flex;gap:10px;align-items:flex-end;flex-shrink:0;">'
+    +'<div style="background:#fff;border:1px solid #c4dcc8;border-radius:12px;padding:12px;display:flex;gap:10px;align-items:flex-end;">'
     +'<textarea id="adm-inline-inp" rows="2" style="flex:1;border:1.5px solid #c4dcc8;border-radius:8px;padding:10px;font-size:16px;font-family:inherit;resize:none;outline:none;max-height:72px;overflow-y:auto;" placeholder="日本語 / Tiếng Việt / English..."></textarea>'
     +'<button onclick="adminSendChatInline(\''+escHtml(orderNo)+'\')" style="background:#1a6b2a;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;">送信</button>'
     +'</div>'
-    +'<div id="adm-chat-hint" style="font-size:10px;color:#888;text-align:center;padding:6px 0;flex-shrink:0;">自動翻訳対応</div>';
-  adminBody.appendChild(chatDiv);
-  if(adminScreen)adminScreen.scrollTop=0;
+    +'<div id="adm-chat-hint" style="font-size:10px;color:#888;text-align:center;padding:8px 0;">自動翻訳対応</div>'
+    +'</div>';
+  document.body.appendChild(chatDiv);
   var msgsEl=document.getElementById("adm-inline-msgs");
   if(!fbEnabled||!fbDb){
     msgsEl.innerHTML='<div style="color:#aaa;text-align:center;padding:20px;font-size:13px;">Firebase未接続</div>';
