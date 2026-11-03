@@ -341,9 +341,9 @@ var nm=L(p.ja||p.vi||p.en,p.en||p.ja||p.vi,p.vi||p.ja||p.en), nmsub=L(p.vi,p.vi,
 var desc=L(p.dja||p.dvi||p.den,p.den||p.dja||p.dvi,p.dvi||p.dja||p.den)||"", unit=L(p.unit,p.uniten||p.unit,p.unitvi);
 var inCart=cart[p.id]||0;var _totalStock=p.stock||0;if(p.variants&&p.variants.length>0){var _vTotal=0,_vStock=0;p.variants.forEach(function(v){var ck=p.id+"_"+v;_vTotal+=(cart[ck]?cart[ck]:0);var sk="stock"+v.replace("g","");_vStock+=(p[sk]!==undefined?p[sk]:p.stock);});inCart=_vTotal;_totalStock=_vStock;}var oos=(season==="all"&&_totalStock===0);var low=(season==="all"&&_totalStock>0&&_totalStock<=5);
 var _seasonBadge="";
-var _rb=p.badge||"";var _tb=_rb==="NEW"?T("badgeNew"):_rb==="おすすめ"?T("badgeRec"):_rb==="旬"?T("badgeSeason"):_rb;
+var _rb=p.badge||"";var _tb=_rb==="NEW"?T("badgeNew"):_rb==="おすすめ"?T("badgeRec"):_rb==="旬"?T("badgeSeason"):_rb==="送料無料"?L("🚚 送料無料","🚚 Free Shipping","🚚 Miễn ship"):_rb;
 var bdgTxt=oos?L("在庫なし","Out of Stock","Hết hàng"):(_seasonBadge||_tb);
-var bdgCls=oos?"badge-grey":_seasonBadge?"badge-green":"badge-gold";
+var bdgCls=oos?"badge-grey":_seasonBadge?"badge-green":(_rb==="送料無料"?"badge-ship":"badge-gold");
 var rv=REVIEWS[p.id]||[], avg=avgRating(p.id);
 var avgTxt=rv.length?stars(avg)+'<span class="star-count">('+rv.length+')</span>':'';
 var rvPreview='';
@@ -450,7 +450,8 @@ html+='<div class="cc-item"><span>'+p.e+' '+nm+' × '+qty+'</span><span style="f
 document.getElementById("cc-items").innerHTML=html;
 document.getElementById("cc-tot-val").textContent=vnd(tot);
 var _farmMode=typeof DELIVERY_ORIGIN!=="undefined"&&DELIVERY_ORIGIN.active==="farm";
-var _sf=selDel==="deliver"?_shippingFee:0,_gt=tot+_sf+(selDel==="deliver"&&!_farmMode?10000:0);
+var _hasFreeShipConf=Object.keys(cart).some(function(ck){var _m=CART_META[ck];var _pid=_m?_m.id:(ck.indexOf("_")>0?ck.split("_")[0]:ck);var _pp=PRODUCTS.find(function(x){return Number(x.id)===Number(_pid);});return _pp&&_pp.freeShip;});
+var _sf=selDel==="deliver"&&!_hasFreeShipConf?_shippingFee:0,_gt=tot+_sf+(selDel==="deliver"&&!_farmMode&&!_hasFreeShipConf?10000:0);
 var _sr=document.getElementById("cc-ship-row");if(_sr){if(_sf>0){_sr.style.display="";var _sv=document.getElementById("cc-ship-val");if(_sv)_sv.textContent=vnd(_sf+(_farmMode?0:10000));}else _sr.style.display="none";}
 var _gr=document.getElementById("cc-grand-row");if(_gr){if(_sf>0){_gr.style.display="";var _gv=document.getElementById("cc-grand-val");if(_gv)_gv.textContent=vnd(_gt);}else _gr.style.display="none";}
 var n=document.getElementById("inp-name").value, ph=document.getElementById("inp-phone").value,
@@ -486,14 +487,17 @@ alert(lang==="ja"?"電話番号を入力してください":"Vui lòng nhập s�
 if(_nameEl)_nameEl.style.borderColor="";if(_phoneEl)_phoneEl.style.borderColor="";
 var _ts=Date.now(),_rnd=Math.floor(Math.random()*900)+100;var no="#NNY-"+(_ts.toString(36).toUpperCase().slice(-4))+_rnd;
 var _isFarm=typeof DELIVERY_ORIGIN!=="undefined"&&DELIVERY_ORIGIN.active==="farm";
-var ts=new Date().toLocaleString("ja-JP"), tot=cartTotal()+(selDel==="deliver"?_shippingFee+(_isFarm?0:10000):0);
+var _freeShipInCart=Object.keys(cart).some(function(ck){var _m=CART_META[ck];var _pid=_m?_m.id:(ck.indexOf("_")>0?ck.split("_")[0]:ck);var _pp=PRODUCTS.find(function(x){return Number(x.id)===Number(_pid);});return _pp&&_pp.freeShip;});
+var ts=new Date().toLocaleString("ja-JP"), tot=cartTotal()+(selDel==="deliver"&&!_freeShipInCart?_shippingFee+(_isFarm?0:10000):0);
 var name=document.getElementById("inp-name").value, phone=document.getElementById("inp-phone").value,
 zalo=document.getElementById("inp-zalo").value, addr=document.getElementById("inp-addr").value,
 email=document.getElementById("inp-email").value, note=document.getElementById("inp-note").value;
 var items=[];
 Object.keys(cart).forEach(function(ck){var qty=cart[ck];if(!qty)return;var meta=CART_META[ck];var pid=meta?meta.id:(ck.indexOf("_")>0?ck.split("_")[0]:ck);var p=PRODUCTS.find(function(x){return Number(x.id)===Number(pid);});if(!p)return;var price=meta?meta.price:p.price;var variant=meta?meta.variant:"";var nm_ja=p.ja+(variant?" "+variant:""),nm_vi=p.vi+(variant?" "+variant:"");var unit=p.unit,unitvi=p.unitvi;
 items.push({id:p.id,qty:qty,ja:nm_ja,vi:nm_vi,e:p.e,price:price,unit:unit,unitvi:unitvi});});
-var shipFeeVal=selDel==="deliver"?_shippingFee+((_isFarm||false)?0:10000):0;
+// カート内に送料無料商品があれば送料0円
+var _hasFreeShip=Object.keys(cart).some(function(ck){var meta=CART_META[ck];var pid=meta?meta.id:(ck.indexOf("_")>0?ck.split("_")[0]:ck);var p=PRODUCTS.find(function(x){return Number(x.id)===Number(pid);});return p&&p.freeShip;});
+var shipFeeVal=selDel==="deliver"&&!_hasFreeShip?_shippingFee+((_isFarm||false)?0:10000):0;
 var _lineNotify=document.getElementById("inp-line-notify");
 var _lineUid="";try{_lineUid=localStorage.getItem("nny_line_uid")||"";}catch(e){}
 console.log("[NNY] order lineUserId:",_lineUid||"(なし)","token:",LINE_CHANNEL_TOKEN?"あり":"(なし)");
@@ -2448,7 +2452,8 @@ var nm=esc(adminLang==="vi"?p.vi:p.ja);
 var sqHtml=(p.variants&&p.variants.length>0?(function(){var _ul=adminLang==="vi"?p.unitvi:p.unit;var rows='';p.variants.forEach(function(v){var sk="stock"+v.replace("g","");var sv=p[sk]!==undefined?p[sk]:p.stock;var pk="price"+v.replace("g","");var pv=p[pk]||p.price;rows+='<div style="background:var(--gp);border-radius:10px;padding:10px;">'+'<div style="font-size:13px;font-weight:800;color:var(--g1);margin-bottom:8px;">'+v+'</div>'+'<div style="display:flex;align-items:center;gap:4px;" onclick="event.stopPropagation()">'+'<button class="sqbtn" onclick="adjVariantStock('+p.id+",'"+v+"'"+',-1)">−</button>'+'<input class="sq-num" id="sq-'+p.id+'-'+v+'" type="number" value="'+sv+'" min="0" onchange="setVariantStock('+p.id+",'"+v+"'"+',this.value)" onclick="this.select()">'+'<button class="sqbtn" onclick="adjVariantStock('+p.id+",'"+v+"'"+',1)">＋</button>'+'<span style="font-size:11px;color:var(--muted);margin-left:3px;">'+_ul+'</span>'+'</div>'+'<div style="display:flex;align-items:center;gap:4px;margin-top:6px;" onclick="event.stopPropagation()">'+'<input type="number" id="pe-price-'+p.id+'-'+v+'" value="'+pv+'" min="0" step="1000" onchange="saveVariantPrice('+p.id+",'"+v+"'"+',this.value)" onclick="this.select()" style="width:80px;font-size:12px;font-weight:700;border:2px solid var(--g3);border-radius:6px;padding:4px 8px;text-align:right;">'+'<span style="font-size:11px;color:var(--g2);">₫</span>'+'</div>'+'</div>';});return '<div class="stock-quick" onclick="event.stopPropagation()"><div style="display:grid;grid-template-columns:1fr;gap:6px;">'+rows+'</div></div>';})():'<div onclick="event.stopPropagation()" style="display:flex;flex-direction:column;gap:5px;"><div style="display:flex;align-items:center;gap:4px;"><button class="sqbtn" onclick="adjStock('+p.id+',-1)">−</button><input class="sq-num" id="sq-'+p.id+'" type="number" value="'+p.stock+'" min="0" onchange="setStock('+p.id+',this.value)" onclick="this.select()"><button class="sqbtn" onclick="adjStock('+p.id+',1)">＋</button><span style="font-size:11px;color:var(--muted);margin-left:3px;">'+(adminLang==="vi"?p.unitvi:p.unit)+'</span></div><div style="display:flex;align-items:center;gap:4px;"><input type="number" id="pe-price-'+p.id+'" value="'+p.price+'" min="0" step="1000" onchange="saveProductEdit('+p.id+')" onclick="this.select()" style="width:80px;font-size:12px;font-weight:700;border:2px solid var(--g3);border-radius:6px;padding:4px 8px;text-align:right;"><span style="font-size:11px;color:var(--g2);">₫</span></div></div>')
 +'<div style="margin-top:6px;display:flex;align-items:center;gap:6px;">'
 +'<span style="font-size:10px;color:var(--muted);white-space:nowrap;">'+(adminLang==="vi"?"Nhãn:":"バッジ:")+'</span>'
-+'<select id="pe-badge-'+p.id+'" onchange="saveProductEdit('+p.id+')" style="font-size:11px;border:1px solid var(--border);border-radius:4px;padding:2px 4px;flex:1;">'+'<option value="" '+((!p.badge||p.badge==="")?"selected":"")+'>— '+(adminLang==="vi"?"Không có":adminLang==="en"?"None":"なし")+'</option>'+'<option value="NEW" '+(p.badge==="NEW"?"selected":"")+'>NEW</option>'+'<option value="おすすめ" '+(p.badge==="おすすめ"?"selected":"")+'>⭐ '+(adminLang==="vi"?"Nổi bật":adminLang==="en"?"Recommended":"おすすめ")+'</option>'+'<option value="旬" '+(p.badge==="旬"?"selected":"")+'>🌿 '+(adminLang==="vi"?"Đặc sản":adminLang==="en"?"In Season":"旬")+'</option>'+'</select>'
++'<select id="pe-badge-'+p.id+'" onchange="saveProductEdit('+p.id+')" style="font-size:11px;border:1px solid var(--border);border-radius:4px;padding:2px 4px;flex:1;">'+'<option value="" '+((!p.badge||p.badge==="")?"selected":"")+'>— '+(adminLang==="vi"?"Không có":adminLang==="en"?"None":"なし")+'</option>'+'<option value="NEW" '+(p.badge==="NEW"?"selected":"")+'>NEW</option>'+'<option value="おすすめ" '+(p.badge==="おすすめ"?"selected":"")+'>⭐ '+(adminLang==="vi"?"Nổi bật":adminLang==="en"?"Recommended":"おすすめ")+'</option>'+'<option value="旬" '+(p.badge==="旬"?"selected":"")+'>🌿 '+(adminLang==="vi"?"Đặc sản":adminLang==="en"?"In Season":"旬")+'</option>'+'<option value="送料無料" '+(p.badge==="送料無料"?"selected":"")+'>🚚 '+(adminLang==="vi"?"Miễn ship":adminLang==="en"?"Free Shipping":"送料無料")+'</option>'+'</select>'
++'<label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--g1);cursor:pointer;margin-top:4px;white-space:nowrap;" onclick="event.stopPropagation()">'+'<input type="checkbox" id="pe-freeship-'+p.id+'" '+(p.freeShip?"checked":"")+' onchange="saveProductEdit('+p.id+')" style="width:14px;height:14px;accent-color:var(--g1);">'+'🚚 '+(adminLang==="vi"?"Miễn phí vận chuyển":adminLang==="en"?"Free shipping":"送料無料（送料なし）")+'</label>'
 +'</div>'
 +'<span class="sq-saved-flash" id="sq-flash-'+p.id+'">✅</span>';
 html+='<div class="apc-card" id="apcb-'+p.id+'">';
@@ -3328,6 +3333,8 @@ var priceEl=document.getElementById("pe-price-"+id);
 if(priceEl&&priceEl.value)p.price=Math.max(0,parseInt(priceEl.value)||0);
 var badgeEl=document.getElementById("pe-badge-"+id);
 if(badgeEl)p.badge=badgeEl.value;
+var freeShipEl=document.getElementById("pe-freeship-"+id);
+if(freeShipEl)p.freeShip=freeShipEl.checked;
 _localProductChanges[id]=Date.now();
 try{var _lpcSave=JSON.parse(localStorage.getItem('nny_prod_changes')||'{}');_lpcSave[id]=_localProductChanges[id];localStorage.setItem('nny_prod_changes',JSON.stringify(_lpcSave));}catch(e){}
 saveProducts();
