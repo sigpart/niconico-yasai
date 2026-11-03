@@ -73,6 +73,7 @@ var nxtId = 200;
 var selDel = "deliver";
 var selPay = "vietqr";
 var sheetsUrl = "https://script.google.com/macros/s/AKfycbxIB-iXq7SJiDintklAsRQe2EpQlmFGeUMRZ-IszpHqqA5dpmQq3sPJ0R9Az4bTDwx2WQ/exec";
+var sheetsViewUrl = "https://docs.google.com/spreadsheets/d/1HHiggHRhwGzERGsQRIwvGJ518Tt3DLSchxjOmOhjXW0/edit";
 var pendingOrder = null, pendingScreenshot = null;
 var currentQRMethod = null;
 var currentReviewProductId = null;
@@ -959,8 +960,8 @@ function renderDB(){/* replaced by renderAdminDB2 */}
 function saveSheetUrl(){
 var inp=document.getElementById("sheets-url-inp");
 var url=inp?inp.value.trim():"";
-sheetsUrl=url;
-localStorage.setItem("nny_sheets_url",url);
+sheetsViewUrl=url;
+localStorage.setItem("nny_sheets_view_url",url);
 var a=document.getElementById("sheets-open-a");
 if(a){a.href=url;a.style.display=url?"inline-flex":"none";}
 var tl=document.getElementById("sheets-toplink");
@@ -2689,11 +2690,12 @@ var txt=[hdr].concat(rows).map(function(r){return r.join("\t");}).join("\n");
 navigator.clipboard.writeText(txt).then(function(){showToast(adminLang==="vi"?"✅ Đã copy!":"✅ コピーしました！");}).catch(function(){});
 }
 function loadSheetUrl(){
-var saved=localStorage.getItem("nny_sheets_url");
-if(saved)sheetsUrl=saved;
-var inp=document.getElementById("sheets-url-inp");if(inp)inp.value=sheetsUrl;
-var link=document.getElementById("sheets-open-a");if(link){link.href=sheetsUrl;link.style.display=sheetsUrl?"inline":"none";}
-var tl=document.getElementById("sheets-toplink");if(tl)tl.href=sheetsUrl;
+var savedView=localStorage.getItem("nny_sheets_view_url");
+if(savedView)sheetsViewUrl=savedView;
+else{var legacySaved=localStorage.getItem("nny_sheets_url");if(legacySaved&&legacySaved.indexOf("docs.google.com")>=0){sheetsViewUrl=legacySaved;localStorage.setItem("nny_sheets_view_url",legacySaved);}}
+var inp=document.getElementById("sheets-url-inp");if(inp)inp.value=sheetsViewUrl;
+var link=document.getElementById("sheets-open-a");if(link){link.href=sheetsViewUrl;link.style.display=sheetsViewUrl?"inline":"none";}
+var tl=document.getElementById("sheets-toplink");if(tl)tl.href=sheetsViewUrl;
 }
 // 入荷通知
 function renderAdminNotify2(){
