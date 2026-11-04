@@ -3882,7 +3882,9 @@ function adminChatFromOrder(orderNo){
   backBtn.type="button";
   backBtn.style.cssText="background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.6);color:#fff;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;touch-action:manipulation;";
   backBtn.textContent="← 戻る";
-  backBtn.addEventListener("click",function(e){e.preventDefault();restoreAdminBody();},false);
+  function _doBack(){var el=document.getElementById("adm-inline-chat");if(el&&el.parentNode)el.parentNode.removeChild(el);var as=document.getElementById("admin-screen");if(as){var sp=ADMIN_SAVED_SCROLL||0;as.scrollTop=sp;}}
+  backBtn.addEventListener("click",_doBack,false);
+  backBtn.addEventListener("touchend",function(e){e.preventDefault();_doBack();},false);
   var titleDiv=document.createElement("div");
   titleDiv.style.cssText="font-family:'Shippori Mincho B1',serif;font-size:16px;font-weight:800;color:#fff;";
   titleDiv.textContent="💬 "+orderNo;
