@@ -188,7 +188,7 @@ var k="data-"+lang;
 if(opt.getAttribute(k))opt.textContent=opt.getAttribute(k);
 });
 })();
-s("hdr-cart-lbl","hdrCart"); s("shop-title","shopTitle"); s("cart-ttl","cartTtl");
+s("hdr-cart-lbl","hdrCart"); s("shop-title","shopTitle"); s("cart-ttl","cartTtl"); s("fc-order-lbl","toInfo");
 s("cart-back","cartBack"); s("sum-qty-lbl","sumQty"); s("sum-tot-lbl","sumTot");
 s("to-info-lbl","toInfo"); s("info-ttl","infoTtl"); s("info-back","infoBack");
 s("fc-cust","fcCust"); s("fc-del","fcDel"); s("fc-pay","fcPay"); s("fc-note","fcNote");
