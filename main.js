@@ -3862,65 +3862,32 @@ document.addEventListener("keydown",function(e){
 });
 
 function restoreAdminBody(){
-  var chatDiv=document.getElementById("adm-inline-chat");
-  if(chatDiv)chatDiv.remove();
   var adminScreen=document.getElementById("admin-screen");
-  if(adminScreen){
-    var sp=ADMIN_SAVED_SCROLL||0;
-    adminScreen.scrollTop=sp;
-    requestAnimationFrame(function(){adminScreen.scrollTop=sp;});
-  }
-  var tm=document.getElementById("adm-tab-main");
-  var ts=document.getElementById("adm-tab-settings");
-  if(tm)tm.style.display="block";
-  if(ts)ts.style.display="none";
-  var bm=document.getElementById("adm-tab-btn-main");
-  var bs=document.getElementById("adm-tab-btn-settings");
-  if(bm){bm.style.background="rgba(255,255,255,.18)";bm.style.color="#fff";bm.style.borderBottom="3px solid #fff";}
-  if(bs){bs.style.background="transparent";bs.style.color="rgba(255,255,255,.65)";bs.style.borderBottom="3px solid transparent";}
+  if(!adminScreen||!ADMIN_BODY_SAVED_HTML)return;
+  adminScreen.innerHTML=ADMIN_BODY_SAVED_HTML;
+  ADMIN_BODY_SAVED_HTML="";
+  var sp=ADMIN_SAVED_SCROLL||0;
+  adminScreen.scrollTop=sp;
+  requestAnimationFrame(function(){adminScreen.scrollTop=sp;});
 }
 function adminChatFromOrder(orderNo){
-  var existing=document.getElementById("adm-inline-chat");
-  if(existing)existing.remove();
   var adminScreen=document.getElementById("admin-screen");
-  ADMIN_SAVED_SCROLL=adminScreen?adminScreen.scrollTop:0;
-  var chatDiv=document.createElement("div");
-  chatDiv.id="adm-inline-chat";
-  chatDiv.style.cssText="position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:#f0f4f0;display:flex;flex-direction:column;";
-  var hdrDiv=document.createElement("div");
-  hdrDiv.style.cssText="background:#1a6b2a;padding:0 16px;height:56px;min-height:56px;display:flex;align-items:center;gap:12px;flex-shrink:0;";
-  hdrDiv.innerHTML='<button type="button" onclick="restoreAdminBody()" style="background:#fff;border:2px solid #fff;color:#1a6b2a;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;min-height:44px;min-width:72px;flex-shrink:0;">← 戻る</button>'
-    +'<div style="font-family:\'Shippori Mincho B1\',serif;font-size:16px;font-weight:800;color:#fff;flex:1;">💬 '+escHtml(orderNo)+'</div>';
-  chatDiv.appendChild(hdrDiv);
-  // コンテンツ部分のみスクロール
-  var bodyDiv=document.createElement("div");
-  bodyDiv.style.cssText="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;";
-  var bodyInner=document.createElement("div");
-  bodyInner.style.cssText="max-width:640px;margin:0 auto;display:flex;flex-direction:column;min-height:100%;";
-  var msgsDiv=document.createElement("div");
-  msgsDiv.id="adm-inline-msgs";
-  msgsDiv.style.cssText="flex:1;background:#fff;border:1px solid #c4dcc8;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px;margin-bottom:12px;min-height:200px;";
-  msgsDiv.innerHTML='<div style="color:#aaa;text-align:center;padding:20px;font-size:13px;">読み込み中...</div>';
-  var inpWrap=document.createElement("div");
-  inpWrap.style.cssText="background:#fff;border:1px solid #c4dcc8;border-radius:12px;padding:12px;display:flex;gap:10px;align-items:flex-end;";
-  var inp=document.createElement("textarea");
-  inp.id="adm-inline-inp";inp.rows=2;
-  inp.style.cssText="flex:1;border:1.5px solid #c4dcc8;border-radius:8px;padding:10px;font-size:16px;font-family:inherit;resize:none;outline:none;max-height:72px;overflow-y:auto;";
-  inp.placeholder="日本語 / Tiếng Việt / English...";
-  var sendBtn=document.createElement("button");
-  sendBtn.type="button";
-  sendBtn.style.cssText="background:#1a6b2a;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;touch-action:manipulation;";
-  sendBtn.textContent="送信";
-  sendBtn.addEventListener("click",function(e){e.preventDefault();adminSendChatInline(orderNo);},false);
-  inpWrap.appendChild(inp);inpWrap.appendChild(sendBtn);
-  var hintDiv=document.createElement("div");
-  hintDiv.id="adm-chat-hint";
-  hintDiv.style.cssText="font-size:10px;color:#888;text-align:center;padding:8px 0;";
-  hintDiv.textContent="自動翻訳対応";
-  bodyInner.appendChild(msgsDiv);bodyInner.appendChild(inpWrap);bodyInner.appendChild(hintDiv);
-  bodyDiv.appendChild(bodyInner);
-  chatDiv.appendChild(bodyDiv);
-  document.documentElement.appendChild(chatDiv);
+  if(!adminScreen)return;
+  if(!ADMIN_BODY_SAVED_HTML)ADMIN_BODY_SAVED_HTML=adminScreen.innerHTML;
+  ADMIN_SAVED_SCROLL=adminScreen.scrollTop;
+  adminScreen.innerHTML=''
+    +'<div style="background:#1a6b2a;padding:0 16px;height:56px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;flex-shrink:0;">'
+    +'<button type="button" onclick="restoreAdminBody()" style="background:#fff;border:none;color:#1a6b2a;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">← 戻る</button>'
+    +'<span style="font-family:\'Shippori Mincho B1\',serif;font-size:16px;font-weight:800;color:#fff;">💬 '+escHtml(orderNo)+'</span>'
+    +'</div>'
+    +'<div style="padding:16px;max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:12px;min-height:calc(100vh - 56px);">'
+    +'<div id="adm-inline-msgs" style="background:#fff;border:1px solid #c4dcc8;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px;min-height:200px;"><div style="color:#aaa;text-align:center;padding:20px;font-size:13px;">読み込み中...</div></div>'
+    +'<div style="background:#fff;border:1px solid #c4dcc8;border-radius:12px;padding:12px;display:flex;gap:10px;align-items:flex-end;">'
+    +'<textarea id="adm-inline-inp" rows="2" placeholder="日本語 / Tiếng Việt / English..." style="flex:1;border:1.5px solid #c4dcc8;border-radius:8px;padding:10px;font-size:16px;font-family:inherit;resize:none;outline:none;max-height:72px;overflow-y:auto;"></textarea>'
+    +'<button type="button" onclick="adminSendChatInline(\''+escHtml(orderNo)+'\')" style="background:#1a6b2a;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;">送信</button>'
+    +'</div>'
+    +'<div id="adm-chat-hint" style="font-size:10px;color:#888;text-align:center;">自動翻訳対応</div>'
+    +'</div>';
   var msgsEl=document.getElementById("adm-inline-msgs");
   if(!fbEnabled||!fbDb){
     msgsEl.innerHTML='<div style="color:#aaa;text-align:center;padding:20px;font-size:13px;">Firebase未接続</div>';
