@@ -3865,6 +3865,7 @@ function restoreAdminBody(){
   var chatDiv=document.getElementById("adm-inline-chat");
   if(chatDiv)chatDiv.remove();
   var adminScreen=document.getElementById("admin-screen");
+  adminScreen.style.overflow="";
   var sp=ADMIN_SAVED_SCROLL;
   if(adminScreen){adminScreen.scrollTop=sp;requestAnimationFrame(function(){adminScreen.scrollTop=sp;});}
 }
@@ -3875,15 +3876,14 @@ function adminChatFromOrder(orderNo){
   ADMIN_SAVED_SCROLL=adminScreen?adminScreen.scrollTop:0;
   var chatDiv=document.createElement("div");
   chatDiv.id="adm-inline-chat";
-  // flexレイアウトでヘッダー固定・コンテンツのみスクロール（stickyを使わない）
-  chatDiv.style.cssText="position:fixed;top:0;left:0;right:0;bottom:0;z-index:800;background:#f0f4f0;display:flex;flex-direction:column;";
+  chatDiv.style.cssText="position:absolute;top:0;left:0;right:0;bottom:0;z-index:9999;background:#f0f4f0;display:flex;flex-direction:column;";
   var hdrDiv=document.createElement("div");
   hdrDiv.style.cssText="background:var(--g1);padding:0 20px;height:56px;min-height:56px;display:flex;align-items:center;gap:12px;flex-shrink:0;";
   var backBtn=document.createElement("button");
   backBtn.type="button";
   backBtn.style.cssText="background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.6);color:#fff;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;touch-action:manipulation;min-width:80px;";
   backBtn.textContent="← 戻る";
-  function _doBack(){var el=document.getElementById("adm-inline-chat");if(el&&el.parentNode)el.parentNode.removeChild(el);var as=document.getElementById("admin-screen");if(as){var sp=ADMIN_SAVED_SCROLL||0;as.scrollTop=sp;}}
+  function _doBack(){var el=document.getElementById("adm-inline-chat");if(el&&el.parentNode)el.parentNode.removeChild(el);var as=document.getElementById("admin-screen");if(as){as.style.overflow="";var sp=ADMIN_SAVED_SCROLL||0;as.scrollTop=sp;}}
   backBtn.addEventListener("click",_doBack,false);
   backBtn.addEventListener("touchend",function(e){e.preventDefault();e.stopPropagation();_doBack();},false);
   var titleDiv=document.createElement("div");
@@ -3919,7 +3919,9 @@ function adminChatFromOrder(orderNo){
   bodyInner.appendChild(msgsDiv);bodyInner.appendChild(inpWrap);bodyInner.appendChild(hintDiv);
   bodyDiv.appendChild(bodyInner);
   chatDiv.appendChild(bodyDiv);
-  document.body.appendChild(chatDiv);
+  adminScreen.style.overflow="hidden";
+  adminScreen.scrollTop=0;
+  adminScreen.appendChild(chatDiv);
   var msgsEl=document.getElementById("adm-inline-msgs");
   if(!fbEnabled||!fbDb){
     msgsEl.innerHTML='<div style="color:#aaa;text-align:center;padding:20px;font-size:13px;">Firebase未接続</div>';
