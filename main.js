@@ -3865,9 +3865,20 @@ function restoreAdminBody(){
   var chatDiv=document.getElementById("adm-inline-chat");
   if(chatDiv)chatDiv.remove();
   var adminScreen=document.getElementById("admin-screen");
-  adminScreen.style.overflow="";
-  var sp=ADMIN_SAVED_SCROLL;
-  if(adminScreen){adminScreen.scrollTop=sp;requestAnimationFrame(function(){adminScreen.scrollTop=sp;});}
+  if(adminScreen){
+    adminScreen.style.overflow="";
+    var sp=ADMIN_SAVED_SCROLL||0;
+    adminScreen.scrollTop=sp;
+    requestAnimationFrame(function(){adminScreen.scrollTop=sp;});
+  }
+  var tm=document.getElementById("adm-tab-main");
+  var ts=document.getElementById("adm-tab-settings");
+  if(tm)tm.style.display="block";
+  if(ts)ts.style.display="none";
+  var bm=document.getElementById("adm-tab-btn-main");
+  var bs=document.getElementById("adm-tab-btn-settings");
+  if(bm){bm.style.background="rgba(255,255,255,.18)";bm.style.color="#fff";bm.style.borderBottom="3px solid #fff";}
+  if(bs){bs.style.background="transparent";bs.style.color="rgba(255,255,255,.65)";bs.style.borderBottom="3px solid transparent";}
 }
 function adminChatFromOrder(orderNo){
   var existing=document.getElementById("adm-inline-chat");
@@ -3883,7 +3894,7 @@ function adminChatFromOrder(orderNo){
   backBtn.type="button";
   backBtn.style.cssText="background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.6);color:#fff;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;touch-action:manipulation;min-width:80px;";
   backBtn.textContent="← 戻る";
-  function _doBack(){var el=document.getElementById("adm-inline-chat");if(el&&el.parentNode)el.parentNode.removeChild(el);var as=document.getElementById("admin-screen");if(as){as.style.overflow="";var sp=ADMIN_SAVED_SCROLL||0;as.scrollTop=sp;}}
+  function _doBack(){restoreAdminBody();}
   backBtn.addEventListener("click",_doBack,false);
   backBtn.addEventListener("touchend",function(e){e.preventDefault();e.stopPropagation();_doBack();},false);
   var titleDiv=document.createElement("div");
