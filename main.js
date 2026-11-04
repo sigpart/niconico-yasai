@@ -3862,6 +3862,7 @@ document.addEventListener("keydown",function(e){
 });
 
 function restoreAdminBody(){
+  alert("DEBUG: restoreAdminBody called. saved="+(ADMIN_BODY_SAVED_HTML?ADMIN_BODY_SAVED_HTML.length+"chars":"empty"));
   var adminScreen=document.getElementById("admin-screen");
   if(!adminScreen||!ADMIN_BODY_SAVED_HTML)return;
   adminScreen.innerHTML=ADMIN_BODY_SAVED_HTML;
@@ -3876,7 +3877,7 @@ function adminChatFromOrder(orderNo){
   if(!ADMIN_BODY_SAVED_HTML)ADMIN_BODY_SAVED_HTML=adminScreen.innerHTML;
   ADMIN_SAVED_SCROLL=adminScreen.scrollTop;
   adminScreen.innerHTML=''
-    +'<div style="background:#1a6b2a;padding:0 16px;height:56px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;flex-shrink:0;">'
+    +'<div style="background:#1a6b2a;padding:0 16px;height:56px;display:flex;align-items:center;gap:12px;">'
     +'<button type="button" onclick="restoreAdminBody()" style="background:#fff;border:none;color:#1a6b2a;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">← 戻る</button>'
     +'<span style="font-family:\'Shippori Mincho B1\',serif;font-size:16px;font-weight:800;color:#fff;">💬 '+escHtml(orderNo)+'</span>'
     +'</div>'
