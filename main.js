@@ -3866,7 +3866,6 @@ function restoreAdminBody(){
   if(chatDiv)chatDiv.remove();
   var adminScreen=document.getElementById("admin-screen");
   if(adminScreen){
-    adminScreen.style.overflow="";
     var sp=ADMIN_SAVED_SCROLL||0;
     adminScreen.scrollTop=sp;
     requestAnimationFrame(function(){adminScreen.scrollTop=sp;});
@@ -3887,18 +3886,11 @@ function adminChatFromOrder(orderNo){
   ADMIN_SAVED_SCROLL=adminScreen?adminScreen.scrollTop:0;
   var chatDiv=document.createElement("div");
   chatDiv.id="adm-inline-chat";
-  chatDiv.style.cssText="position:absolute;top:0;left:0;right:0;bottom:0;z-index:9999;background:#f0f4f0;display:flex;flex-direction:column;";
+  chatDiv.style.cssText="position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:#f0f4f0;display:flex;flex-direction:column;";
   var hdrDiv=document.createElement("div");
-  hdrDiv.style.cssText="background:var(--g1);padding:0 20px;height:56px;min-height:56px;display:flex;align-items:center;gap:12px;flex-shrink:0;";
-  var backBtn=document.createElement("button");
-  backBtn.type="button";
-  backBtn.style.cssText="background:#fff;border:2px solid #1a6b2a;color:#1a6b2a;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;";
-  backBtn.textContent="← 戻る";
-  backBtn.onclick=restoreAdminBody;
-  var titleDiv=document.createElement("div");
-  titleDiv.style.cssText="font-family:'Shippori Mincho B1',serif;font-size:16px;font-weight:800;color:#fff;";
-  titleDiv.textContent="💬 "+orderNo;
-  hdrDiv.appendChild(backBtn);hdrDiv.appendChild(titleDiv);
+  hdrDiv.style.cssText="background:#1a6b2a;padding:0 16px;height:56px;min-height:56px;display:flex;align-items:center;gap:12px;flex-shrink:0;";
+  hdrDiv.innerHTML='<button type="button" onclick="restoreAdminBody()" style="background:#fff;border:2px solid #fff;color:#1a6b2a;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;min-height:44px;min-width:72px;flex-shrink:0;">← 戻る</button>'
+    +'<div style="font-family:\'Shippori Mincho B1\',serif;font-size:16px;font-weight:800;color:#fff;flex:1;">💬 '+escHtml(orderNo)+'</div>';
   chatDiv.appendChild(hdrDiv);
   // コンテンツ部分のみスクロール
   var bodyDiv=document.createElement("div");
@@ -3928,9 +3920,7 @@ function adminChatFromOrder(orderNo){
   bodyInner.appendChild(msgsDiv);bodyInner.appendChild(inpWrap);bodyInner.appendChild(hintDiv);
   bodyDiv.appendChild(bodyInner);
   chatDiv.appendChild(bodyDiv);
-  adminScreen.style.overflow="hidden";
-  adminScreen.scrollTop=0;
-  adminScreen.appendChild(chatDiv);
+  document.documentElement.appendChild(chatDiv);
   var msgsEl=document.getElementById("adm-inline-msgs");
   if(!fbEnabled||!fbDb){
     msgsEl.innerHTML='<div style="color:#aaa;text-align:center;padding:20px;font-size:13px;">Firebase未接続</div>';
