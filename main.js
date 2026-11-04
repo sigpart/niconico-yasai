@@ -3875,26 +3875,30 @@ function adminChatFromOrder(orderNo){
   ADMIN_SAVED_SCROLL=adminScreen?adminScreen.scrollTop:0;
   var chatDiv=document.createElement("div");
   chatDiv.id="adm-inline-chat";
-  chatDiv.style.cssText="position:fixed;inset:0;z-index:800;background:#f0f4f0;overflow-y:auto;-webkit-overflow-scrolling:touch;";
+  // flexレイアウトでヘッダー固定・コンテンツのみスクロール（stickyを使わない）
+  chatDiv.style.cssText="position:fixed;top:0;left:0;right:0;bottom:0;z-index:800;background:#f0f4f0;display:flex;flex-direction:column;";
   var hdrDiv=document.createElement("div");
-  hdrDiv.style.cssText="background:var(--g1);padding:0 20px;height:56px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;flex-shrink:0;";
+  hdrDiv.style.cssText="background:var(--g1);padding:0 20px;height:56px;min-height:56px;display:flex;align-items:center;gap:12px;flex-shrink:0;";
   var backBtn=document.createElement("button");
   backBtn.type="button";
-  backBtn.style.cssText="background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.6);color:#fff;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;touch-action:manipulation;";
+  backBtn.style.cssText="background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.6);color:#fff;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;touch-action:manipulation;min-width:80px;";
   backBtn.textContent="← 戻る";
   function _doBack(){var el=document.getElementById("adm-inline-chat");if(el&&el.parentNode)el.parentNode.removeChild(el);var as=document.getElementById("admin-screen");if(as){var sp=ADMIN_SAVED_SCROLL||0;as.scrollTop=sp;}}
   backBtn.addEventListener("click",_doBack,false);
-  backBtn.addEventListener("touchend",function(e){e.preventDefault();_doBack();},false);
+  backBtn.addEventListener("touchend",function(e){e.preventDefault();e.stopPropagation();_doBack();},false);
   var titleDiv=document.createElement("div");
   titleDiv.style.cssText="font-family:'Shippori Mincho B1',serif;font-size:16px;font-weight:800;color:#fff;";
   titleDiv.textContent="💬 "+orderNo;
   hdrDiv.appendChild(backBtn);hdrDiv.appendChild(titleDiv);
   chatDiv.appendChild(hdrDiv);
+  // コンテンツ部分のみスクロール
   var bodyDiv=document.createElement("div");
-  bodyDiv.style.cssText="max-width:640px;margin:0 auto;padding:16px 16px 8px;display:flex;flex-direction:column;min-height:calc(100dvh - 56px);";
+  bodyDiv.style.cssText="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;";
+  var bodyInner=document.createElement("div");
+  bodyInner.style.cssText="max-width:640px;margin:0 auto;display:flex;flex-direction:column;min-height:100%;";
   var msgsDiv=document.createElement("div");
   msgsDiv.id="adm-inline-msgs";
-  msgsDiv.style.cssText="flex:1;background:#fff;border:1px solid #c4dcc8;border-radius:12px;padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:10px;margin-bottom:12px;min-height:200px;";
+  msgsDiv.style.cssText="flex:1;background:#fff;border:1px solid #c4dcc8;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px;margin-bottom:12px;min-height:200px;";
   msgsDiv.innerHTML='<div style="color:#aaa;text-align:center;padding:20px;font-size:13px;">読み込み中...</div>';
   var inpWrap=document.createElement("div");
   inpWrap.style.cssText="background:#fff;border:1px solid #c4dcc8;border-radius:12px;padding:12px;display:flex;gap:10px;align-items:flex-end;";
@@ -3912,7 +3916,8 @@ function adminChatFromOrder(orderNo){
   hintDiv.id="adm-chat-hint";
   hintDiv.style.cssText="font-size:10px;color:#888;text-align:center;padding:8px 0;";
   hintDiv.textContent="自動翻訳対応";
-  bodyDiv.appendChild(msgsDiv);bodyDiv.appendChild(inpWrap);bodyDiv.appendChild(hintDiv);
+  bodyInner.appendChild(msgsDiv);bodyInner.appendChild(inpWrap);bodyInner.appendChild(hintDiv);
+  bodyDiv.appendChild(bodyInner);
   chatDiv.appendChild(bodyDiv);
   document.body.appendChild(chatDiv);
   var msgsEl=document.getElementById("adm-inline-msgs");
