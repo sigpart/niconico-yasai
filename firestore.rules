@@ -49,6 +49,12 @@ service cloud.firestore {
       allow delete: if request.auth != null && request.auth.token.email != null;
     }
 
+    // LINE通知用公開設定: PHPプロキシから読み取り可能
+    match /pub_config/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.token.email != null;
+    }
+
     // adminsコレクション: 参照用に残す
     match /admins/{email} {
       allow read: if request.auth != null && request.auth.token.email == email;

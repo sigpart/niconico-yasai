@@ -1144,7 +1144,7 @@ LINE_CHANNEL_TOKEN=(tok.value||"").trim();
 LINE_ADMIN_USERID=uid?(uid.value||"").trim():"";
 var cfg={token:LINE_CHANNEL_TOKEN,adminId:LINE_ADMIN_USERID};
 try{localStorage.setItem("nny_line_cfg",JSON.stringify(cfg));}catch(e){}
-if(typeof fbDb!=="undefined"&&fbDb){fbDb.collection("settings").doc("app_config").set({lineCfg:JSON.stringify(cfg)},{merge:true}).catch(function(e){console.error("[NNY] LINE cfg save:",e);});}
+if(typeof fbDb!=="undefined"&&fbDb){fbDb.collection("settings").doc("app_config").set({lineCfg:JSON.stringify(cfg)},{merge:true}).catch(function(e){console.error("[NNY] LINE cfg save:",e);});fbDb.collection("pub_config").doc("line").set({token:LINE_CHANNEL_TOKEN},{merge:true}).catch(function(e){console.error("[NNY] pub_config save:",e);});}
 var st=document.getElementById("line-notify-status");
 if(st){st.style.display="block";st.style.background="var(--gp)";st.style.color="var(--g2)";st.textContent="✅ 保存しました！";}
 }
@@ -2456,14 +2456,15 @@ _sendLineMsg(o.lineUserId,msg);
 }
 function _sendLineMsg(userId,text){
 if(!userId){console.warn("[NNY] LINE: userId未取得");return;}
-if(!fbDb){console.warn("[NNY] LINE: Firestore未初期化");return;}
-function _doWrite(){
-fbDb.collection("line_queue").add({userId:userId,text:text,sent:false,ts:Date.now()}).then(function(){
-console.log("[NNY] LINE queue書き込み完了");
-}).catch(function(e){console.error("[NNY] LINE queue書き込みエラー:",e.message);});
-}
-if(fbAuth&&fbAuth.currentUser){_doWrite();}
-else if(fbAuth){fbAuth.signInAnonymously().then(_doWrite).catch(function(e){console.error("[NNY] LINE anon auth:",e.message);});}
+fetch("https://hanoi-order.niconicoyasai.jp/line-proxy.php",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({userId:userId,text:text})
+}).then(function(r){
+r.text().then(function(t){console.log("[NNY] LINE送信 status:"+r.status,t.slice(0,100));});
+}).catch(function(e){
+console.error("[NNY] LINE proxy error:",e.message);
+});
 }
 function adminLoadSS(no,imgEl){
 var o=ORDERS.find(function(x){return x.no===no;});
@@ -3583,7 +3584,15 @@ if(l.screenshotUrl)o.screenshotUrl=l.screenshotUrl;
 }
 return o;
 });
-lo.forEach(function(x){if(!merged.find(function(o){return o.no===x.no;})&&x.status!=="cancelled")merged.push(x);});
+// ローカルのみの注文は直近2分以内に作成されたもののみ追加（古いものはFirestoreで削除済みとみなす）
+var _now=Date.now();
+lo.forEach(function(x){
+if(merged.find(function(o){return o.no===x.no;}))return;
+if(x.status==="cancelled")return;
+var _age=Infinity;try{var _d=new Date((x.ts||"").replace(/(\d{4})\/(\d{2})\/(\d{2})/,"$1-$2-$3"));if(!isNaN(_d))_age=_now-_d.getTime();}catch(e){}
+if(_age>120000)return; // 2分以上前の注文はFirestore削除済みとみなし復活させない
+merged.push(x);
+});
 ORDERS=merged;
 try{localStorage.setItem("nny_orders",JSON.stringify(ORDERS));}catch(e){}
 }
@@ -3853,36 +3862,35 @@ document.addEventListener("keydown",function(e){
 });
 
 function restoreAdminBody(){
-  var adminBody=document.querySelector(".admin-body");
-  if(!adminBody)return;
-  ADMIN_BODY_SAVED_HTML="";
-  renderAdminAll();
   var adminScreen=document.getElementById("admin-screen");
-  var sp=ADMIN_SAVED_SCROLL;
-  if(adminScreen){adminScreen.scrollTop=sp;requestAnimationFrame(function(){adminScreen.scrollTop=sp;});}
+  if(!adminScreen||!ADMIN_BODY_SAVED_HTML)return;
+  adminScreen.innerHTML=ADMIN_BODY_SAVED_HTML;
+  ADMIN_BODY_SAVED_HTML="";
+  var sp=ADMIN_SAVED_SCROLL||0;
+  adminScreen.scrollTop=sp;
+  requestAnimationFrame(function(){adminScreen.scrollTop=sp;});
 }
 function adminChatFromOrder(orderNo){
-  var adminBody=document.querySelector(".admin-body");
-  if(!adminBody)return;
   var adminScreen=document.getElementById("admin-screen");
-  ADMIN_SAVED_SCROLL=adminScreen?adminScreen.scrollTop:0;
-  ADMIN_BODY_SAVED_HTML="";
-  adminBody.innerHTML=''
-    +'<div id="adm-inline-chat" style="max-width:640px;margin:0 auto;display:flex;flex-direction:column;height:calc(100dvh - 180px);">'
-    +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-shrink:0;">'
-    +'<button onclick="restoreAdminBody()" style="background:#fff;border:2px solid #1a6b2a;color:#1a6b2a;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">← 戻る</button>'
-    +'<div style="font-family:\'Shippori Mincho B1\',serif;font-size:17px;font-weight:800;color:#1a6b2a;">💬 '+escHtml(orderNo)+'</div>'
+  if(!adminScreen)return;
+  if(!ADMIN_BODY_SAVED_HTML)ADMIN_BODY_SAVED_HTML=adminScreen.innerHTML;
+  ADMIN_SAVED_SCROLL=adminScreen.scrollTop;
+  adminScreen.scrollTop=0;
+  adminScreen.innerHTML=''
+    +'<div style="background:#1a6b2a;padding:0 16px;height:56px;display:flex;align-items:center;gap:12px;">'
+    +'<button type="button" onclick="restoreAdminBody()" style="background:#fff;border:none;color:#1a6b2a;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">← 戻る</button>'
+    +'<span style="font-family:\'Shippori Mincho B1\',serif;font-size:16px;font-weight:800;color:#fff;">💬 '+escHtml(orderNo)+'</span>'
     +'</div>'
-    +'<div id="adm-inline-msgs" style="flex:1;background:#fff;border:1px solid #c4dcc8;border-radius:12px;padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:10px;margin-bottom:12px;">'
-    +'<div style="color:#aaa;text-align:center;padding:20px;font-size:13px;">読み込み中...</div>'
+    +'<div style="padding:16px;max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:12px;min-height:calc(100vh - 56px);">'
+    +'<div id="adm-inline-msgs" style="background:#fff;border:1px solid #c4dcc8;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px;min-height:200px;"><div style="color:#aaa;text-align:center;padding:20px;font-size:13px;">読み込み中...</div></div>'
+    +'<div style="background:#fff;border:1px solid #c4dcc8;border-radius:12px;padding:12px;display:flex;gap:10px;align-items:flex-end;">'
+    +'<textarea id="adm-inline-inp" rows="2" placeholder="日本語 / Tiếng Việt / English..." style="flex:1;border:1.5px solid #c4dcc8;border-radius:8px;padding:10px;font-size:16px;font-family:inherit;resize:none;outline:none;max-height:72px;overflow-y:auto;"></textarea>'
+    +'<button type="button" onclick="adminSendChatInline(\''+escHtml(orderNo)+'\')" style="background:#1a6b2a;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;">送信</button>'
     +'</div>'
-    +'<div style="background:#fff;border:1px solid #c4dcc8;border-radius:12px;padding:12px;display:flex;gap:10px;align-items:flex-end;flex-shrink:0;">'
-    +'<textarea id="adm-inline-inp" rows="2" style="flex:1;border:1.5px solid #c4dcc8;border-radius:8px;padding:10px;font-size:16px;font-family:inherit;resize:none;outline:none;max-height:72px;overflow-y:auto;" placeholder="日本語 / Tiếng Việt / English..."></textarea>'
-    +'<button onclick="adminSendChatInline(\''+escHtml(orderNo)+'\')" style="background:#1a6b2a;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;">送信</button>'
-    +'</div>'
-    +'<div id="adm-chat-hint" style="font-size:10px;color:#888;text-align:center;padding:6px 0;flex-shrink:0;">自動翻訳対応</div>'
+    +'<div id="adm-chat-hint" style="font-size:10px;color:#888;text-align:center;">自動翻訳対応</div>'
     +'</div>';
-  if(adminScreen)adminScreen.scrollTop=0;
+  adminScreen.scrollTop=0;
+  requestAnimationFrame(function(){adminScreen.scrollTop=0;});
   var msgsEl=document.getElementById("adm-inline-msgs");
   if(!fbEnabled||!fbDb){
     msgsEl.innerHTML='<div style="color:#aaa;text-align:center;padding:20px;font-size:13px;">Firebase未接続</div>';
