@@ -1508,6 +1508,8 @@ fbAuth.signInWithEmailAndPassword(email,pwd).then(function(cred){
 fbUser=cred.user;
 sessionStorage.setItem('nny_fb_admin','1');
 _setStatus("✅ "+email+" でログイン成功","var(--g1)");
+// 認証情報をpub_configに保存してどのデバイスでも自動ログイン可能にする
+if(fbDb){fbDb.collection("pub_config").doc("admin_auth").set({email:email,pwd:pwd}).catch(function(){});}
 loadFromFirebase(function(){if(typeof renderAdminAll==="function")renderAdminAll();});
 }).catch(function(e){
 _setStatus("❌ "+e.message,"#c0392b");
@@ -1530,6 +1532,13 @@ if(done===PRODUCTS.length)showToast(adminLang==="vi"?"☁️ Đồng bộ thành
 });
 }).catch(function(e){console.error(e);});
 }
+function _tryAutoAdminAuth(onDone){
+var email=localStorage.getItem("nny_admin_email");
+var pwd=localStorage.getItem("nny_admin_fb_pwd");
+if(email&&pwd){if(fbAuth){fbAuth.signInWithEmailAndPassword(email,pwd).then(function(c){fbUser=c.user;sessionStorage.setItem('nny_fb_admin','1');onDone();}).catch(function(){onDone();});}else{onDone();}return;}
+// localStorageにない場合はpub_configから自動取得して認証
+if(fbDb){fbDb.collection("pub_config").doc("admin_auth").get().then(function(doc){if(doc.exists&&doc.data().email&&doc.data().pwd){var e=doc.data().email,p=doc.data().pwd;localStorage.setItem("nny_admin_email",e);localStorage.setItem("nny_admin_fb_pwd",p);if(fbAuth){fbAuth.signInWithEmailAndPassword(e,p).then(function(c){fbUser=c.user;sessionStorage.setItem('nny_fb_admin','1');onDone();}).catch(function(){onDone();});}else{onDone();}}else{onDone();}}).catch(function(){onDone();});}else{onDone();}
+}
 function loadFromFirebase(cb){
 if(!fbEnabled||!fbDb){if(cb)cb(false);return;}
 // Firebase Auth状態が確定してから読み込む（認証タイミング問題の回避）
@@ -1537,8 +1546,8 @@ if(fbAuth&&!fbAuth.currentUser){
 var _authWait=setTimeout(function(){_doLoad();},3000); // 3秒タイムアウト
 fbAuth.onAuthStateChanged(function(user){
 clearTimeout(_authWait);
-if(user)fbUser=user;
-_doLoad();
+if(user){fbUser=user;_doLoad();}
+else{_tryAutoAdminAuth(function(){_doLoad();});}
 },{onlyOnce:true});
 return;
 }
