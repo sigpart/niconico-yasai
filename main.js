@@ -1542,14 +1542,17 @@ return;
 function _doLoad(){
 // app_config（EJ・銀行・deliveryOrigin等）をFirebaseから読み込む
 fbDb.collection("settings").doc("app_config").get().then(function(doc){
-if(doc.exists){
-var cfg=doc.data();
+var cfg=doc.exists?doc.data():{};
+var _sync={};
 if(cfg.ej){try{var ej=JSON.parse(cfg.ej);EJ.service=ej.service||EJ.service;EJ.template=ej.template||EJ.template;EJ.pubkey=ej.pubkey||EJ.pubkey;EJ.from=ej.from||EJ.from;EJ.admin=ej.admin||EJ.admin||"";if(EJ.pubkey)emailjs.init({publicKey:EJ.pubkey});localStorage.setItem("nny_ej",cfg.ej);if(typeof loadEJConfigUI==="function")loadEJConfigUI();}catch(e){}}
+else{var _lsEj=localStorage.getItem("nny_ej");if(_lsEj)_sync.ej=_lsEj;}
 if(cfg.lineCfg){try{var _lc=JSON.parse(cfg.lineCfg);LINE_CHANNEL_TOKEN=_lc.token||LINE_CHANNEL_TOKEN;LINE_ADMIN_USERID=_lc.adminId||LINE_ADMIN_USERID;localStorage.setItem("nny_line_cfg",cfg.lineCfg);if(typeof loadLineCfgUI==="function")loadLineCfgUI();}catch(e){}}
+else{var _lsLine=localStorage.getItem("nny_line_cfg");if(_lsLine)_sync.lineCfg=_lsLine;}
 if(cfg.bank){try{var bk=JSON.parse(cfg.bank);BANK_CFG=Object.assign(BANK_CFG,bk);localStorage.setItem("nny_bank",cfg.bank);if(typeof loadBankConfigUI==="function")loadBankConfigUI();}catch(e){}}
-else if(BANK_CFG.account){fbDb.collection("settings").doc("app_config").set({bank:JSON.stringify(BANK_CFG)},{merge:true}).catch(function(e){console.error("[NNY] bank auto-sync:",e);});}
+else if(BANK_CFG.account){_sync.bank=JSON.stringify(BANK_CFG);}
 if(cfg.deliveryOrigin){try{var dor=JSON.parse(cfg.deliveryOrigin);DELIVERY_ORIGIN=Object.assign(DELIVERY_ORIGIN,dor);localStorage.setItem("nny_delivery_origin",cfg.deliveryOrigin);if(typeof loadDeliveryOriginUI==="function")loadDeliveryOriginUI();if(typeof updatePickupAvailability==="function")updatePickupAvailability();}catch(e){}}
-}
+else{var _lsDo=localStorage.getItem("nny_delivery_origin");if(_lsDo)_sync.deliveryOrigin=_lsDo;}
+if(Object.keys(_sync).length){fbDb.collection("settings").doc("app_config").set(_sync,{merge:true}).catch(function(e){console.error("[NNY] settings auto-sync:",e);});}
 }).catch(function(){});
 // 商品のpub状態をFirebaseから即時取得して反映（新商品も取り込む）
 fbDb.collection("products").get().then(function(snap){
