@@ -937,6 +937,9 @@ if(typeof renderAdminProducts2==="function")renderAdminProducts2();
 }
 if(typeof loadEJConfigUI==="function")loadEJConfigUI();
 if(typeof loadFirebaseConfigUI==="function")loadFirebaseConfigUI();
+if(typeof loadBankConfigUI==="function")loadBankConfigUI();
+if(typeof loadLineCfgUI==="function")loadLineCfgUI();
+if(typeof loadDeliveryOriginUI==="function")loadDeliveryOriginUI();
 if(fbEnabled&&typeof loadFromFirebase==="function"){
 loadFromFirebase(function(){renderProducts();setTimeout(_autoSyncProducts,1000);startFbPolling();});
 }
