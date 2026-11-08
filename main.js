@@ -1092,7 +1092,7 @@ try{
 var _ejJson=JSON.stringify(EJ);
 localStorage.setItem("nny_ej",_ejJson);
 if(EJ.pubkey)emailjs.init({publicKey:EJ.pubkey});
-if(typeof fbDb!=="undefined"&&fbDb){fbDb.collection("settings").doc("app_config").set({ej:_ejJson},{merge:true}).catch(function(e){console.error("[NNY] EJ save:",e);});}
+if(typeof fbDb!=="undefined"&&fbDb){fbDb.collection("settings").doc("app_config").set({ej:_ejJson},{merge:true}).catch(function(e){console.error("[NNY] EJ save:",e);});fbDb.collection("pub_config").doc("admin_settings").set({ej:_ejJson},{merge:true}).catch(function(e){console.error("[NNY] pub EJ save:",e);});}
 var st2=document.getElementById("ej-status");
 if(st2){st2.style.display="block";st2.style.background="var(--gp)";st2.style.color="var(--g2)";st2.textContent=lang==="ja"?"✅ 保存しました！テスト送信で動作確認してください":"✅ Đã lưu! Hãy gửi thử để kiểm tra.";}
 }catch(e){var _ejSt=document.getElementById("ej-status");if(_ejSt)_ejSt.textContent="Error: "+e.message;}
@@ -1148,7 +1148,7 @@ LINE_CHANNEL_TOKEN=(tok.value||"").trim();
 LINE_ADMIN_USERID=uid?(uid.value||"").trim():"";
 var cfg={token:LINE_CHANNEL_TOKEN,adminId:LINE_ADMIN_USERID};
 try{localStorage.setItem("nny_line_cfg",JSON.stringify(cfg));}catch(e){}
-if(typeof fbDb!=="undefined"&&fbDb){fbDb.collection("settings").doc("app_config").set({lineCfg:JSON.stringify(cfg)},{merge:true}).catch(function(e){console.error("[NNY] LINE cfg save:",e);});fbDb.collection("pub_config").doc("line").set({token:LINE_CHANNEL_TOKEN},{merge:true}).catch(function(e){console.error("[NNY] pub_config save:",e);});}
+if(typeof fbDb!=="undefined"&&fbDb){var _lcJson=JSON.stringify(cfg);fbDb.collection("settings").doc("app_config").set({lineCfg:_lcJson},{merge:true}).catch(function(e){console.error("[NNY] LINE cfg save:",e);});fbDb.collection("pub_config").doc("line").set({token:LINE_CHANNEL_TOKEN},{merge:true}).catch(function(e){console.error("[NNY] pub_config save:",e);});fbDb.collection("pub_config").doc("admin_settings").set({lineCfg:_lcJson},{merge:true}).catch(function(e){console.error("[NNY] pub LINE save:",e);});}
 var st=document.getElementById("line-notify-status");
 if(st){st.style.display="block";st.style.background="var(--gp)";st.style.color="var(--g2)";st.textContent="✅ 保存しました！";}
 }
@@ -1225,7 +1225,7 @@ BANK_CFG.owner=((document.getElementById("bank-owner")||{}).value||"").trim().to
 BANK_CFG.descTemplate=((document.getElementById("bank-desc-template")||{}).value||"").trim()||"NICONICO {no}";
 if(!BANK_CFG.account){alert(adminLang==="vi"?"Vui lòng nhập số tài khoản":"口座番号を入力してください");return;}
 localStorage.setItem("nny_bank",JSON.stringify(BANK_CFG));
-if(typeof fbDb!=="undefined"&&fbDb){fbDb.collection("settings").doc("app_config").set({bank:JSON.stringify(BANK_CFG)},{merge:true}).catch(function(e){console.error("[NNY] bank cfg save:",e);});}
+if(typeof fbDb!=="undefined"&&fbDb){var _bkJson=JSON.stringify(BANK_CFG);fbDb.collection("settings").doc("app_config").set({bank:_bkJson},{merge:true}).catch(function(e){console.error("[NNY] bank cfg save:",e);});fbDb.collection("pub_config").doc("admin_settings").set({bank:_bkJson},{merge:true}).catch(function(e){console.error("[NNY] pub bank save:",e);});}
 var area=document.getElementById("bank-test-qr-area");
 if(area){
 area.style.display="block";
@@ -1555,7 +1555,14 @@ if(cfg.bank){try{var bk=JSON.parse(cfg.bank);BANK_CFG=Object.assign(BANK_CFG,bk)
 else if(BANK_CFG.account){_sync.bank=JSON.stringify(BANK_CFG);}
 if(cfg.deliveryOrigin){try{var dor=JSON.parse(cfg.deliveryOrigin);DELIVERY_ORIGIN=Object.assign(DELIVERY_ORIGIN,dor);localStorage.setItem("nny_delivery_origin",cfg.deliveryOrigin);if(typeof loadDeliveryOriginUI==="function")loadDeliveryOriginUI();if(typeof updatePickupAvailability==="function")updatePickupAvailability();}catch(e){}}
 else{var _lsDo=localStorage.getItem("nny_delivery_origin");if(_lsDo)_sync.deliveryOrigin=_lsDo;}
-if(Object.keys(_sync).length){fbDb.collection("settings").doc("app_config").set(_sync,{merge:true}).catch(function(e){console.error("[NNY] settings auto-sync:",e);});}
+if(Object.keys(_sync).length){fbDb.collection("settings").doc("app_config").set(_sync,{merge:true}).catch(function(e){console.error("[NNY] settings auto-sync:",e);});fbDb.collection("pub_config").doc("admin_settings").set(_sync,{merge:true}).catch(function(e){console.error("[NNY] pub auto-sync:",e);});}
+// 全設定をpub_configにもミラー（メール認証後に確実に反映）
+var _pubMirror={};
+var _curEj=localStorage.getItem("nny_ej");if(_curEj)_pubMirror.ej=_curEj;
+var _curLine=localStorage.getItem("nny_line_cfg");if(_curLine)_pubMirror.lineCfg=_curLine;
+if(BANK_CFG.account)_pubMirror.bank=JSON.stringify(BANK_CFG);
+var _curDo=localStorage.getItem("nny_delivery_origin");if(_curDo)_pubMirror.deliveryOrigin=_curDo;
+if(Object.keys(_pubMirror).length){fbDb.collection("pub_config").doc("admin_settings").set(_pubMirror,{merge:true}).catch(function(e){console.error("[NNY] pub mirror:",e);});}
 }).catch(function(){});
 // 商品のpub状態をFirebaseから即時取得して反映（新商品も取り込む）
 fbDb.collection("products").get().then(function(snap){
@@ -1645,6 +1652,15 @@ d.p=true;chk();
 fbDb.collection("settings").doc("notify_list").get().then(function(doc){if(doc.exists&&doc.data().list)NOTIFY_LIST=doc.data().list;d.n=true;chk();}).catch(function(){d.n=true;chk();});
 } // end _doLoad
 _doLoad();
+// 匿名ユーザー向け: pub_config/admin_settings から設定を読み込む
+fbDb.collection("pub_config").doc("admin_settings").get().then(function(doc){
+if(!doc.exists)return;
+var d=doc.data();
+if(d.ej&&!localStorage.getItem("nny_ej")){try{var ej=JSON.parse(d.ej);EJ.service=ej.service||EJ.service;EJ.template=ej.template||EJ.template;EJ.pubkey=ej.pubkey||EJ.pubkey;EJ.from=ej.from||EJ.from;EJ.admin=ej.admin||EJ.admin||"";if(EJ.pubkey)emailjs.init({publicKey:EJ.pubkey});localStorage.setItem("nny_ej",d.ej);if(typeof loadEJConfigUI==="function")loadEJConfigUI();}catch(e){}}
+if(d.lineCfg&&!localStorage.getItem("nny_line_cfg")){try{var lc=JSON.parse(d.lineCfg);LINE_CHANNEL_TOKEN=lc.token||LINE_CHANNEL_TOKEN;LINE_ADMIN_USERID=lc.adminId||LINE_ADMIN_USERID;localStorage.setItem("nny_line_cfg",d.lineCfg);if(typeof loadLineCfgUI==="function")loadLineCfgUI();}catch(e){}}
+if(d.bank&&!localStorage.getItem("nny_bank")){try{var bk=JSON.parse(d.bank);BANK_CFG=Object.assign(BANK_CFG,bk);localStorage.setItem("nny_bank",d.bank);if(typeof loadBankConfigUI==="function")loadBankConfigUI();}catch(e){}}
+if(d.deliveryOrigin&&!localStorage.getItem("nny_delivery_origin")){try{var dor=JSON.parse(d.deliveryOrigin);DELIVERY_ORIGIN=Object.assign(DELIVERY_ORIGIN,dor);localStorage.setItem("nny_delivery_origin",d.deliveryOrigin);if(typeof loadDeliveryOriginUI==="function")loadDeliveryOriginUI();}catch(e){}}
+}).catch(function(){});
 } // end loadFromFirebase
 function fbDeleteOrder(no){
 if(!fbEnabled||!fbDb)return;
@@ -3506,9 +3522,7 @@ _persistDeliveryOrigin();
 }
 function _persistDeliveryOrigin(){
 try{localStorage.setItem("nny_delivery_origin",JSON.stringify(DELIVERY_ORIGIN));}catch(e){}
-if(typeof fbEnabled!=="undefined"&&fbEnabled&&fbDb){
-fbDb.collection("settings").doc("app_config").set({deliveryOrigin:JSON.stringify(DELIVERY_ORIGIN)},{merge:true}).catch(function(e){console.error(e);});
-}
+if(typeof fbEnabled!=="undefined"&&fbEnabled&&fbDb){var _doJson=JSON.stringify(DELIVERY_ORIGIN);fbDb.collection("settings").doc("app_config").set({deliveryOrigin:_doJson},{merge:true}).catch(function(e){console.error(e);});fbDb.collection("pub_config").doc("admin_settings").set({deliveryOrigin:_doJson},{merge:true}).catch(function(e){console.error("[NNY] pub delivery save:",e);});}
 if(typeof updatePickupAvailability==="function")updatePickupAvailability();
 showToast("✅ 配送元を保存しました");
 }
