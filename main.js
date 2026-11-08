@@ -1547,6 +1547,7 @@ var cfg=doc.data();
 if(cfg.ej){try{var ej=JSON.parse(cfg.ej);EJ.service=ej.service||EJ.service;EJ.template=ej.template||EJ.template;EJ.pubkey=ej.pubkey||EJ.pubkey;EJ.from=ej.from||EJ.from;EJ.admin=ej.admin||EJ.admin||"";if(EJ.pubkey)emailjs.init({publicKey:EJ.pubkey});localStorage.setItem("nny_ej",cfg.ej);if(typeof loadEJConfigUI==="function")loadEJConfigUI();}catch(e){}}
 if(cfg.lineCfg){try{var _lc=JSON.parse(cfg.lineCfg);LINE_CHANNEL_TOKEN=_lc.token||LINE_CHANNEL_TOKEN;LINE_ADMIN_USERID=_lc.adminId||LINE_ADMIN_USERID;localStorage.setItem("nny_line_cfg",cfg.lineCfg);if(typeof loadLineCfgUI==="function")loadLineCfgUI();}catch(e){}}
 if(cfg.bank){try{var bk=JSON.parse(cfg.bank);BANK_CFG=Object.assign(BANK_CFG,bk);localStorage.setItem("nny_bank",cfg.bank);if(typeof loadBankConfigUI==="function")loadBankConfigUI();}catch(e){}}
+else if(BANK_CFG.account){fbDb.collection("settings").doc("app_config").set({bank:JSON.stringify(BANK_CFG)},{merge:true}).catch(function(e){console.error("[NNY] bank auto-sync:",e);});}
 if(cfg.deliveryOrigin){try{var dor=JSON.parse(cfg.deliveryOrigin);DELIVERY_ORIGIN=Object.assign(DELIVERY_ORIGIN,dor);localStorage.setItem("nny_delivery_origin",cfg.deliveryOrigin);if(typeof loadDeliveryOriginUI==="function")loadDeliveryOriginUI();if(typeof updatePickupAvailability==="function")updatePickupAvailability();}catch(e){}}
 }
 }).catch(function(){});
