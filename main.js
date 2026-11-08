@@ -1222,6 +1222,7 @@ BANK_CFG.owner=((document.getElementById("bank-owner")||{}).value||"").trim().to
 BANK_CFG.descTemplate=((document.getElementById("bank-desc-template")||{}).value||"").trim()||"NICONICO {no}";
 if(!BANK_CFG.account){alert(adminLang==="vi"?"Vui lòng nhập số tài khoản":"口座番号を入力してください");return;}
 localStorage.setItem("nny_bank",JSON.stringify(BANK_CFG));
+if(typeof fbDb!=="undefined"&&fbDb){fbDb.collection("settings").doc("app_config").set({bank:JSON.stringify(BANK_CFG)},{merge:true}).catch(function(e){console.error("[NNY] bank cfg save:",e);});}
 var area=document.getElementById("bank-test-qr-area");
 if(area){
 area.style.display="block";
