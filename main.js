@@ -450,10 +450,9 @@ html+='<div class="cc-item"><span>'+p.e+' '+nm+' × '+qty+'</span><span style="f
 });
 document.getElementById("cc-items").innerHTML=html;
 document.getElementById("cc-tot-val").textContent=vnd(tot);
-var _farmMode=typeof DELIVERY_ORIGIN!=="undefined"&&DELIVERY_ORIGIN.active==="farm";
 var _hasFreeShipConf=Object.keys(cart).some(function(ck){var _m=CART_META[ck];var _pid=_m?_m.id:(ck.indexOf("_")>0?ck.split("_")[0]:ck);var _pp=PRODUCTS.find(function(x){return Number(x.id)===Number(_pid);});return _pp&&_pp.freeShip;});
-var _sf=selDel==="deliver"&&!_hasFreeShipConf?_shippingFee:0,_gt=tot+_sf+(selDel==="deliver"&&!_farmMode&&!_hasFreeShipConf?10000:0);
-var _sr=document.getElementById("cc-ship-row");if(_sr){if(_sf>0){_sr.style.display="";var _sv=document.getElementById("cc-ship-val");if(_sv)_sv.textContent=vnd(_sf+(_farmMode?0:10000));}else _sr.style.display="none";}
+var _sf=selDel==="deliver"&&!_hasFreeShipConf?_shippingFee:0,_gt=tot+_sf;
+var _sr=document.getElementById("cc-ship-row");if(_sr){if(_sf>0){_sr.style.display="";var _sv=document.getElementById("cc-ship-val");if(_sv)_sv.textContent=vnd(_sf);}else _sr.style.display="none";}
 var _gr=document.getElementById("cc-grand-row");if(_gr){if(_sf>0){_gr.style.display="";var _gv=document.getElementById("cc-grand-val");if(_gv)_gv.textContent=vnd(_gt);}else _gr.style.display="none";}
 var n=document.getElementById("inp-name").value, ph=document.getElementById("inp-phone").value,
 z=document.getElementById("inp-zalo").value, a=document.getElementById("inp-addr").value, em=document.getElementById("inp-email").value;
@@ -487,9 +486,8 @@ alert(lang==="ja"?"電話番号を入力してください":"Vui lòng nhập s�
 }
 if(_nameEl)_nameEl.style.borderColor="";if(_phoneEl)_phoneEl.style.borderColor="";
 var _ts=Date.now(),_rnd=Math.floor(Math.random()*900)+100;var no="#NNY-"+(_ts.toString(36).toUpperCase().slice(-4))+_rnd;
-var _isFarm=typeof DELIVERY_ORIGIN!=="undefined"&&DELIVERY_ORIGIN.active==="farm";
 var _freeShipInCart=Object.keys(cart).some(function(ck){var _m=CART_META[ck];var _pid=_m?_m.id:(ck.indexOf("_")>0?ck.split("_")[0]:ck);var _pp=PRODUCTS.find(function(x){return Number(x.id)===Number(_pid);});return _pp&&_pp.freeShip;});
-var ts=new Date().toLocaleString("ja-JP"), tot=cartTotal()+(selDel==="deliver"&&!_freeShipInCart?_shippingFee+(_isFarm?0:10000):0);
+var ts=new Date().toLocaleString("ja-JP"), tot=cartTotal()+(selDel==="deliver"&&!_freeShipInCart?_shippingFee:0);
 var name=document.getElementById("inp-name").value, phone=document.getElementById("inp-phone").value,
 zalo=document.getElementById("inp-zalo").value, addr=document.getElementById("inp-addr").value,
 email=document.getElementById("inp-email").value, note=document.getElementById("inp-note").value;
@@ -498,7 +496,7 @@ Object.keys(cart).forEach(function(ck){var qty=cart[ck];if(!qty)return;var meta=
 items.push({id:p.id,qty:qty,ja:nm_ja,vi:nm_vi,e:p.e,price:price,unit:unit,unitvi:unitvi});});
 // カート内に送料無料商品があれば送料0円
 var _hasFreeShip=Object.keys(cart).some(function(ck){var meta=CART_META[ck];var pid=meta?meta.id:(ck.indexOf("_")>0?ck.split("_")[0]:ck);var p=PRODUCTS.find(function(x){return Number(x.id)===Number(pid);});return p&&p.freeShip;});
-var shipFeeVal=selDel==="deliver"&&!_hasFreeShip?_shippingFee+((_isFarm||false)?0:10000):0;
+var shipFeeVal=selDel==="deliver"&&!_hasFreeShip?_shippingFee:0;
 var _lineNotify=document.getElementById("inp-line-notify");
 var _lineUid="";try{_lineUid=localStorage.getItem("nny_line_uid")||"";}catch(e){}
 console.log("[NNY] order lineUserId:",_lineUid||"(なし)","token:",LINE_CHANNEL_TOKEN?"あり":"(なし)");
@@ -752,20 +750,7 @@ document.getElementById("ntf-modal-body").innerHTML='<div class="notify-success"
 setTimeout(closeNotify,2000);
 }
 function pickDel(el,v){document.querySelectorAll(".opt-card:not(.disabled)").forEach(function(e){e.classList.remove("on");});el.classList.add("on");selDel=v;saveCust();var _ae=document.getElementById("inp-addr");if(_ae&&_ae.value.trim()){calcShippingFee(_ae.value,function(){updateShippingDisplay(null,false);});}else{_shippingFee=0;_shippingDist=0;updateShippingDisplay(null,false);}}
-function updatePickupAvailability(){
-var isFarm=typeof DELIVERY_ORIGIN!=="undefined"&&DELIVERY_ORIGIN.active==="farm";
-var pickupCard=document.querySelector("[onclick=\"pickDel(this,'pickup')\"]");
-if(!pickupCard)return;
-var noteEl=document.getElementById("farm-pickup-note");
-if(isFarm){
-pickupCard.classList.add("disabled");
-if(selDel==="pickup"){selDel="deliver";document.querySelectorAll(".opt-card").forEach(function(e){e.classList.remove("on");});var deliverCard=document.querySelector("[onclick=\"pickDel(this,'deliver')\"]");if(deliverCard){deliverCard.classList.add("on");deliverCard.classList.remove("disabled");}}
-if(noteEl){noteEl.textContent=L("農場からの配達のため「直接受取」は選択できません。","Farm delivery only — in-store pickup is not available.","Giao hàng từ trang trại — không thể chọn nhận trực tiếp.");noteEl.style.display="";}
-}else{
-pickupCard.classList.remove("disabled");
-if(noteEl)noteEl.style.display="none";
-}
-}
+function updatePickupAvailability(){}
 function pickPay(el,v){document.querySelectorAll(".pay-opt").forEach(function(e){e.classList.remove("on");});el.classList.add("on");selPay=v;saveCust();}
 var QR_META={momo:{logo:"💜",ja:"MoMo で支払う",vi:"Thanh toán qua MoMo"},zalopay:{logo:"💙",ja:"ZaloPay で支払う",vi:"Thanh toán qua ZaloPay"},vnpay:{logo:"❤️",ja:"VNPay で支払う",vi:"Thanh toán qua VNPay"}};
 function showQR(method){
@@ -939,7 +924,6 @@ if(typeof loadEJConfigUI==="function")loadEJConfigUI();
 if(typeof loadFirebaseConfigUI==="function")loadFirebaseConfigUI();
 if(typeof loadBankConfigUI==="function")loadBankConfigUI();
 if(typeof loadLineCfgUI==="function")loadLineCfgUI();
-if(typeof loadDeliveryOriginUI==="function")loadDeliveryOriginUI();
 if(fbEnabled&&typeof loadFromFirebase==="function"){
 loadFromFirebase(function(){renderProducts();setTimeout(_autoSyncProducts,1000);startFbPolling();});
 }
@@ -1562,15 +1546,12 @@ if(cfg.lineCfg){try{var _lc=JSON.parse(cfg.lineCfg);LINE_CHANNEL_TOKEN=_lc.token
 else{var _lsLine=localStorage.getItem("nny_line_cfg");if(_lsLine)_sync.lineCfg=_lsLine;}
 if(cfg.bank){try{var bk=JSON.parse(cfg.bank);BANK_CFG=Object.assign(BANK_CFG,bk);localStorage.setItem("nny_bank",cfg.bank);if(typeof loadBankConfigUI==="function")loadBankConfigUI();}catch(e){}}
 else if(BANK_CFG.account){_sync.bank=JSON.stringify(BANK_CFG);}
-if(cfg.deliveryOrigin){try{var dor=JSON.parse(cfg.deliveryOrigin);DELIVERY_ORIGIN=Object.assign(DELIVERY_ORIGIN,dor);localStorage.setItem("nny_delivery_origin",cfg.deliveryOrigin);if(typeof loadDeliveryOriginUI==="function")loadDeliveryOriginUI();if(typeof updatePickupAvailability==="function")updatePickupAvailability();}catch(e){}}
-else{var _lsDo=localStorage.getItem("nny_delivery_origin");if(_lsDo)_sync.deliveryOrigin=_lsDo;}
 if(Object.keys(_sync).length){fbDb.collection("settings").doc("app_config").set(_sync,{merge:true}).catch(function(e){console.error("[NNY] settings auto-sync:",e);});fbDb.collection("pub_config").doc("admin_settings").set(_sync,{merge:true}).catch(function(e){console.error("[NNY] pub auto-sync:",e);});}
 // 全設定をpub_configにもミラー（メール認証後に確実に反映）
 var _pubMirror={};
 var _curEj=localStorage.getItem("nny_ej");if(_curEj)_pubMirror.ej=_curEj;
 var _curLine=localStorage.getItem("nny_line_cfg");if(_curLine)_pubMirror.lineCfg=_curLine;
 if(BANK_CFG.account)_pubMirror.bank=JSON.stringify(BANK_CFG);
-var _curDo=localStorage.getItem("nny_delivery_origin");if(_curDo)_pubMirror.deliveryOrigin=_curDo;
 if(Object.keys(_pubMirror).length){fbDb.collection("pub_config").doc("admin_settings").set(_pubMirror,{merge:true}).catch(function(e){console.error("[NNY] pub mirror:",e);});}
 }).catch(function(){});
 // 商品のpub状態をFirebaseから即時取得して反映（新商品も取り込む）
@@ -1668,7 +1649,6 @@ var d=doc.data();
 if(d.ej&&!localStorage.getItem("nny_ej")){try{var ej=JSON.parse(d.ej);EJ.service=ej.service||EJ.service;EJ.template=ej.template||EJ.template;EJ.pubkey=ej.pubkey||EJ.pubkey;EJ.from=ej.from||EJ.from;EJ.admin=ej.admin||EJ.admin||"";if(EJ.pubkey)emailjs.init({publicKey:EJ.pubkey});localStorage.setItem("nny_ej",d.ej);if(typeof loadEJConfigUI==="function")loadEJConfigUI();}catch(e){}}
 if(d.lineCfg&&!localStorage.getItem("nny_line_cfg")){try{var lc=JSON.parse(d.lineCfg);LINE_CHANNEL_TOKEN=lc.token||LINE_CHANNEL_TOKEN;LINE_ADMIN_USERID=lc.adminId||LINE_ADMIN_USERID;localStorage.setItem("nny_line_cfg",d.lineCfg);if(typeof loadLineCfgUI==="function")loadLineCfgUI();}catch(e){}}
 if(d.bank&&!localStorage.getItem("nny_bank")){try{var bk=JSON.parse(d.bank);BANK_CFG=Object.assign(BANK_CFG,bk);localStorage.setItem("nny_bank",d.bank);if(typeof loadBankConfigUI==="function")loadBankConfigUI();}catch(e){}}
-if(d.deliveryOrigin&&!localStorage.getItem("nny_delivery_origin")){try{var dor=JSON.parse(d.deliveryOrigin);DELIVERY_ORIGIN=Object.assign(DELIVERY_ORIGIN,dor);localStorage.setItem("nny_delivery_origin",d.deliveryOrigin);if(typeof loadDeliveryOriginUI==="function")loadDeliveryOriginUI();}catch(e){}}
 }).catch(function(){});
 } // end loadFromFirebase
 function fbDeleteOrder(no){
@@ -2024,7 +2004,7 @@ var us=document.getElementById("user-screen");
 var as=document.getElementById("admin-screen");
 if(us)us.style.display="none";
 if(as)as.classList.add("on");
-loadEJConfigUI();loadBankConfigUI();loadFBConfigUI();if(typeof loadDeliveryOriginUI==="function")loadDeliveryOriginUI();if(typeof loadLineCfgUI==="function")loadLineCfgUI();
+loadEJConfigUI();loadBankConfigUI();loadFBConfigUI();if(typeof loadLineCfgUI==="function")loadLineCfgUI();
 applyAdminI18n();
 function _doOpenAdminLoad(){
 if(fbEnabled){
@@ -3440,28 +3420,15 @@ var os=document.getElementById("owner-screen");if(os){os.style.cssText="display:
 var us=document.getElementById("user-screen");if(us){us.style.cssText="";us.style.display="block";}
 renderProducts();
 }
-var EM_HANOI_LNG=105.8417,EM_HANOI_LAT=21.0335,_shippingFee=0,_shippingDist=0,_shippingLoading=false;
-var DELIVERY_ORIGIN={active:"farm",farm:{name:"Bản Hang Trùng 2",addr:"Bản Hang Trùng 2, Xã Vân Hồ, Sơn La, Vietnam",lat:20.855,lng:104.585,fixedFee:100000}};
-(function(){try{var _d=localStorage.getItem("nny_delivery_origin");if(_d)DELIVERY_ORIGIN=JSON.parse(_d);}catch(e){}})();
-function calcGrabFee(km){if(km<=2)return 15000;return Math.ceil((15000+Math.ceil(km-2)*5000)/1000)*1000;}
-function updateShippingDisplay(msg,loading){var el=document.getElementById("shipping-fee-row"),valEl=document.getElementById("shipping-fee-val");if(!el||!valEl)return;if(typeof selDel==="undefined"||selDel!=="deliver"){el.style.display="none";return;}el.style.display="flex";if(loading||msg){valEl.textContent=msg||L("計算中...","Calculating...","Đang tính...");return;}var _fm=typeof DELIVERY_ORIGIN!=="undefined"&&DELIVERY_ORIGIN.active==="farm";valEl.textContent=_shippingFee>0?vnd(_shippingFee+(_fm?0:10000)):L("住所を入力してください","Enter address","Nhập địa chỉ");}
+var _shippingFee=0,_shippingDist=0,_shippingLoading=false;
+var FIXED_SHIPPING_FEE=100000;
+function updateShippingDisplay(msg,loading){var el=document.getElementById("shipping-fee-row"),valEl=document.getElementById("shipping-fee-val");if(!el||!valEl)return;if(typeof selDel==="undefined"||selDel!=="deliver"){el.style.display="none";return;}el.style.display="flex";if(loading||msg){valEl.textContent=msg||"";return;}valEl.textContent=vnd(FIXED_SHIPPING_FEE);}
 function calcShippingFee(addr,cb){
-if(typeof selDel==="undefined"||selDel!=="deliver"){_shippingFee=0;_shippingDist=0;if(cb)cb(0,0);return;}
-if(!addr||addr.trim().length<3){_shippingFee=0;_shippingDist=0;if(cb)cb(0,0);return;}
-// 農場モードは固定送料（長距離のためGrab計算不適用）
-if(DELIVERY_ORIGIN.active==="farm"){
-_shippingFee=DELIVERY_ORIGIN.farm.fixedFee||100000;
-_shippingDist=0;
+if(typeof selDel==="undefined"||selDel!=="deliver"){_shippingFee=0;if(cb)cb(0,0);return;}
+_shippingFee=FIXED_SHIPPING_FEE;
 _shippingLoading=false;
 updateShippingDisplay(null,false);
 if(cb)cb(_shippingFee,0);
-return;
-}
-_shippingLoading=true;updateShippingDisplay(L("計算中...","Calculating...","Đang tính..."),true);
-var dm={"ba dinh":1,"hoan kiem":2,"dong da":2,"kim ma":2,"linh lang":2,"giang vo":3,"tay ho":4,"quang an":4,"ciputra":8,"hai ba trung":4,"times city":5,"cau giay":6,"dich vong":5,"long bien":12,"vinhomes riverside":18,"bo de":10,"thach ban":12,"gia lam":14,"ocean park":20,"thanh xuan":7,"royal city":7,"nam tu liem":9,"my dinh":7,"smart city":14,"phuong khoang":10,"dai mo":10,"bac tu liem":5,"tu liem":7,"starlake":8,"hoang mai":7,"linh dam":8,"dong anh":16,"ha dong":13,"me linh":22,"soc son":32,"thuong tin":26,"thanh oai":22,"my duc":52};
-var al=addr.toLowerCase().replace(/[àáạảãăắặẳẵâấậẩẫ]/g,"a").replace(/[èéẹẻẽêếệểễ]/g,"e").replace(/[ìíịỉĩ]/g,"i").replace(/[òóọỏõôốộổỗơớợởỡ]/g,"o").replace(/[ùúụủũưứựửữ]/g,"u").replace(/[ỳýỵỷỹ]/g,"y").replace(/đ/g,"d");
-var dk=7;for(var k in dm){if(al.indexOf(k)>=0){dk=dm[k];break;}}
-fetch("https://nominatim.openstreetmap.org/search?q="+encodeURIComponent(addr.trim()+" Ha Noi Vietnam")+"&format=json&limit=1").then(function(r){return r.json();}).then(function(d){if(!d||!d.length)throw 0;return fetch("https://router.project-osrm.org/route/v1/driving/"+EM_HANOI_LNG+","+EM_HANOI_LAT+";"+d[0].lon+","+d[0].lat+"?overview=false");}).then(function(r){return r.json();}).then(function(d){if(!d||!d.routes||!d.routes.length)throw 0;var km=d.routes[0].distance/1000;_shippingDist=Math.round(km*10)/10;_shippingFee=calcGrabFee(km);_shippingLoading=false;updateShippingDisplay(null,false);if(cb)cb(_shippingFee,_shippingDist);}).catch(function(){_shippingDist=dk;_shippingFee=calcGrabFee(dk);_shippingLoading=false;updateShippingDisplay(null,false);if(cb)cb(_shippingFee,_shippingDist);});
 }
 var OWNER_FEE_RATE=0.13,_ownerPayments=[];try{var _op=localStorage.getItem("nny_owner_payments");if(_op)_ownerPayments=JSON.parse(_op);}catch(e){}
 function renderOwnerDashboard(){var ys=document.getElementById("owner-year"),ms=document.getElementById("owner-month");if(!ys||!ms)return;var now=new Date();var _curYr=now.getFullYear(),_curMo=now.getMonth()+1;var _prevYrVal=parseInt(ys.value)||_curYr,_prevMoVal=parseInt(ms.value)||_curMo;ys.innerHTML="";for(var y=_curYr-2;y<=_curYr+3;y++){var op=document.createElement("option");op.value=y;op.textContent=y+"年";if(y===_prevYrVal)op.selected=true;ys.appendChild(op);}ms.innerHTML="";for(var mo=1;mo<=12;mo++){var op2=document.createElement("option");op2.value=mo;op2.textContent=mo+"月";if(mo===_prevMoVal)op2.selected=true;ms.appendChild(op2);}var yr=parseInt(ys.value),m=parseInt(ms.value);var orders=ORDERS.filter(function(o){if(o.status==="cancelled")return false;var d=new Date(o.ts||o.no);if(isNaN(d.getTime())){var mm=(o.ts||"").match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);if(mm)d=new Date(mm[1],mm[2]-1,mm[3]);else return false;}return d.getFullYear()===yr&&d.getMonth()+1===m;});var ts=orders.reduce(function(s,o){return s+(o.tot||0);},0),fee=Math.round(ts*OWNER_FEE_RATE),fp=ts-fee;var e=document.getElementById.bind(document);if(e("owner-total-sales"))e("owner-total-sales").textContent=vnd(ts);if(e("owner-fee"))e("owner-fee").textContent=vnd(fee);if(e("owner-order-count"))e("owner-order-count").textContent=orders.length+"件";if(e("owner-farmer-pay"))e("owner-farmer-pay").textContent=vnd(fp);renderPaymentList();renderOwnerHistory();var se=localStorage.getItem("nny_farm_email");if(se){var el=e("owner-farm-email");if(el&&!el.value)el.value=se;}}
@@ -3475,77 +3442,6 @@ function uploadPaymentSS(input){if(!input.files||!input.files[0])return;var read
 function renderPaymentList(){var el=document.getElementById("owner-payment-list");if(!el)return;var ys=document.getElementById("owner-year"),ms=document.getElementById("owner-month");var payments=_ownerPayments.filter(function(p){if(!ys||!ms)return true;return p.yr===parseInt(ys.value)&&p.mo===parseInt(ms.value);});if(!payments.length){el.innerHTML='<div style="color:#aaa;font-size:12px;text-align:center;padding:12px;">この月の支払い記録なし</div>';return;}el.innerHTML=payments.map(function(p,i){return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f0f0;"><img src="'+p.data+'" style="width:60px;height:45px;object-fit:cover;border-radius:6px;cursor:pointer;" onclick="window.open(this.src)"><div style="flex:1;font-size:12px;font-weight:700;">'+p.yr+'年'+p.mo+'月</div><button onclick="confirmPaymentOwner('+i+')" style="font-size:11px;padding:5px 10px;border:1px solid #ccc;border-radius:6px;background:'+(p.status==="confirmed"?"#e8f5e2":"#fff")+';cursor:pointer;">'+(p.status==="confirmed"?"✅ 確認済":"確認する")+'</button></div>';}).join('');}
 function confirmPaymentOwner(idx){var ys=document.getElementById("owner-year"),ms=document.getElementById("owner-month");var payments=_ownerPayments.filter(function(p){if(!ys||!ms)return true;return p.yr===parseInt(ys.value)&&p.mo===parseInt(ms.value);});if(payments[idx]){payments[idx].status="confirmed";try{localStorage.setItem("nny_owner_payments",JSON.stringify(_ownerPayments));}catch(e){}}renderPaymentList();}
 
-function setDeliveryOriginMode(mode){
-DELIVERY_ORIGIN.active=mode;
-var btnEm=document.getElementById("dorigin-btn-emhanoi");
-var btnFarm=document.getElementById("dorigin-btn-farm");
-var farmFields=document.getElementById("dorigin-farm-fields");
-var emInfo=document.getElementById("dorigin-emhanoi-info");
-var _saveBtn=document.getElementById("dorigin-save-btn");if(_saveBtn)_saveBtn.disabled=false;
-if(mode==="farm"){
-if(btnEm){btnEm.style.background="#fff";btnEm.style.color="var(--g2)";btnEm.style.borderColor="var(--g3)";}
-if(btnFarm){btnFarm.style.background="var(--g1)";btnFarm.style.color="#fff";btnFarm.style.borderColor="var(--g1)";}
-if(farmFields)farmFields.style.display="";
-if(emInfo)emInfo.style.display="none";
-}else{
-if(btnEm){btnEm.style.background="var(--g1)";btnEm.style.color="#fff";btnEm.style.borderColor="var(--g1)";}
-if(btnFarm){btnFarm.style.background="#fff";btnFarm.style.color="var(--g2)";btnFarm.style.borderColor="var(--g3)";}
-if(farmFields)farmFields.style.display="none";
-if(emInfo)emInfo.style.display="";
-}
-}
-function saveDeliveryOrigin(){
-var mode=DELIVERY_ORIGIN.active;
-if(mode==="farm"){
-var name=((document.getElementById("dorigin-farm-name")||{}).value||"").trim();
-var addr=((document.getElementById("dorigin-farm-addr")||{}).value||"").trim();
-var feeInp=document.getElementById("dorigin-farm-fee");
-var fixedFee=feeInp?Math.max(0,parseInt(feeInp.value)||100000):100000;
-if(!addr){alert("農場の住所を入力してください");return;}
-var coords=document.getElementById("dorigin-farm-coords");
-var btn=document.getElementById("dorigin-save-btn");
-if(coords)coords.textContent="📍 ジオコーディング中...";
-if(btn)btn.disabled=true;
-var _geoTimer=setTimeout(function(){
-if(btn)btn.disabled=false;
-if(coords)coords.textContent="⚠ タイムアウト。現在の座標で保存します。";
-DELIVERY_ORIGIN.farm={name:name,addr:addr,lat:DELIVERY_ORIGIN.farm.lat||0,lng:DELIVERY_ORIGIN.farm.lng||0,fixedFee:fixedFee};
-_persistDeliveryOrigin();
-},5000);
-fetch("https://nominatim.openstreetmap.org/search?q="+encodeURIComponent(addr)+"&format=json&limit=1").then(function(r){return r.json();}).then(function(d){
-clearTimeout(_geoTimer);
-if(!d||!d.length)throw new Error("not found");
-var lat=parseFloat(d[0].lat),lng=parseFloat(d[0].lon);
-DELIVERY_ORIGIN.farm={name:name,addr:addr,lat:lat,lng:lng,fixedFee:fixedFee};
-if(coords)coords.textContent="✅ "+lat.toFixed(5)+", "+lng.toFixed(5);
-_persistDeliveryOrigin();
-}).catch(function(){
-clearTimeout(_geoTimer);
-if(coords)coords.textContent="⚠ 住所が見つかりません。現在の座標で保存します。";
-DELIVERY_ORIGIN.farm={name:name,addr:addr,lat:DELIVERY_ORIGIN.farm.lat||0,lng:DELIVERY_ORIGIN.farm.lng||0,fixedFee:fixedFee};
-_persistDeliveryOrigin();
-}).then(function(){if(btn)btn.disabled=false;},function(){if(btn)btn.disabled=false;});
-}else{
-_persistDeliveryOrigin();
-}
-}
-function _persistDeliveryOrigin(){
-try{localStorage.setItem("nny_delivery_origin",JSON.stringify(DELIVERY_ORIGIN));}catch(e){}
-if(typeof fbEnabled!=="undefined"&&fbEnabled&&fbDb){var _doJson=JSON.stringify(DELIVERY_ORIGIN);fbDb.collection("settings").doc("app_config").set({deliveryOrigin:_doJson},{merge:true}).catch(function(e){console.error(e);});fbDb.collection("pub_config").doc("admin_settings").set({deliveryOrigin:_doJson},{merge:true}).catch(function(e){console.error("[NNY] pub delivery save:",e);});}
-if(typeof updatePickupAvailability==="function")updatePickupAvailability();
-showToast("✅ 配送元を保存しました");
-}
-function loadDeliveryOriginUI(){
-setDeliveryOriginMode(DELIVERY_ORIGIN.active||"farm");
-var fn=document.getElementById("dorigin-farm-name");
-var fa=document.getElementById("dorigin-farm-addr");
-var fc=document.getElementById("dorigin-farm-coords");
-if(fn)fn.value=DELIVERY_ORIGIN.farm.name||"";
-if(fa)fa.value=DELIVERY_ORIGIN.farm.addr||"";
-var ff=document.getElementById("dorigin-farm-fee");
-if(ff)ff.value=DELIVERY_ORIGIN.farm.fixedFee||100000;
-if(fc&&DELIVERY_ORIGIN.farm.lat&&DELIVERY_ORIGIN.farm.lng)fc.textContent="📍 "+DELIVERY_ORIGIN.farm.lat.toFixed(5)+", "+DELIVERY_ORIGIN.farm.lng.toFixed(5);
-}
 var _fbPollTimer=null;
 function startFbPolling(){
 if(!fbEnabled||!fbDb)return;
@@ -3640,11 +3536,6 @@ var _elP=document.getElementById("adm-orders-list-pending");
 if(_elP&&!ORDERS.length){_elP.innerHTML='<div style="text-align:center;padding:24px;color:#c0392b;font-size:13px;line-height:1.6;">🔒 Firebaseメール認証が必要です<br><span style="font-size:12px;color:var(--muted);">設定 → Firebase → 管理者Firebase認証<br>でメールとパスワードを設定してください</span></div>';}
 }else if(typeof renderAdminOrders2==="function"){renderAdminOrders2();}
 });
-fbDb.collection("settings").doc("app_config").get().then(function(doc){
-if(!doc.exists)return;
-var cfg=doc.data();
-if(cfg.deliveryOrigin){try{var dor=JSON.parse(cfg.deliveryOrigin);var prev=JSON.stringify(DELIVERY_ORIGIN);DELIVERY_ORIGIN=Object.assign(DELIVERY_ORIGIN,dor);localStorage.setItem("nny_delivery_origin",cfg.deliveryOrigin);if(JSON.stringify(DELIVERY_ORIGIN)!==prev&&typeof loadDeliveryOriginUI==="function")loadDeliveryOriginUI();if(typeof updatePickupAvailability==="function")updatePickupAvailability();}catch(e){}}
-}).catch(function(){});
 },10000);
 }
 function showProductSkeletons(){
