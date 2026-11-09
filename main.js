@@ -1962,15 +1962,15 @@ if(ownerMatch){OWNER_PIN=h;try{localStorage.setItem("nny_owner_pin",h);}catch(ex
 });
 }
 if(ownerMatch){
-closePinGate();
-sessionStorage.setItem('nny_owner_session','1');
-// Firebase管理者ログイン（設定済みの場合）
-_tryFirebaseAdminLogin(function(){window.location.href='/owner/';});
+_tryFirebaseAdminLogin(function(ok){
+if(ok){closePinGate();sessionStorage.setItem('nny_owner_session','1');window.location.href='/owner/';}
+else{var err=document.getElementById("pin-error");if(err){err.textContent="Firebase認証に失敗しました。管理画面 > Firebase設定を確認してください。";err.style.display="block";setTimeout(function(){err.style.display="none";err.textContent="";},4000);}}
+});
 } else if(adminMatch){
-closePinGate();
-sessionStorage.setItem('nny_admin_session','1');
-// Firebase管理者ログイン（設定済みの場合）
-_tryFirebaseAdminLogin(function(){window.location.href='/admin/';});
+_tryFirebaseAdminLogin(function(ok){
+if(ok){closePinGate();sessionStorage.setItem('nny_admin_session','1');window.location.href='/admin/';}
+else{var err=document.getElementById("pin-error");if(err){err.textContent="Firebase認証に失敗しました。管理画面 > Firebase設定を確認してください。";err.style.display="block";setTimeout(function(){err.style.display="none";err.textContent="";},4000);}}
+});
 } else {
 inp.value="";
 inp.style.borderColor="var(--red)";
@@ -1988,22 +1988,22 @@ if(gate&&gate.style.display!=="none"&&gate.style.display!==""&&e.key==="Enter")c
 // nny_admin_emailとnny_admin_fb_pwdがlocalStorageに設定されている場合のみ実行
 function _tryFirebaseAdminLogin(cb){
 try{
+if(fbUser){if(cb)cb(true);return;}
 var email=localStorage.getItem("nny_admin_email")||"";
 var pwd=localStorage.getItem("nny_admin_fb_pwd")||"";
 if(email&&pwd&&fbAuth){
 fbAuth.signInWithEmailAndPassword(email,pwd).then(function(cred){
 fbUser=cred.user;
 sessionStorage.setItem('nny_fb_admin','1');
-console.log('[NNY Auth] Firebase管理者ログイン成功:',email);
-if(cb)cb();
+if(cb)cb(true);
 }).catch(function(e){
-console.warn('[NNY Auth] Firebase認証失敗（PIN認証は有効）:',e.message);
-if(cb)cb();
+console.warn('[NNY Auth] Firebase認証失敗:',e.message);
+if(cb)cb(false);
 });
 return;
 }
 }catch(ex){}
-if(cb)cb();
+if(cb)cb(false);
 }
 // 管理画面 開閉
 function openAdmin(){
