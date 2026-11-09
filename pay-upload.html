@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Xác nhận thanh toán — NICO NICO YASAI</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:sans-serif;background:#f5f5f5;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.card{background:#fff;border-radius:16px;padding:32px 24px;max-width:420px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,0.08);}
+.logo{text-align:center;font-size:22px;font-weight:800;color:#2d6a2d;margin-bottom:8px;}
+.sub{text-align:center;color:#666;font-size:13px;margin-bottom:24px;}
+.period{text-align:center;font-size:16px;font-weight:700;color:#333;margin-bottom:20px;padding:12px;background:#e8f5e2;border-radius:8px;}
+.upload-area{border:2px dashed #c8e6c9;border-radius:12px;padding:32px 16px;text-align:center;cursor:pointer;margin-bottom:16px;transition:background .2s;}
+.upload-area:hover,.upload-area.drag{background:#f1f8e9;}
+.upload-area input{display:none;}
+.upload-icon{font-size:40px;margin-bottom:8px;}
+.upload-label{font-size:14px;color:#555;}
+.preview{width:100%;max-height:240px;object-fit:contain;border-radius:8px;margin-bottom:16px;display:none;}
+.btn{width:100%;padding:14px;background:#2d6a2d;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;}
+.btn:disabled{background:#aaa;cursor:not-allowed;}
+.status{margin-top:12px;text-align:center;font-size:14px;font-weight:700;display:none;}
+.status.ok{color:#2d6a2d;}
+.status.err{color:#c62828;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">🌿 NICO NICO YASAI</div>
+  <div class="sub">Bản Hồ Farm</div>
+  <div class="period" id="period-label">Đang tải...</div>
+  <div class="upload-area" id="drop-zone" onclick="document.getElementById('file-input').click()">
+    <input type="file" id="file-input" accept="image/*">
+    <div class="upload-icon">📸</div>
+    <div class="upload-label">Chọn ảnh xác nhận chuyển khoản<br><small style="color:#aaa">JPG / PNG / HEIC</small></div>
+  </div>
+  <img id="preview" class="preview">
+  <button class="btn" id="upload-btn" disabled>📤 Gửi xác nhận</button>
+  <div class="status" id="status"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script>
+var params=new URLSearchParams(window.location.search);
+var yr=parseInt(params.get("yr"))||new Date().getFullYear();
+var mo=parseInt(params.get("mo"))||new Date().getMonth()+1;
+document.getElementById("period-label").textContent="Tháng "+mo+"/"+yr;
+
+var selectedFile=null,selectedDataUrl=null;
+var fileInput=document.getElementById("file-input");
+var preview=document.getElementById("preview");
+var uploadBtn=document.getElementById("upload-btn");
+var status=document.getElementById("status");
+var dropZone=document.getElementById("drop-zone");
+
+fileInput.addEventListener("change",function(){
+  if(fileInput.files&&fileInput.files[0])handleFile(fileInput.files[0]);
+});
+dropZone.addEventListener("dragover",function(e){e.preventDefault();dropZone.classList.add("drag");});
+dropZone.addEventListener("dragleave",function(){dropZone.classList.remove("drag");});
+dropZone.addEventListener("drop",function(e){e.preventDefault();dropZone.classList.remove("drag");if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0]);});
+
+function handleFile(f){
+  if(!f.type.match(/^image\//)){alert("画像ファイルを選んでください");return;}
+  selectedFile=f;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    selectedDataUrl=e.target.result;
+    preview.src=selectedDataUrl;
+    preview.style.display="block";
+    uploadBtn.disabled=false;
+  };
+  reader.readAsDataURL(f);
+}
+
+function resizeAndUpload(){
+  if(!selectedDataUrl)return;
+  var img=new Image();
+  img.onload=function(){
+    var w=img.width,h=img.height;
+    var scale=Math.min(800/w,600/h,1);
+    var cw=Math.round(w*scale),ch=Math.round(h*scale);
+    var canvas=document.createElement("canvas");
+    canvas.width=cw;canvas.height=ch;
+    canvas.getContext("2d").drawImage(img,0,0,cw,ch);
+    var resized=canvas.toDataURL("image/jpeg",0.75);
+    doUpload(resized);
+  };
+  img.src=selectedDataUrl;
+}
+
+function doUpload(dataUrl){
+  uploadBtn.disabled=true;
+  uploadBtn.textContent="Đang gửi...";
+  status.style.display="none";
+
+  var projectId="nico-nico-yasai-hanoi-order";
+  var apiKey="AIzaSyCE15q3KAPiXCUrzEmsVEL92HtE95eOBUk";
+
+  var fbCfgUrl="https://firestore.googleapis.com/v1/projects/"+projectId+"/databases/(default)/documents/pub_config/firebase_cfg?key="+apiKey;
+  fetch(fbCfgUrl).then(function(r){return r.json();}).then(function(cfg){
+    var fields=cfg.fields||{};
+    function fv(k){return fields[k]?fields[k].stringValue||fields[k].booleanValue||"":"";}
+    var fbConfig={
+      apiKey:fv("apiKey")||apiKey,
+      authDomain:fv("authDomain")||projectId+".firebaseapp.com",
+      projectId:fv("projectId")||projectId,
+      storageBucket:fv("storageBucket")||"",
+      messagingSenderId:fv("messagingSenderId")||"",
+      appId:fv("appId")||""
+    };
+    initAndUpload(fbConfig,dataUrl);
+  }).catch(function(){
+    initAndUpload({apiKey:apiKey,authDomain:"nico-nico-yasai-hanoi-order.firebaseapp.com",projectId:"nico-nico-yasai-hanoi-order"},dataUrl);
+  });
+}
+
+function initAndUpload(fbConfig,dataUrl){
+  var app;
+  try{app=firebase.app();}catch(e){app=firebase.initializeApp(fbConfig);}
+  var auth=firebase.auth(app);
+  var db=firebase.firestore(app);
+  auth.signInAnonymously().then(function(){
+    var key=yr+"_"+(mo<10?"0":"")+mo+"_"+Date.now();
+    var rec={yr:yr,mo:mo,data:dataUrl,uploadedAt:new Date().toISOString(),status:"pending",source:"farmer"};
+    return db.collection("owner_payments").doc(key).set(rec);
+  }).then(function(){
+    uploadBtn.disabled=false;
+    uploadBtn.textContent="📤 Gửi xác nhận";
+    status.className="status ok";
+    status.textContent="✅ Đã gửi thành công! Cảm ơn bạn.";
+    status.style.display="block";
+  }).catch(function(err){
+    uploadBtn.disabled=false;
+    uploadBtn.textContent="📤 Gửi xác nhận";
+    status.className="status err";
+    status.textContent="❌ Lỗi: "+err.message;
+    status.style.display="block";
+  });
+}
+
+uploadBtn.addEventListener("click",function(){resizeAndUpload();});
+</script>
+</body>
+</html>
