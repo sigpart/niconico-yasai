@@ -1460,6 +1460,7 @@ FB_CFG.appId=((document.getElementById("fb-appid")||{}).value||"").trim();
 FB_CFG.messagingSenderId=((document.getElementById("fb-senderid")||{}).value||"").trim();
 if(!FB_CFG.projectId){alert(adminLang==="vi"?"Vui lòng nhập Project ID":"Project IDを入力してください");return;}
 localStorage.setItem("nny_fb",JSON.stringify(FB_CFG));
+if(typeof fbDb!=="undefined"&&fbDb){fbDb.collection("pub_config").doc("firebase_cfg").set(FB_CFG).catch(function(){});}
 var ok=initFirebase();
 var res=document.getElementById("fb-result");
 if(res){res.style.display="block";res.style.background=ok?"var(--gp)":"var(--rp)";res.style.color=ok?"var(--g2)":"var(--red)";res.textContent=ok?(adminLang==="vi"?"✅ Kết nối thành công! Đang đồng bộ...":"✅ 接続成功！同期中..."):(adminLang==="vi"?"❌ Kết nối thất bại":"❌ 接続失敗");}
@@ -1656,6 +1657,26 @@ var d=doc.data();
 if(d.ej&&!localStorage.getItem("nny_ej")){try{var ej=JSON.parse(d.ej);EJ.service=ej.service||EJ.service;EJ.template=ej.template||EJ.template;EJ.pubkey=ej.pubkey||EJ.pubkey;EJ.from=ej.from||EJ.from;EJ.admin=ej.admin||EJ.admin||"";if(EJ.pubkey)emailjs.init({publicKey:EJ.pubkey});localStorage.setItem("nny_ej",d.ej);if(typeof loadEJConfigUI==="function")loadEJConfigUI();}catch(e){}}
 if(d.lineCfg&&!localStorage.getItem("nny_line_cfg")){try{var lc=JSON.parse(d.lineCfg);LINE_CHANNEL_TOKEN=lc.token||LINE_CHANNEL_TOKEN;LINE_ADMIN_USERID=lc.adminId||LINE_ADMIN_USERID;localStorage.setItem("nny_line_cfg",d.lineCfg);if(typeof loadLineCfgUI==="function")loadLineCfgUI();}catch(e){}}
 if(d.bank&&!localStorage.getItem("nny_bank")){try{var bk=JSON.parse(d.bank);BANK_CFG=Object.assign(BANK_CFG,bk);localStorage.setItem("nny_bank",d.bank);if(typeof loadBankConfigUI==="function")loadBankConfigUI();}catch(e){}}
+}).catch(function(){});
+// Firebase設定（messagingSenderIdなど）をpub_configから復元
+fbDb.collection("pub_config").doc("firebase_cfg").get().then(function(doc){
+if(!doc.exists)return;
+var d=doc.data();
+if(d.projectId&&!localStorage.getItem("nny_fb")){
+FB_CFG=Object.assign({},FB_CFG,d);
+localStorage.setItem("nny_fb",JSON.stringify(FB_CFG));
+if(typeof loadFBConfigUI==="function")loadFBConfigUI();
+}
+}).catch(function(){});
+// 管理者Firebase認証情報をpub_configから復元（UIに反映）
+fbDb.collection("pub_config").doc("admin_auth").get().then(function(doc){
+if(!doc.exists)return;
+var d=doc.data();
+if(d.email&&d.pwd){
+if(!localStorage.getItem("nny_admin_email"))localStorage.setItem("nny_admin_email",d.email);
+if(!localStorage.getItem("nny_admin_fb_pwd"))localStorage.setItem("nny_admin_fb_pwd",d.pwd);
+if(typeof loadFBConfigUI==="function")loadFBConfigUI();
+}
 }).catch(function(){});
 } // end loadFromFirebase
 function fbDeleteOrder(no){
@@ -1962,15 +1983,15 @@ if(ownerMatch){OWNER_PIN=h;try{localStorage.setItem("nny_owner_pin",h);}catch(ex
 });
 }
 if(ownerMatch){
-closePinGate();
-sessionStorage.setItem('nny_owner_session','1');
-// Firebase管理者ログイン（設定済みの場合）
-_tryFirebaseAdminLogin(function(){window.location.href='/owner/';});
+_tryFirebaseAdminLogin(function(ok){
+if(ok){closePinGate();sessionStorage.setItem('nny_owner_session','1');window.location.href='/owner/';}
+else{var err=document.getElementById("pin-error");if(err){err.textContent="Firebase認証に失敗しました。管理画面 > Firebase設定を確認してください。";err.style.display="block";setTimeout(function(){err.style.display="none";err.textContent="";},4000);}}
+});
 } else if(adminMatch){
-closePinGate();
-sessionStorage.setItem('nny_admin_session','1');
-// Firebase管理者ログイン（設定済みの場合）
-_tryFirebaseAdminLogin(function(){window.location.href='/admin/';});
+_tryFirebaseAdminLogin(function(ok){
+if(ok){closePinGate();sessionStorage.setItem('nny_admin_session','1');window.location.href='/admin/';}
+else{var err=document.getElementById("pin-error");if(err){err.textContent="Firebase認証に失敗しました。管理画面 > Firebase設定を確認してください。";err.style.display="block";setTimeout(function(){err.style.display="none";err.textContent="";},4000);}}
+});
 } else {
 inp.value="";
 inp.style.borderColor="var(--red)";
@@ -1988,22 +2009,22 @@ if(gate&&gate.style.display!=="none"&&gate.style.display!==""&&e.key==="Enter")c
 // nny_admin_emailとnny_admin_fb_pwdがlocalStorageに設定されている場合のみ実行
 function _tryFirebaseAdminLogin(cb){
 try{
+if(fbUser){if(cb)cb(true);return;}
 var email=localStorage.getItem("nny_admin_email")||"";
 var pwd=localStorage.getItem("nny_admin_fb_pwd")||"";
 if(email&&pwd&&fbAuth){
 fbAuth.signInWithEmailAndPassword(email,pwd).then(function(cred){
 fbUser=cred.user;
 sessionStorage.setItem('nny_fb_admin','1');
-console.log('[NNY Auth] Firebase管理者ログイン成功:',email);
-if(cb)cb();
+if(cb)cb(true);
 }).catch(function(e){
-console.warn('[NNY Auth] Firebase認証失敗（PIN認証は有効）:',e.message);
-if(cb)cb();
+console.warn('[NNY Auth] Firebase認証失敗:',e.message);
+if(cb)cb(false);
 });
 return;
 }
 }catch(ex){}
-if(cb)cb();
+if(cb)cb(false);
 }
 // 管理画面 開閉
 function openAdmin(){
