@@ -1,5 +1,12 @@
 <?php
-header('Access-Control-Allow-Origin: https://hanoi-order.niconicoyasai.jp');
+$allowedOrigins=[
+  'https://hanoi-order.niconicoyasai.jp',
+  'https://sigpart.github.io',
+];
+$origin=isset($_SERVER['HTTP_ORIGIN'])?$_SERVER['HTTP_ORIGIN']:'';
+if(in_array($origin,$allowedOrigins)){
+  header('Access-Control-Allow-Origin: '.$origin);
+}
 header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 if($_SERVER['REQUEST_METHOD']==='OPTIONS'){http_response_code(200);exit;}
@@ -9,11 +16,16 @@ $userId=isset($data['userId'])?trim($data['userId']):'';
 $text=isset($data['text'])?trim($data['text']):'';
 if(!$userId||!$text){http_response_code(400);echo json_encode(['error'=>'missing params']);exit;}
 
-// Firestoreのpub_config/lineからLINEチャネルトークンを取得
+// Firestoreのpub_config/lineからLINEチャネルトークンをcurlで取得
 $projectId='nico-nico-yasai-hanoi-order';
 $apiKey='AIzaSyCE15q3KAPiXCUrzEmsVEL92HtE95eOBUk';
 $cfgUrl="https://firestore.googleapis.com/v1/projects/{$projectId}/databases/(default)/documents/pub_config/line?key={$apiKey}";
-$cfgRaw=@file_get_contents($cfgUrl);
+$cfgCh=curl_init($cfgUrl);
+curl_setopt($cfgCh,CURLOPT_RETURNTRANSFER,true);
+curl_setopt($cfgCh,CURLOPT_SSL_VERIFYPEER,true);
+curl_setopt($cfgCh,CURLOPT_TIMEOUT,5);
+$cfgRaw=curl_exec($cfgCh);
+curl_close($cfgCh);
 $cfg=$cfgRaw?json_decode($cfgRaw,true):null;
 $token=isset($cfg['fields']['token']['stringValue'])?$cfg['fields']['token']['stringValue']:'';
 
