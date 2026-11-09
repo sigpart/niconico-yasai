@@ -1654,9 +1654,9 @@ _doLoad();
 fbDb.collection("pub_config").doc("admin_settings").get().then(function(doc){
 if(!doc.exists)return;
 var d=doc.data();
-if(d.ej&&!localStorage.getItem("nny_ej")){try{var ej=JSON.parse(d.ej);EJ.service=ej.service||EJ.service;EJ.template=ej.template||EJ.template;EJ.pubkey=ej.pubkey||EJ.pubkey;EJ.from=ej.from||EJ.from;EJ.admin=ej.admin||EJ.admin||"";if(EJ.pubkey)emailjs.init({publicKey:EJ.pubkey});localStorage.setItem("nny_ej",d.ej);if(typeof loadEJConfigUI==="function")loadEJConfigUI();}catch(e){}}
-if(d.lineCfg&&!localStorage.getItem("nny_line_cfg")){try{var lc=JSON.parse(d.lineCfg);LINE_CHANNEL_TOKEN=lc.token||LINE_CHANNEL_TOKEN;LINE_ADMIN_USERID=lc.adminId||LINE_ADMIN_USERID;localStorage.setItem("nny_line_cfg",d.lineCfg);if(typeof loadLineCfgUI==="function")loadLineCfgUI();}catch(e){}}
-if(d.bank&&!localStorage.getItem("nny_bank")){try{var bk=JSON.parse(d.bank);BANK_CFG=Object.assign(BANK_CFG,bk);localStorage.setItem("nny_bank",d.bank);if(typeof loadBankConfigUI==="function")loadBankConfigUI();}catch(e){}}
+if(d.ej){try{var ej=JSON.parse(d.ej);EJ.service=ej.service||EJ.service;EJ.template=ej.template||EJ.template;EJ.pubkey=ej.pubkey||EJ.pubkey;EJ.from=ej.from||EJ.from;EJ.admin=ej.admin||EJ.admin||"";if(EJ.pubkey)emailjs.init({publicKey:EJ.pubkey});localStorage.setItem("nny_ej",d.ej);if(typeof loadEJConfigUI==="function")loadEJConfigUI();}catch(e){}}
+if(d.lineCfg){try{var lc=JSON.parse(d.lineCfg);LINE_CHANNEL_TOKEN=lc.token||LINE_CHANNEL_TOKEN;LINE_ADMIN_USERID=lc.adminId||LINE_ADMIN_USERID;localStorage.setItem("nny_line_cfg",d.lineCfg);if(typeof loadLineCfgUI==="function")loadLineCfgUI();}catch(e){}}
+if(d.bank){try{var bk=JSON.parse(d.bank);BANK_CFG=Object.assign(BANK_CFG,bk);localStorage.setItem("nny_bank",d.bank);if(typeof loadBankConfigUI==="function")loadBankConfigUI();}catch(e){}}
 }).catch(function(){});
 // Firebase設定（messagingSenderIdなど）をpub_configから復元
 fbDb.collection("pub_config").doc("firebase_cfg").get().then(function(doc){
