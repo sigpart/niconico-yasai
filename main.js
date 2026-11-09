@@ -1460,6 +1460,7 @@ FB_CFG.appId=((document.getElementById("fb-appid")||{}).value||"").trim();
 FB_CFG.messagingSenderId=((document.getElementById("fb-senderid")||{}).value||"").trim();
 if(!FB_CFG.projectId){alert(adminLang==="vi"?"Vui lòng nhập Project ID":"Project IDを入力してください");return;}
 localStorage.setItem("nny_fb",JSON.stringify(FB_CFG));
+if(typeof fbDb!=="undefined"&&fbDb){fbDb.collection("pub_config").doc("firebase_cfg").set(FB_CFG).catch(function(){});}
 var ok=initFirebase();
 var res=document.getElementById("fb-result");
 if(res){res.style.display="block";res.style.background=ok?"var(--gp)":"var(--rp)";res.style.color=ok?"var(--g2)":"var(--red)";res.textContent=ok?(adminLang==="vi"?"✅ Kết nối thành công! Đang đồng bộ...":"✅ 接続成功！同期中..."):(adminLang==="vi"?"❌ Kết nối thất bại":"❌ 接続失敗");}
@@ -1656,6 +1657,26 @@ var d=doc.data();
 if(d.ej&&!localStorage.getItem("nny_ej")){try{var ej=JSON.parse(d.ej);EJ.service=ej.service||EJ.service;EJ.template=ej.template||EJ.template;EJ.pubkey=ej.pubkey||EJ.pubkey;EJ.from=ej.from||EJ.from;EJ.admin=ej.admin||EJ.admin||"";if(EJ.pubkey)emailjs.init({publicKey:EJ.pubkey});localStorage.setItem("nny_ej",d.ej);if(typeof loadEJConfigUI==="function")loadEJConfigUI();}catch(e){}}
 if(d.lineCfg&&!localStorage.getItem("nny_line_cfg")){try{var lc=JSON.parse(d.lineCfg);LINE_CHANNEL_TOKEN=lc.token||LINE_CHANNEL_TOKEN;LINE_ADMIN_USERID=lc.adminId||LINE_ADMIN_USERID;localStorage.setItem("nny_line_cfg",d.lineCfg);if(typeof loadLineCfgUI==="function")loadLineCfgUI();}catch(e){}}
 if(d.bank&&!localStorage.getItem("nny_bank")){try{var bk=JSON.parse(d.bank);BANK_CFG=Object.assign(BANK_CFG,bk);localStorage.setItem("nny_bank",d.bank);if(typeof loadBankConfigUI==="function")loadBankConfigUI();}catch(e){}}
+}).catch(function(){});
+// Firebase設定（messagingSenderIdなど）をpub_configから復元
+fbDb.collection("pub_config").doc("firebase_cfg").get().then(function(doc){
+if(!doc.exists)return;
+var d=doc.data();
+if(d.projectId&&!localStorage.getItem("nny_fb")){
+FB_CFG=Object.assign({},FB_CFG,d);
+localStorage.setItem("nny_fb",JSON.stringify(FB_CFG));
+if(typeof loadFBConfigUI==="function")loadFBConfigUI();
+}
+}).catch(function(){});
+// 管理者Firebase認証情報をpub_configから復元（UIに反映）
+fbDb.collection("pub_config").doc("admin_auth").get().then(function(doc){
+if(!doc.exists)return;
+var d=doc.data();
+if(d.email&&d.pwd){
+if(!localStorage.getItem("nny_admin_email"))localStorage.setItem("nny_admin_email",d.email);
+if(!localStorage.getItem("nny_admin_fb_pwd"))localStorage.setItem("nny_admin_fb_pwd",d.pwd);
+if(typeof loadFBConfigUI==="function")loadFBConfigUI();
+}
 }).catch(function(){});
 } // end loadFromFirebase
 function fbDeleteOrder(no){
