@@ -239,7 +239,7 @@ updateProg(v);
 window.scrollTo({top:0,behavior:"smooth"});
 var ns=document.getElementById("nav-shop");if(ns)ns.classList.toggle("active",v==="shop"||v==="cart"||v==="info"||v==="confirm"||v==="receipt");
 document.getElementById("nav-hist").classList.toggle("active",v==="history");
-var fc=document.getElementById("float-cart");if(fc)fc.style.visibility=(v==="cart")?"hidden":"";
+var fc=document.getElementById("float-cart");if(fc)fc.style.visibility=(v==="cart"||v==="info"||v==="confirm"||v==="receipt")?"hidden":"";
 }
 function updateProg(v){
 var map={cart:0,info:1,confirm:2,receipt:3};
