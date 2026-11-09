@@ -489,21 +489,6 @@
 </div>
 </div>
 <div class="admin-section">
-<div class="admin-sec-title">🚚 <span id="adm-delivery-origin-ttl">配送元の設定 / Điểm xuất phát giao hàng</span></div>
-<div style="display:flex;gap:8px;margin-bottom:14px;">
-<button id="dorigin-btn-emhanoi" onclick="setDeliveryOriginMode('emhanoi')" style="flex:1;padding:10px 8px;border-radius:8px;border:2px solid var(--g3);background:#fff;color:var(--g2);font-size:13px;font-weight:700;cursor:pointer;touch-action:manipulation;">① Em Hanoi</button>
-<button id="dorigin-btn-farm" onclick="setDeliveryOriginMode('farm')" style="flex:1;padding:10px 8px;border-radius:8px;border:2px solid var(--g1);background:var(--g1);color:#fff;font-size:13px;font-weight:700;cursor:pointer;touch-action:manipulation;">② 農場 / Farm</button>
-</div>
-<div id="dorigin-emhanoi-info" style="display:none;font-size:12px;color:var(--muted);margin-bottom:10px;padding:8px 12px;background:var(--gp);border-radius:8px;">📍 Em Hanoi: 105.8417, 21.0335（固定）</div>
-<div id="dorigin-farm-fields">
-<div style="margin-bottom:8px;"><label class="set-lbl">農場名 / Tên trang trại</label><input class="set-inp" id="dorigin-farm-name" placeholder="例: Bản Hang Trùng 2"></div>
-<div style="margin-bottom:8px;"><label class="set-lbl">農場住所 / Địa chỉ trang trại</label><input class="set-inp" id="dorigin-farm-addr" placeholder="例: Bản Hang Trùng 2, Xã Vân Hồ, Sơn La, Vietnam"></div>
-<div style="margin-bottom:8px;"><label class="set-lbl">農場からの固定送料 ₫ / Phí giao hàng cố định từ trang trại</label><input class="set-inp" id="dorigin-farm-fee" type="number" placeholder="例: 50000" min="0" step="1000"></div>
-<div id="dorigin-farm-coords" style="font-size:11px;color:var(--muted);margin-bottom:8px;min-height:18px;"></div>
-</div>
-<button class="set-btn" onclick="saveDeliveryOrigin()" id="dorigin-save-btn" style="margin-top:4px;touch-action:manipulation;">💾 保存して適用 / Lưu & Áp dụng</button>
-</div>
-<div class="admin-section">
 <div class="admin-sec-title">🗄 <span id="adm-db-ttl">Dữ liệu đơn hàng</span></div>
 <div class="sheets-box">
 <input class="sheets-inp" id="sheets-url-inp" placeholder="https://docs.google.com/spreadsheets/...">
@@ -701,7 +686,7 @@ giữa người sản xuất và người tiêu dùng</textarea></div>
 </div>
 <div class="email-toast" id="email-toast"></div>
 <script src=""></script>
-<script src="main.js?v=171"></script>
+<script src="main.js?v=172"></script>
 <div id="qr-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;flex-direction:column;align-items:center;justify-content:center;">
 <div style="background:#fff;border-radius:16px;padding:24px;max-width:360px;width:90%;text-align:center;">
 <div id="qr-logo" style="font-size:48px;margin-bottom:8px;"></div>
