@@ -2011,7 +2011,9 @@ if(gate&&gate.style.display!=="none"&&gate.style.display!==""&&e.key==="Enter")c
 // nny_admin_emailとnny_admin_fb_pwdがlocalStorageに設定されている場合のみ実行
 function _tryFirebaseAdminLogin(cb){
 try{
-if(fbUser){if(cb)cb(true);return;}
+// fbUserまたはfbAuth.currentUserのいずれかが設定済みなら即時成功
+var _cu=fbUser||(fbAuth&&fbAuth.currentUser);
+if(_cu){fbUser=_cu;if(cb)cb(true);return;}
 var email=localStorage.getItem("nny_admin_email")||"";
 var pwd=localStorage.getItem("nny_admin_fb_pwd")||"";
 if(email&&pwd&&fbAuth){
@@ -2021,8 +2023,15 @@ sessionStorage.setItem('nny_fb_admin','1');
 if(cb)cb(true);
 }).catch(function(e){
 console.warn('[NNY Auth] Firebase認証失敗:',e.message);
-if(cb)cb(false);
+// メール認証失敗時は匿名サインインを試みる（匿名ユーザーでもPIN認証は許可）
+if(fbAuth){fbAuth.signInAnonymously().then(function(c){fbUser=c.user;if(cb)cb(true);}).catch(function(){if(cb)cb(false);});}
+else{if(cb)cb(false);}
 });
+return;
+}
+// 認証情報がない場合は匿名サインインを試みる
+if(fbAuth){
+fbAuth.signInAnonymously().then(function(cred){fbUser=cred.user;if(cb)cb(true);}).catch(function(){if(cb)cb(false);});
 return;
 }
 }catch(ex){}
