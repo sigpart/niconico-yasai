@@ -1678,8 +1678,6 @@ if(!localStorage.getItem("nny_admin_fb_pwd"))localStorage.setItem("nny_admin_fb_
 if(typeof loadFBConfigUI==="function")loadFBConfigUI();
 }
 }).catch(function(){});
-} // end _doLoad
-_doLoad();
 } // end loadFromFirebase
 function fbDeleteOrder(no){
 if(!fbEnabled||!fbDb)return;
