@@ -1591,8 +1591,8 @@ if(d.season&&p.season!==d.season){p.season=d.season;changed=true;}
 PRODUCTS.push(d);changed=true;
 }
 });
-if(changed){applyViPatches();renderProducts();}
-}).catch(function(){});
+applyViPatches();renderProducts();
+}).catch(function(){renderProducts();});
 var d={o:false,p:false,n:false};
 function chk(){if(d.o&&d.p&&d.n&&cb)cb(true);}
 fbDb.collection("orders").get().then(function(s){var a=[];s.forEach(function(doc){a.push(doc.data());});if(a.length){
@@ -1678,6 +1678,8 @@ if(!localStorage.getItem("nny_admin_fb_pwd"))localStorage.setItem("nny_admin_fb_
 if(typeof loadFBConfigUI==="function")loadFBConfigUI();
 }
 }).catch(function(){});
+} // end _doLoad
+_doLoad();
 } // end loadFromFirebase
 function fbDeleteOrder(no){
 if(!fbEnabled||!fbDb)return;
