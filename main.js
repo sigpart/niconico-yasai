@@ -750,6 +750,13 @@ document.getElementById("ntf-modal-body").innerHTML='<div class="notify-success"
 setTimeout(closeNotify,2000);
 }
 function pickDel(el,v){document.querySelectorAll(".opt-card:not(.disabled)").forEach(function(e){e.classList.remove("on");});el.classList.add("on");selDel=v;saveCust();var _ae=document.getElementById("inp-addr");if(_ae&&_ae.value.trim()){calcShippingFee(_ae.value,function(){updateShippingDisplay(null,false);});}else{_shippingFee=0;_shippingDist=0;updateShippingDisplay(null,false);}}
+function pickDelPickup(el){
+var msg=lang==="vi"
+?"Nhận hàng trực tiếp tại Em Hanoi chỉ có vào Chủ nhật hàng tuần.\n⏰ Thời gian nhận hàng: 13:00 – 15:00\n📍 Em Hanoi, 12 P. Nguyễn Văn Ngọc, Hà Nội\n\nBạn đồng ý nhận hàng trong khung giờ trên không?"
+:"毎週日曜日のEm Hanoiでの直売会での直接受取となります。\n⏰ 受取時間：13:00 – 15:00\n📍 Em Hanoi（12 P. Nguyễn Văn Ngọc, Hà Nội）\n\n上記時間内でのお受け取りに同意しますか？";
+if(!confirm(msg)){return;}
+pickDel(el,"pickup");
+}
 function updatePickupAvailability(){}
 function pickPay(el,v){document.querySelectorAll(".pay-opt").forEach(function(e){e.classList.remove("on");});el.classList.add("on");selPay=v;saveCust();}
 var QR_META={momo:{logo:"💜",ja:"MoMo で支払う",vi:"Thanh toán qua MoMo"},zalopay:{logo:"💙",ja:"ZaloPay で支払う",vi:"Thanh toán qua ZaloPay"},vnpay:{logo:"❤️",ja:"VNPay で支払う",vi:"Thanh toán qua VNPay"}};
