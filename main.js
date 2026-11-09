@@ -552,6 +552,7 @@ setTimeout(function(){sendToSheets(order);},1000);
 setTimeout(function(){sendLineOrderConfirm(order);},1200);
 try{if(order.lineUserId)localStorage.removeItem("nny_line_uid");}catch(e){}
 setTimeout(function(){sendNewOrderEmailToAdmin(order);},1500);
+setTimeout(function(){sendLineAdminNotify(order);},2000);
 }
 function buildReceipt(o){
 RECEIPT_ORDER = o;
@@ -1130,6 +1131,13 @@ subject:"🛒 Đơn hàng mới #"+o.no+" — "+o.name,
 message:msg
 }).catch(function(e){console.error("[NNY] order notify email:",e);});
 });
+}
+function sendLineAdminNotify(o){
+if(!LINE_ADMIN_USERID)return;
+var items=(o.items||[]).map(function(it){return (it.e||"")+" "+(it.vi||it.ja||"")+" ×"+it.qty;}).join("\n");
+var chatLink="https://hanoi-order.niconicoyasai.jp/?chat="+encodeURIComponent(o.no);
+var msg="🛒 Đơn hàng mới!\n\nMã: "+o.no+"\nTên: "+o.name+"\nSĐT: "+o.phone+"\n"+items+"\nTổng: "+(o.tot||0).toLocaleString()+"₫\nĐịa chỉ: "+(o.addr||"")+(o.note?"\nGhi chú: "+o.note:"")+"\n\n💬 Chat: "+chatLink;
+_sendLineMsg(LINE_ADMIN_USERID,msg);
 }
 function saveLineCfg(){
 var tok=document.getElementById("line-channel-token");
