@@ -3458,17 +3458,202 @@ _shippingLoading=false;
 updateShippingDisplay(null,false);
 if(cb)cb(_shippingFee,0);
 }
-var OWNER_FEE_RATE=0.13,_ownerPayments=[];try{var _op=localStorage.getItem("nny_owner_payments");if(_op)_ownerPayments=JSON.parse(_op);}catch(e){}
-function renderOwnerDashboard(){var ys=document.getElementById("owner-year"),ms=document.getElementById("owner-month");if(!ys||!ms)return;var now=new Date();var _curYr=now.getFullYear(),_curMo=now.getMonth()+1;var _prevYrVal=parseInt(ys.value)||_curYr,_prevMoVal=parseInt(ms.value)||_curMo;ys.innerHTML="";for(var y=_curYr-2;y<=_curYr+3;y++){var op=document.createElement("option");op.value=y;op.textContent=y+"年";if(y===_prevYrVal)op.selected=true;ys.appendChild(op);}ms.innerHTML="";for(var mo=1;mo<=12;mo++){var op2=document.createElement("option");op2.value=mo;op2.textContent=mo+"月";if(mo===_prevMoVal)op2.selected=true;ms.appendChild(op2);}var yr=parseInt(ys.value),m=parseInt(ms.value);var orders=ORDERS.filter(function(o){if(o.status==="cancelled")return false;var d=new Date(o.ts||o.no);if(isNaN(d.getTime())){var mm=(o.ts||"").match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);if(mm)d=new Date(mm[1],mm[2]-1,mm[3]);else return false;}return d.getFullYear()===yr&&d.getMonth()+1===m;});var ts=orders.reduce(function(s,o){return s+(o.tot||0);},0),fee=Math.round(ts*OWNER_FEE_RATE),fp=ts-fee;var e=document.getElementById.bind(document);if(e("owner-total-sales"))e("owner-total-sales").textContent=vnd(ts);if(e("owner-fee"))e("owner-fee").textContent=vnd(fee);if(e("owner-order-count"))e("owner-order-count").textContent=orders.length+"件";if(e("owner-farmer-pay"))e("owner-farmer-pay").textContent=vnd(fp);renderPaymentList();renderOwnerHistory();var se=localStorage.getItem("nny_farm_email");if(se){var el=e("owner-farm-email");if(el&&!el.value)el.value=se;}}
-function _buildInvoiceBody(mo,yr,ordersLen,ts,fee,fp){return "━━━━━━━━━━━━━━━━━━━━━━\nNICO NICO YASAI — HÓA ĐƠN PHÍ DỊCH VỤ\n━━━━━━━━━━━━━━━━━━━━━━\n\nKính gửi trang trại Bản Hồ,\n\nDưới đây là tổng kết doanh thu tháng "+mo+"/"+yr+":\n\n  📦 Số đơn hàng        : "+ordersLen+" đơn\n  💰 Tổng doanh thu    : "+ts.toLocaleString()+"₫\n  📊 13% doanh thu     : "+fee.toLocaleString()+"₫\n  🌿 Trang trại nhận   : "+fp.toLocaleString()+"₫\n\n━━━━━━━━━━━━━━━━━━━━━━\n⚠️  YÊU CẦU THANH TOÁN\n━━━━━━━━━━━━━━━━━━━━━━\nVui lòng chuyển khoản 13% doanh thu tháng "+mo+"/"+yr+"\n\n    "+fee.toLocaleString()+"₫\n\nvề tài khoản NICO NICO YASAI trong vòng 7 ngày.\n\nSau khi chuyển khoản, vui lòng gửi ảnh xác nhận giao dịch\nbằng một trong các cách sau:\n\n  📱 Messenger: Gửi qua bất kỳ cuộc trò chuyện nào với tôi trên Messenger\n  📧 Email: Reply email này kèm ảnh\n\nXin cảm ơn sự hợp tác của bạn!\nNICO NICO YASAI — Bản Hồ Farm";}
+var OWNER_FEE_RATE=0.13,_ownerPayments=[],_ownerMoChecked={};
+try{var _op=localStorage.getItem("nny_owner_payments");if(_op)_ownerPayments=JSON.parse(_op);}catch(e){}
+function _getSelectedPeriods(){
+var ys=document.getElementById("owner-year");
+if(!ys)return [];
+var yr=parseInt(ys.value);
+var periods=[];
+for(var mo=1;mo<=12;mo++){if(_ownerMoChecked[mo])periods.push({yr:yr,mo:mo});}
+return periods;
+}
+function ownerSelectAllMonths(all){
+var now=new Date();
+_ownerMoChecked={};
+for(var mo=1;mo<=12;mo++){_ownerMoChecked[mo]=all?true:(mo===now.getMonth()+1);}
+renderOwnerDashboard();
+}
+function renderOwnerDashboard(){
+var ys=document.getElementById("owner-year");
+if(!ys)return;
+var now=new Date();
+var _curYr=now.getFullYear(),_curMo=now.getMonth()+1;
+var _prevYrVal=parseInt(ys.value)||_curYr;
+if(!Object.keys(_ownerMoChecked).length){_ownerMoChecked[_curMo]=true;}
+ys.innerHTML="";
+for(var y=_curYr-2;y<=_curYr+3;y++){var op=document.createElement("option");op.value=y;op.textContent=y+"年";if(y===_prevYrVal)op.selected=true;ys.appendChild(op);}
+var mc=document.getElementById("owner-month-checks");
+if(mc){
+mc.innerHTML="";
+for(var mo=1;mo<=12;mo++){
+var isChecked=!!_ownerMoChecked[mo];
+mc.innerHTML+='<label onclick="_ownerMoChecked['+mo+']=!_ownerMoChecked['+mo+'];renderOwnerDashboard()" style="display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;padding:5px 6px;border-radius:6px;cursor:pointer;border:1.5px solid '+(isChecked?"#2d6a2d":"#ddd")+';background:'+(isChecked?"#e8f5e2":"#fafafa")+';user-select:none;">'+mo+'月</label>';
+}
+}
+var periods=_getSelectedPeriods();
+if(!periods.length){
+var e=document.getElementById.bind(document);
+if(e("owner-total-sales"))e("owner-total-sales").textContent="—";
+if(e("owner-fee"))e("owner-fee").textContent="—";
+if(e("owner-order-count"))e("owner-order-count").textContent="—";
+if(e("owner-farmer-pay"))e("owner-farmer-pay").textContent="—";
+renderPaymentList();renderOwnerHistory();return;
+}
+var allOrders=[];
+periods.forEach(function(p){allOrders=allOrders.concat(_getMonthOrders(p.yr,p.mo));});
+var ts=allOrders.reduce(function(s,o){return s+(o.tot||0);},0),fee=Math.round(ts*OWNER_FEE_RATE),fp=ts-fee;
+var e=document.getElementById.bind(document);
+if(e("owner-total-sales"))e("owner-total-sales").textContent=vnd(ts);
+if(e("owner-fee"))e("owner-fee").textContent=vnd(fee);
+if(e("owner-order-count"))e("owner-order-count").textContent=allOrders.length+"件";
+if(e("owner-farmer-pay"))e("owner-farmer-pay").textContent=vnd(fp);
+renderPaymentList();renderOwnerHistory();
+var se=localStorage.getItem("nny_farm_email");
+if(se){var farmEl=e("owner-farm-email");if(farmEl&&!farmEl.value)farmEl.value=se;}
+}
+function _buildInvoiceBody(periods,uploadLinks){
+var lines=["━━━━━━━━━━━━━━━━━━━━━━","NICO NICO YASAI — HÓA ĐƠN PHÍ DỊCH VỤ","━━━━━━━━━━━━━━━━━━━━━━","","Kính gửi trang trại Bản Hồ,",""];
+var totalSales=0,totalFee=0,totalFp=0,totalOrders=0;
+periods.forEach(function(p){totalSales+=p.ts;totalFee+=p.fee;totalFp+=p.fp;totalOrders+=p.ordersLen;});
+if(periods.length===1){
+lines.push("Tổng kết doanh thu tháng "+periods[0].mo+"/"+periods[0].yr+":");
+}else{
+var moList=periods.map(function(p){return p.mo+"/"+p.yr;}).join(", ");
+lines.push("Tổng kết doanh thu các tháng: "+moList);
+periods.forEach(function(p){lines.push("  • Tháng "+p.mo+"/"+p.yr+": "+p.ts.toLocaleString()+"₫ ("+p.ordersLen+" đơn)");});
+lines.push("");
+}
+lines=lines.concat(["","  📦 Tổng số đơn hàng  : "+totalOrders+" đơn","  💰 Tổng doanh thu    : "+totalSales.toLocaleString()+"₫","  📊 13% doanh thu     : "+totalFee.toLocaleString()+"₫","  🌿 Trang trại nhận   : "+totalFp.toLocaleString()+"₫","","━━━━━━━━━━━━━━━━━━━━━━","⚠️  YÊu CẦU THANH TOÁN","━━━━━━━━━━━━━━━━━━━━━━","Vui lòng chuyển khoản:","","    "+totalFee.toLocaleString()+"₫","","về tài khoản NICO NICO YASAI trong vòng 7 ngày.","","━━━━━━━━━━━━━━━━━━━━━━","📸 XÁC NHẬN THANH TOÁN","━━━━━━━━━━━━━━━━━━━━━━","Sau khi chuyển khoản, vui lòng upload ảnh xác nhận","giao dịch qua liên kết dưới đây:"]);
+uploadLinks.forEach(function(ul){lines.push("  👉 "+ul.label+": "+ul.url);});
+lines=lines.concat(["","(Ảnh sẽ được lưu tự động và chúng tôi sẽ xác nhận.)","","Xin cảm ơn sự hợp tác của bạn!","NICO NICO YASAI — Bản Hồ Farm"]);
+return lines.join("\n");
+}
 function _getMonthOrders(yr,mo){return ORDERS.filter(function(o){if(o.status==="cancelled")return false;var d=new Date(o.ts||o.no);if(isNaN(d.getTime())){var mm=(o.ts||"").match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);if(mm)d=new Date(mm[1],mm[2]-1,mm[3]);else return false;}return d.getFullYear()===yr&&d.getMonth()+1===mo;});}
-function sendInvoice(autoMode){var ys=document.getElementById("owner-year"),ms=document.getElementById("owner-month"),em=document.getElementById("owner-farm-email"),st=document.getElementById("owner-invoice-status"),btn=document.getElementById("owner-send-btn");if(!ys||!ms||!em)return;var email=em.value.trim();if(!email){if(!autoMode)alert("農家のメールアドレスを入力してください");return;}localStorage.setItem("nny_farm_email",email);var yr=parseInt(ys.value),mo=parseInt(ms.value);var orders=_getMonthOrders(yr,mo);var ts=orders.reduce(function(s,o){return s+(o.tot||0);},0),fee=Math.round(ts*OWNER_FEE_RATE),fp=ts-fee;var replyAddr=EJ&&EJ.from?EJ.from:"";var body2=_buildInvoiceBody(mo,yr,orders.length,ts,fee,fp);if(typeof emailjs!=="undefined"&&EJ&&EJ.pubkey){if(btn){btn.disabled=true;btn.textContent="送信中...";}emailjs.init(EJ.pubkey);emailjs.send(EJ.service,EJ.template,{to_email:email,to_name:"Trang trại Bản Hồ",from_name:"NICO NICO YASAI",reply_to:replyAddr,subject:"[NICO NICO YASAI] Hóa đơn phí dịch vụ tháng "+mo+"/"+yr+" — "+fee.toLocaleString()+"₫",message:body2}).then(function(){if(btn){btn.disabled=false;btn.textContent="📧 請求書をメール送付";}saveInvoiceHistory(yr,mo,ts,fee,email);if(st){st.style.display="block";st.textContent=autoMode?"🤖 月末自動送信完了！農家へ請求メールを送りました。":"✅ 送信成功！農家へ請求メールを送りました。";setTimeout(function(){st.style.display="none";},5000);}}).catch(function(e){if(btn){btn.disabled=false;btn.textContent="📧 請求書をメール送付";}if(!autoMode)alert("送信失敗: "+JSON.stringify(e));});}else{if(!autoMode)alert("EmailJSが設定されていません。");}}
-function autoSendInvoiceIfNeeded(){var now=new Date();var day=now.getDate(),yr=now.getFullYear(),mo=now.getMonth()+1;if(day<25)return;var savedEmail=localStorage.getItem("nny_farm_email");if(!savedEmail)return;var h2=[];try{var s=localStorage.getItem("nny_invoice_history");if(s)h2=JSON.parse(s);}catch(e){}var alreadySent=h2.some(function(r){return r.yr===yr&&r.mo===mo;});if(alreadySent)return;var ys=document.getElementById("owner-year"),ms=document.getElementById("owner-month");if(ys)ys.value=yr;if(ms)ms.value=mo;var em=document.getElementById("owner-farm-email");if(em)em.value=savedEmail;renderOwnerDashboard();setTimeout(function(){sendInvoice(true);},500);}
-function saveInvoiceHistory(yr,mo,ts,fee,email){var h2=[];try{var s=localStorage.getItem("nny_invoice_history");if(s)h2=JSON.parse(s);}catch(e){}h2.unshift({yr:yr,mo:mo,totalSales:ts,fee:fee,email:email,sentAt:new Date().toISOString()});if(h2.length>24)h2=h2.slice(0,24);try{localStorage.setItem("nny_invoice_history",JSON.stringify(h2));}catch(e){}renderOwnerHistory();}
-function renderOwnerHistory(){var el=document.getElementById("owner-history-list");if(!el)return;var h2=[];try{var s=localStorage.getItem("nny_invoice_history");if(s)h2=JSON.parse(s);}catch(e){}if(!h2.length){el.innerHTML='<div style="color:#aaa;font-size:12px;text-align:center;padding:12px;">履歴なし</div>';return;}el.innerHTML=h2.map(function(r){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0f0f0;"><div><div style="font-size:13px;font-weight:700;">'+r.yr+'年'+r.mo+'月</div><div style="font-size:11px;color:#888;">'+r.email+'</div></div><div style="font-size:13px;font-weight:800;color:#2d6a2d;">'+vnd(r.fee)+'</div></div>';}).join('');}
-function uploadPaymentSS(input){if(!input.files||!input.files[0])return;var reader=new FileReader();reader.onload=function(e){var ys=document.getElementById("owner-year"),ms=document.getElementById("owner-month");var yr=parseInt(ys?ys.value:new Date().getFullYear()),mo=parseInt(ms?ms.value:new Date().getMonth()+1);_ownerPayments.unshift({yr:yr,mo:mo,data:e.target.result,uploadedAt:new Date().toISOString(),status:"pending"});if(_ownerPayments.length>12)_ownerPayments=_ownerPayments.slice(0,12);try{localStorage.setItem("nny_owner_payments",JSON.stringify(_ownerPayments));}catch(e){}renderPaymentList();showToast("✅ スクショを保存しました");};reader.readAsDataURL(input.files[0]);input.value="";}
-function renderPaymentList(){var el=document.getElementById("owner-payment-list");if(!el)return;var ys=document.getElementById("owner-year"),ms=document.getElementById("owner-month");var payments=_ownerPayments.filter(function(p){if(!ys||!ms)return true;return p.yr===parseInt(ys.value)&&p.mo===parseInt(ms.value);});if(!payments.length){el.innerHTML='<div style="color:#aaa;font-size:12px;text-align:center;padding:12px;">この月の支払い記録なし</div>';return;}el.innerHTML=payments.map(function(p,i){return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f0f0;"><img src="'+p.data+'" style="width:60px;height:45px;object-fit:cover;border-radius:6px;cursor:pointer;" onclick="window.open(this.src)"><div style="flex:1;font-size:12px;font-weight:700;">'+p.yr+'年'+p.mo+'月</div><button onclick="confirmPaymentOwner('+i+')" style="font-size:11px;padding:5px 10px;border:1px solid #ccc;border-radius:6px;background:'+(p.status==="confirmed"?"#e8f5e2":"#fff")+';cursor:pointer;">'+(p.status==="confirmed"?"✅ 確認済":"確認する")+'</button></div>';}).join('');}
-function confirmPaymentOwner(idx){var ys=document.getElementById("owner-year"),ms=document.getElementById("owner-month");var payments=_ownerPayments.filter(function(p){if(!ys||!ms)return true;return p.yr===parseInt(ys.value)&&p.mo===parseInt(ms.value);});if(payments[idx]){payments[idx].status="confirmed";try{localStorage.setItem("nny_owner_payments",JSON.stringify(_ownerPayments));}catch(e){}}renderPaymentList();}
+function sendInvoice(autoMode){
+var em=document.getElementById("owner-farm-email"),st=document.getElementById("owner-invoice-status"),btn=document.getElementById("owner-send-btn");
+if(!em)return;
+var email=em.value.trim();
+if(!email){if(!autoMode)alert("農家のメールアドレスを入力してください");return;}
+localStorage.setItem("nny_farm_email",email);
+var periods=_getSelectedPeriods();
+if(!periods.length){if(!autoMode)alert("集計期間を選択してください");return;}
+var invoicePeriods=periods.map(function(p){
+var orders=_getMonthOrders(p.yr,p.mo);
+var ts=orders.reduce(function(s,o){return s+(o.tot||0);},0),fee=Math.round(ts*OWNER_FEE_RATE),fp=ts-fee;
+return {yr:p.yr,mo:p.mo,ordersLen:orders.length,ts:ts,fee:fee,fp:fp};
+});
+var totalFee=invoicePeriods.reduce(function(s,p){return s+p.fee;},0);
+var baseUrl="https://hanoi-order.niconicoyasai.jp/pay-upload.html";
+var uploadLinks=invoicePeriods.map(function(p){return {label:"Tháng "+p.mo+"/"+p.yr,url:baseUrl+"?yr="+p.yr+"&mo="+p.mo};});
+var replyAddr=EJ&&EJ.from?EJ.from:"";
+var moLabel=invoicePeriods.length===1?invoicePeriods[0].mo+"/"+invoicePeriods[0].yr:invoicePeriods.map(function(p){return p.mo+"/"+p.yr;}).join(",");
+var body2=_buildInvoiceBody(invoicePeriods,uploadLinks);
+if(typeof emailjs!=="undefined"&&EJ&&EJ.pubkey){
+if(btn){btn.disabled=true;btn.textContent="送信中...";}
+emailjs.init(EJ.pubkey);
+emailjs.send(EJ.service,EJ.template,{to_email:email,to_name:"Trang trại Bản Hồ",from_name:"NICO NICO YASAI",reply_to:replyAddr,subject:"[NICO NICO YASAI] Hóa đơn phí dịch vụ tháng "+moLabel+" — "+totalFee.toLocaleString()+"₫",message:body2}).then(function(){
+if(btn){btn.disabled=false;btn.textContent="📧 請求書をメール送付";}
+invoicePeriods.forEach(function(p){saveInvoiceHistory(p.yr,p.mo,p.ts,p.fee,email);});
+if(st){st.style.display="block";st.textContent=autoMode?"🤖 月末自動送信完了！":"✅ 送信成功！農家へ請求メールを送りました。";setTimeout(function(){st.style.display="none";},5000);}
+}).catch(function(err){if(btn){btn.disabled=false;btn.textContent="📧 請求書をメール送付";}if(!autoMode)alert("送信失敗: "+JSON.stringify(err));});
+}else{if(!autoMode)alert("EmailJSが設定されていません。");}
+}
+function autoSendInvoiceIfNeeded(){var now=new Date();var day=now.getDate(),yr=now.getFullYear(),mo=now.getMonth()+1;if(day<25)return;var savedEmail=localStorage.getItem("nny_farm_email");if(!savedEmail)return;var h2=[];try{var s=localStorage.getItem("nny_invoice_history");if(s)h2=JSON.parse(s);}catch(e){}var alreadySent=h2.some(function(r){return r.yr===yr&&r.mo===mo;});if(alreadySent)return;_ownerMoChecked={};_ownerMoChecked[mo]=true;var ys=document.getElementById("owner-year");if(ys)ys.value=yr;var farmEl=document.getElementById("owner-farm-email");if(farmEl)farmEl.value=savedEmail;renderOwnerDashboard();setTimeout(function(){sendInvoice(true);},500);}
+function saveInvoiceHistory(yr,mo,ts,fee,email){
+var h2=[];try{var s=localStorage.getItem("nny_invoice_history");if(s)h2=JSON.parse(s);}catch(e){}
+var exists=h2.some(function(r){return r.yr===yr&&r.mo===mo;});
+if(!exists){h2.unshift({yr:yr,mo:mo,totalSales:ts,fee:fee,email:email,sentAt:new Date().toISOString()});if(h2.length>24)h2=h2.slice(0,24);try{localStorage.setItem("nny_invoice_history",JSON.stringify(h2));}catch(e){}}
+if(typeof fbDb!=="undefined"&&fbDb){fbDb.collection("owner_data").doc("invoice_history").set({list:h2}).catch(function(){});}
+renderOwnerHistory();
+}
+function renderOwnerHistory(){
+var el=document.getElementById("owner-history-list");
+if(!el)return;
+var h2=[];try{var s=localStorage.getItem("nny_invoice_history");if(s)h2=JSON.parse(s);}catch(e){}
+if(!h2.length){el.innerHTML='<div style="color:#aaa;font-size:12px;text-align:center;padding:12px;">履歴なし</div>';return;}
+el.innerHTML=h2.map(function(r){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0f0f0;"><div><div style="font-size:13px;font-weight:700;">'+r.yr+'年'+r.mo+'月</div><div style="font-size:11px;color:#888;">'+r.email+'</div></div><div style="font-size:13px;font-weight:800;color:#2d6a2d;">'+vnd(r.fee)+'</div></div>';}).join('');
+}
+function _resizeImage(dataUrl,maxW,maxH,quality,cb){
+var img=new Image();
+img.onload=function(){
+var w=img.width,h=img.height;
+var scale=Math.min(maxW/w,maxH/h,1);
+var cw=Math.round(w*scale),ch=Math.round(h*scale);
+var canvas=document.createElement("canvas");
+canvas.width=cw;canvas.height=ch;
+canvas.getContext("2d").drawImage(img,0,0,cw,ch);
+cb(canvas.toDataURL("image/jpeg",quality));
+};
+img.src=dataUrl;
+}
+function uploadPaymentSS(input){
+if(!input.files||!input.files[0])return;
+var reader=new FileReader();
+reader.onload=function(evt){
+var now2=new Date();
+var yr=now2.getFullYear(),mo=now2.getMonth()+1;
+var periods=_getSelectedPeriods();
+if(periods.length===1){yr=periods[0].yr;mo=periods[0].mo;}
+_resizeImage(evt.target.result,800,600,0.75,function(resized){
+var rec={yr:yr,mo:mo,data:resized,uploadedAt:new Date().toISOString(),status:"pending",source:"owner"};
+_ownerPayments.unshift(rec);
+if(_ownerPayments.length>24)_ownerPayments=_ownerPayments.slice(0,24);
+try{localStorage.setItem("nny_owner_payments",JSON.stringify(_ownerPayments));}catch(ex){}
+if(typeof fbDb!=="undefined"&&fbDb){
+var key=yr+"_"+(mo<10?"0":"")+mo+"_"+Date.now();
+fbDb.collection("owner_payments").doc(key).set(rec).catch(function(){});
+}
+renderPaymentList();
+showToast("✅ スクショを保存しました");
+});
+};
+reader.readAsDataURL(input.files[0]);
+input.value="";
+}
+function loadOwnerPaymentsFromFirestore(cb){
+if(typeof fbDb==="undefined"||!fbDb){if(cb)cb();return;}
+fbDb.collection("owner_payments").get().then(function(snap){
+var arr=[];snap.forEach(function(doc){arr.push(doc.data());});
+if(arr.length){
+arr.sort(function(a,b){return (b.uploadedAt||"").localeCompare(a.uploadedAt||"");});
+_ownerPayments=arr;
+try{localStorage.setItem("nny_owner_payments",JSON.stringify(_ownerPayments));}catch(ex){}
+}
+if(cb)cb();
+}).catch(function(){if(cb)cb();});
+}
+function renderPaymentList(){
+var el=document.getElementById("owner-payment-list");
+if(!el)return;
+var periods=_getSelectedPeriods();
+var payments;
+if(periods.length>0){
+payments=_ownerPayments.filter(function(p){return periods.some(function(pp){return p.yr===pp.yr&&p.mo===pp.mo;});});
+}else{payments=_ownerPayments;}
+if(!payments.length){el.innerHTML='<div style="color:#aaa;font-size:12px;text-align:center;padding:12px;">この期間の支払い記録なし</div>';return;}
+el.innerHTML=payments.map(function(p){
+var allIdx=_ownerPayments.indexOf(p);
+return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f0f0;"><img src="'+p.data+'" style="width:60px;height:45px;object-fit:cover;border-radius:6px;cursor:pointer;" onclick="window.open(this.src)"><div style="flex:1;"><div style="font-size:12px;font-weight:700;">'+p.yr+'年'+p.mo+'月</div><div style="font-size:10px;color:#aaa;">'+(p.source==="farmer"?"農家アップロード":"手動登録")+'</div></div><button onclick="confirmPaymentOwner('+allIdx+')" style="font-size:11px;padding:5px 10px;border:1px solid #ccc;border-radius:6px;background:'+(p.status==="confirmed"?"#e8f5e2":"#fff")+';cursor:pointer;">'+(p.status==="confirmed"?"✅ 確認済":"確認する")+'</button></div>';
+}).join('');
+}
+function confirmPaymentOwner(idx){
+if(!_ownerPayments[idx])return;
+_ownerPayments[idx].status="confirmed";
+try{localStorage.setItem("nny_owner_payments",JSON.stringify(_ownerPayments));}catch(ex){}
+if(typeof fbDb!=="undefined"&&fbDb){
+var target=_ownerPayments[idx];
+fbDb.collection("owner_payments").get().then(function(snap){
+snap.forEach(function(doc){
+var d=doc.data();
+if(d.yr===target.yr&&d.mo===target.mo&&d.uploadedAt===target.uploadedAt){
+fbDb.collection("owner_payments").doc(doc.id).update({status:"confirmed"}).catch(function(){});
+}
+});
+}).catch(function(){});
+}
+renderPaymentList();
+}
 
 var _fbPollTimer=null;
 function startFbPolling(){
@@ -3640,9 +3825,9 @@ if(typeof fbEnabled!=="undefined"&&fbEnabled&&typeof fbDb!=="undefined"&&fbDb){
 fbDb.collection("orders").get().then(function(snap){
 var a=[];snap.forEach(function(doc){a.push(doc.data());});
 if(a.length)ORDERS=a;
-renderOwnerDashboard();autoSendInvoiceIfNeeded();
-}).catch(function(){renderOwnerDashboard();autoSendInvoiceIfNeeded();});
-}else{renderOwnerDashboard();autoSendInvoiceIfNeeded();}
+loadOwnerPaymentsFromFirestore(function(){renderOwnerDashboard();autoSendInvoiceIfNeeded();});
+}).catch(function(){loadOwnerPaymentsFromFirestore(function(){renderOwnerDashboard();autoSendInvoiceIfNeeded();});});
+}else{loadOwnerPaymentsFromFirestore(function(){renderOwnerDashboard();autoSendInvoiceIfNeeded();});}
 },100);
 }
 }

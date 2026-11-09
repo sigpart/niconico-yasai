@@ -55,6 +55,17 @@ service cloud.firestore {
       allow write: if request.auth != null && request.auth.token.email != null;
     }
 
+    // オーナー支払いスクショ: 匿名含む認証済みが作成可、読み取り・更新はメール認証のみ
+    match /owner_payments/{docId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if request.auth != null && request.auth.token.email != null;
+    }
+
+    // オーナー集計データ（請求書履歴等）: メール認証のみ
+    match /owner_data/{docId} {
+      allow read, write: if request.auth != null && request.auth.token.email != null;
+    }
+
     // adminsコレクション: 参照用に残す
     match /admins/{email} {
       allow read: if request.auth != null && request.auth.token.email == email;
