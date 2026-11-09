@@ -547,7 +547,7 @@ saveCust();
 renderProducts(); updateCartBtn();
 buildReceipt(order);
 showView("receipt");
-setTimeout(function(){sendEmail(order);},600);
+if(!order.lineUserId){setTimeout(function(){sendEmail(order);},600);}
 setTimeout(function(){sendToSheets(order);},1000);
 setTimeout(function(){sendLineOrderConfirm(order);},1200);
 try{if(order.lineUserId)localStorage.removeItem("nny_line_uid");}catch(e){}
@@ -1550,7 +1550,7 @@ var cfg=doc.exists?doc.data():{};
 var _sync={};
 if(cfg.ej){try{var ej=JSON.parse(cfg.ej);EJ.service=ej.service||EJ.service;EJ.template=ej.template||EJ.template;EJ.pubkey=ej.pubkey||EJ.pubkey;EJ.from=ej.from||EJ.from;EJ.admin=ej.admin||EJ.admin||"";if(EJ.pubkey)emailjs.init({publicKey:EJ.pubkey});localStorage.setItem("nny_ej",cfg.ej);if(typeof loadEJConfigUI==="function")loadEJConfigUI();}catch(e){}}
 else{var _lsEj=localStorage.getItem("nny_ej");if(_lsEj)_sync.ej=_lsEj;}
-if(cfg.lineCfg){try{var _lc=JSON.parse(cfg.lineCfg);LINE_CHANNEL_TOKEN=_lc.token||LINE_CHANNEL_TOKEN;LINE_ADMIN_USERID=_lc.adminId||LINE_ADMIN_USERID;localStorage.setItem("nny_line_cfg",cfg.lineCfg);if(typeof loadLineCfgUI==="function")loadLineCfgUI();}catch(e){}}
+if(cfg.lineCfg){try{var _lc=JSON.parse(cfg.lineCfg);LINE_CHANNEL_TOKEN=_lc.token||LINE_CHANNEL_TOKEN;LINE_ADMIN_USERID=_lc.adminId||LINE_ADMIN_USERID;localStorage.setItem("nny_line_cfg",cfg.lineCfg);if(typeof loadLineCfgUI==="function")loadLineCfgUI();if(LINE_CHANNEL_TOKEN&&fbDb)fbDb.collection("pub_config").doc("line").set({token:LINE_CHANNEL_TOKEN},{merge:true}).catch(function(){});}catch(e){}}
 else{var _lsLine=localStorage.getItem("nny_line_cfg");if(_lsLine)_sync.lineCfg=_lsLine;}
 if(cfg.bank){try{var bk=JSON.parse(cfg.bank);BANK_CFG=Object.assign(BANK_CFG,bk);localStorage.setItem("nny_bank",cfg.bank);if(typeof loadBankConfigUI==="function")loadBankConfigUI();}catch(e){}}
 else if(BANK_CFG.account){_sync.bank=JSON.stringify(BANK_CFG);}
@@ -1655,7 +1655,7 @@ fbDb.collection("pub_config").doc("admin_settings").get().then(function(doc){
 if(!doc.exists)return;
 var d=doc.data();
 if(d.ej){try{var ej=JSON.parse(d.ej);EJ.service=ej.service||EJ.service;EJ.template=ej.template||EJ.template;EJ.pubkey=ej.pubkey||EJ.pubkey;EJ.from=ej.from||EJ.from;EJ.admin=ej.admin||EJ.admin||"";if(EJ.pubkey)emailjs.init({publicKey:EJ.pubkey});localStorage.setItem("nny_ej",d.ej);if(typeof loadEJConfigUI==="function")loadEJConfigUI();}catch(e){}}
-if(d.lineCfg){try{var lc=JSON.parse(d.lineCfg);LINE_CHANNEL_TOKEN=lc.token||LINE_CHANNEL_TOKEN;LINE_ADMIN_USERID=lc.adminId||LINE_ADMIN_USERID;localStorage.setItem("nny_line_cfg",d.lineCfg);if(typeof loadLineCfgUI==="function")loadLineCfgUI();}catch(e){}}
+if(d.lineCfg){try{var lc=JSON.parse(d.lineCfg);LINE_CHANNEL_TOKEN=lc.token||LINE_CHANNEL_TOKEN;LINE_ADMIN_USERID=lc.adminId||LINE_ADMIN_USERID;localStorage.setItem("nny_line_cfg",d.lineCfg);if(typeof loadLineCfgUI==="function")loadLineCfgUI();if(LINE_CHANNEL_TOKEN&&fbDb)fbDb.collection("pub_config").doc("line").set({token:LINE_CHANNEL_TOKEN},{merge:true}).catch(function(){});}catch(e){}}
 if(d.bank){try{var bk=JSON.parse(d.bank);BANK_CFG=Object.assign(BANK_CFG,bk);localStorage.setItem("nny_bank",d.bank);if(typeof loadBankConfigUI==="function")loadBankConfigUI();}catch(e){}}
 }).catch(function(){});
 // Firebase設定（messagingSenderIdなど）をpub_configから復元
@@ -2512,7 +2512,10 @@ method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({userId:userId,text:text})
 }).then(function(r){
-r.text().then(function(t){console.log("[NNY] LINE送信 status:"+r.status,t.slice(0,100));});
+r.text().then(function(t){
+console.log("[NNY] LINE送信 status:"+r.status,t.slice(0,100));
+if(r.status!==200){console.error("[NNY] LINE送信失敗:",t.slice(0,200));}
+});
 }).catch(function(e){
 console.error("[NNY] LINE proxy error:",e.message);
 });
