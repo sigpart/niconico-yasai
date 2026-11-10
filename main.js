@@ -450,10 +450,8 @@ html+='<div class="cc-item"><span>'+p.e+' '+nm+' × '+qty+'</span><span style="f
 });
 document.getElementById("cc-items").innerHTML=html;
 document.getElementById("cc-tot-val").textContent=vnd(tot);
-var _hasFreeShipConf=Object.keys(cart).some(function(ck){var _m=CART_META[ck];var _pid=_m?_m.id:(ck.indexOf("_")>0?ck.split("_")[0]:ck);var _pp=PRODUCTS.find(function(x){return Number(x.id)===Number(_pid);});return _pp&&_pp.freeShip;});
-var _sf=selDel==="deliver"&&!_hasFreeShipConf?_shippingFee:0,_gt=tot+_sf;
-var _sr=document.getElementById("cc-ship-row");if(_sr){if(_sf>0){_sr.style.display="";var _sv=document.getElementById("cc-ship-val");if(_sv)_sv.textContent=vnd(_sf);}else _sr.style.display="none";}
-var _gr=document.getElementById("cc-grand-row");if(_gr){if(_sf>0){_gr.style.display="";var _gv=document.getElementById("cc-grand-val");if(_gv)_gv.textContent=vnd(_gt);}else _gr.style.display="none";}
+var _sr=document.getElementById("cc-ship-row");if(_sr)_sr.style.display="none";
+var _gr=document.getElementById("cc-grand-row");if(_gr)_gr.style.display="none";
 var n=document.getElementById("inp-name").value, ph=document.getElementById("inp-phone").value,
 z=document.getElementById("inp-zalo").value, a=document.getElementById("inp-addr").value, em=document.getElementById("inp-email").value;
 document.getElementById("cc-cust").innerHTML=esc(n)+"<br>"+esc(ph)+(z?" · Zalo:"+esc(z):"")+"<br>"+esc(a)+(em?"<br>📧 "+esc(em):"");
@@ -550,7 +548,6 @@ showView("receipt");
 if(!order.lineUserId){setTimeout(function(){sendEmail(order);},600);}
 setTimeout(function(){sendToSheets(order);},1000);
 setTimeout(function(){sendLineOrderConfirm(order);},1200);
-try{if(order.lineUserId)localStorage.removeItem("nny_line_uid");}catch(e){}
 setTimeout(function(){sendNewOrderEmailToAdmin(order);},1500);
 }
 function buildReceipt(o){
@@ -874,12 +871,14 @@ if(uid){clearInterval(_lineAuthCheckTimer);_lineAuthCheckTimer=null;_updateLineA
 },1000);
 setTimeout(function(){if(_lineAuthCheckTimer){clearInterval(_lineAuthCheckTimer);_lineAuthCheckTimer=null;}},120000);
 }
-window.addEventListener("focus",function(){
+function _checkLineAuthOnReturn(){
 var cb=document.getElementById("inp-line-notify");
 if(!cb||!cb.checked)return;
 var uid="";try{uid=localStorage.getItem("nny_line_uid")||"";}catch(e){}
-if(uid)_updateLineAuthUI(true);
-});
+if(uid){_updateLineAuthUI(true);if(_lineAuthCheckTimer){clearInterval(_lineAuthCheckTimer);_lineAuthCheckTimer=null;}}
+}
+window.addEventListener("focus",_checkLineAuthOnReturn);
+document.addEventListener("visibilitychange",function(){if(!document.hidden)_checkLineAuthOnReturn();});
 function saveCust(){
 var e=document.getElementById("inp-email");
 try{localStorage.setItem(SAVED_KEY,JSON.stringify({name:document.getElementById("inp-name").value,phone:document.getElementById("inp-phone").value,zalo:document.getElementById("inp-zalo").value,addr:document.getElementById("inp-addr").value,email:e?e.value:"",delivery:selDel,payment:selPay,_ts:Date.now()}));}catch(err){}
