@@ -904,7 +904,7 @@ if(c.phone)document.getElementById("inp-phone").value=c.phone;
 if(c.zalo)document.getElementById("inp-zalo").value=c.zalo;
 if(c.addr)document.getElementById("inp-addr").value=c.addr;
 var em=document.getElementById("inp-email");if(em&&c.email)em.value=c.email;
-if(c.delivery){selDel=c.delivery;document.querySelectorAll(".opt-card:not(.disabled)").forEach(function(el){el.classList.toggle("on",el.getAttribute("onclick")&&el.getAttribute("onclick").indexOf("'"+c.delivery+"'")>-1);});}
+if(c.delivery){selDel=c.delivery;document.querySelectorAll(".opt-card:not(.disabled)").forEach(function(el){var oc=el.getAttribute("onclick")||"";var match=(c.delivery==="pickup")?oc.indexOf("pickup")>-1:oc.indexOf("'"+c.delivery+"'")>-1;el.classList.toggle("on",match);});}
 if(c.payment){selPay=c.payment;document.querySelectorAll(".pay-opt").forEach(function(el){el.classList.toggle("on",el.getAttribute("onclick")&&el.getAttribute("onclick").indexOf("'"+c.payment+"'")>-1);});}
 return !!(c.name||c.phone);
 }catch(e){return false;}
