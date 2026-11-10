@@ -2521,6 +2521,11 @@ if(!userId){console.warn("[NNY] LINE: userId未取得");return;}
 var safeNo=orderNo?orderNo.replace(/[^a-zA-Z0-9]/g,"-"):"";
 console.log("[NNY] LINE送信開始 userId:",userId.slice(0,8)+"... orderNo:",safeNo);
 function _saveStat(stat,body){
+// インメモリORDERSを更新して管理画面に即反映
+var ord=ORDERS.find(function(o){return o.no.replace(/[^a-zA-Z0-9]/g,"-")===safeNo;});
+if(ord){ord.lineSentStatus=stat;ord.lineSentAt=new Date().toISOString();if(body)ord.lineErrBody=body.slice(0,200);}
+if(typeof renderAdminOrders2==="function")renderAdminOrders2();
+// Firestoreにも保存
 if(!fbDb||!safeNo)return;
 var d={lineSentAt:new Date().toISOString(),lineSentStatus:stat};
 if(body)d.lineErrBody=body.slice(0,200);
