@@ -37,6 +37,8 @@ function showDone(){
 }
 function afterUserId(userId){
   try{localStorage.setItem("nny_line_uid",userId);}catch(e){}
+  // 元タブ（メインアプリ）にpostMessageで通知（スマホ別ブラウザ対応）
+  try{if(window.opener)window.opener.postMessage({nny_line_uid:userId},"*");}catch(e){}
   liff.getFriendship().then(function(data){
     if(data&&data.friendFlag){showDone();}
     else{showFriendBtn();}
