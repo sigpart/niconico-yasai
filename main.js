@@ -548,7 +548,7 @@ saveCust();
 renderProducts(); updateCartBtn();
 buildReceipt(order);
 showView("receipt");
-if(!order.lineUserId){setTimeout(function(){sendEmail(order);},600);}
+setTimeout(function(){sendEmail(order);},600);
 setTimeout(function(){sendToSheets(order);},1000);
 setTimeout(function(){sendLineOrderConfirm(order);},1200);
 setTimeout(function(){sendNewOrderEmailToAdmin(order);},1500);
@@ -2352,6 +2352,8 @@ html+='</div>';
 html+='</div>';
 }
 html+='<div class="ao-tot">'+vnd(o.tot)+'</div>';
+var lineStatus=o.lineUserId?(o.lineSentStatus==="ok"?'<span style="font-size:10px;color:#1a6b2a;">📲 LINE通知送信済</span>':o.lineSentStatus?'<span style="font-size:10px;color:#c0392b;" title="'+escHtml(o.lineErrBody||"")+'">📲 LINE失敗('+escHtml(o.lineSentStatus)+')</span>':'<span style="font-size:10px;color:#7a5c00;">📲 LINE未確認</span>'):'<span style="font-size:10px;color:var(--ghost);">📲 LINE ID未取得</span>';
+html+='<div style="padding:4px 12px 2px;">'+lineStatus+'</div>';
 html+='<div class="ao-btns">'+tglBtn+cancelBtn;
 html+='<button class="ao-btn" onclick="adminViewReceiptByNo(\''+safeNo+'\')">'+(adminLang==="vi"?"📄 Hóa đơn":"📄 領収証")+'</button>';
 html+='<button class="ao-btn" onclick="adminChatFromOrder(\''+safeNo+'\')" style="color:var(--g1);border-color:var(--g1);">💬 '+(adminLang==="vi"?"Chat":"チャット")+'</button>';
@@ -2505,28 +2507,35 @@ message:msgJa+"\n\n---\n\n"+msgVi
 }
 }
 function sendLineOrderConfirm(o){
-if(!o.lineUserId)return;
+if(!o.lineUserId){console.warn("[NNY] LINE通知スキップ: lineUserIdが空 (LINE認証未完了)");return;}
 var items=(o.items||[]).map(function(it){return it.e+" "+it.ja+" ×"+it.qty;}).join("\n");
 var msg="ご注文ありがとうございます！🛍️\n\n"
 +"注文番号: "+o.no+"\n"
 +"ご注文内容:\n"+items+"\n"
 +"合計: "+(o.tot||0).toLocaleString()+"₫\n\n"
 +"配達準備が整いましたらLINEにてお知らせします。";
-_sendLineMsg(o.lineUserId,msg);
+_sendLineMsg(o.lineUserId,msg,o.no);
 }
-function _sendLineMsg(userId,text){
+function _sendLineMsg(userId,text,orderNo){
 if(!userId){console.warn("[NNY] LINE: userId未取得");return;}
+console.log("[NNY] LINE送信開始 userId:",userId.slice(0,8)+"...");
 fetch("https://hanoi-order.niconicoyasai.jp/line-proxy.php",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({userId:userId,text:text})
 }).then(function(r){
 r.text().then(function(t){
-console.log("[NNY] LINE送信 status:"+r.status,t.slice(0,100));
-if(r.status!==200){console.error("[NNY] LINE送信失敗:",t.slice(0,200));}
+console.log("[NNY] LINE送信 status:"+r.status,t.slice(0,200));
+if(r.status===200&&fbDb&&orderNo){
+fbDb.collection("orders").doc(orderNo).set({lineSentAt:new Date().toISOString(),lineSentStatus:"ok"},{merge:true}).catch(function(){});
+}else if(r.status!==200){
+console.error("[NNY] LINE送信失敗:",t.slice(0,300));
+if(fbDb&&orderNo)fbDb.collection("orders").doc(orderNo).set({lineSentAt:new Date().toISOString(),lineSentStatus:"err_"+r.status,lineErrBody:t.slice(0,200)},{merge:true}).catch(function(){});
+}
 });
 }).catch(function(e){
 console.error("[NNY] LINE proxy error:",e.message);
+if(fbDb&&orderNo)fbDb.collection("orders").doc(orderNo).set({lineSentAt:new Date().toISOString(),lineSentStatus:"err_network",lineErrBody:e.message},{merge:true}).catch(function(){});
 });
 }
 function adminLoadSS(no,imgEl){
