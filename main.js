@@ -2352,7 +2352,7 @@ html+='</div>';
 html+='</div>';
 }
 html+='<div class="ao-tot">'+vnd(o.tot)+'</div>';
-var lineStatus=o.lineUserId?(o.lineSentStatus==="ok"?'<span style="font-size:10px;color:#1a6b2a;">📲 LINE通知送信済</span>':o.lineSentStatus==="sending"?'<span style="font-size:10px;color:#1a6b2a;">📲 LINE送信中…</span>':o.lineSentStatus?'<span style="font-size:10px;color:#c0392b;" title="'+escHtml(o.lineErrBody||"")+'">📲 LINE失敗('+escHtml(o.lineSentStatus)+')</span>':'<span style="font-size:10px;color:#7a5c00;">📲 LINE未確認</span>'):'<span style="font-size:10px;color:var(--ghost);">📲 LINE ID未取得</span>';
+var lineStatus=o.lineUserId?(o.lineSentStatus==="ok"?'<span style="font-size:10px;color:#1a6b2a;">📲 LINE通知送信済</span>':o.lineSentStatus==="queued"?'<span style="font-size:10px;color:#1a6b2a;">📲 LINE送信待ち(GAS)</span>':o.lineSentStatus==="sending"?'<span style="font-size:10px;color:#1a6b2a;">📲 LINE送信中…</span>':o.lineSentStatus?'<span style="font-size:10px;color:#c0392b;" title="'+escHtml(o.lineErrBody||"")+'">📲 LINE失敗('+escHtml(o.lineSentStatus)+')</span>':'<span style="font-size:10px;color:#7a5c00;">📲 LINE未確認</span>'):'<span style="font-size:10px;color:var(--ghost);">📲 LINE ID未取得</span>';
 html+='<div style="padding:4px 12px 2px;">'+lineStatus+'</div>';
 html+='<div class="ao-btns">'+tglBtn+cancelBtn;
 html+='<button class="ao-btn" onclick="adminViewReceiptByNo(\''+safeNo+'\')">'+(adminLang==="vi"?"📄 Hóa đơn":"📄 領収証")+'</button>';
@@ -2531,20 +2531,19 @@ var d={lineSentAt:new Date().toISOString(),lineSentStatus:stat};
 if(body)d.lineErrBody=body.slice(0,200);
 fbDb.collection("orders").doc(safeNo).set(d,{merge:true}).catch(function(e){console.error("[NNY] LINE stat保存失敗:",e);});
 }
-_saveStat("sending","");
-fetch("https://hanoi-order.niconicoyasai.jp/line-proxy.php",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({userId:userId,text:text})
-}).then(function(r){
-return r.text().then(function(t){
-console.log("[NNY] LINE送信 status:"+r.status,t.slice(0,200));
-if(r.status===200){_saveStat("ok","");}
-else{console.error("[NNY] LINE送信失敗:",t.slice(0,300));_saveStat("err_"+r.status,t);}
-});
+if(!fbDb){console.warn("[NNY] LINE: fbDb未初期化");return;}
+_saveStat("queued","");
+fbDb.collection("line_queue").add({
+userId:userId,
+text:text,
+orderNo:safeNo,
+ts:Date.now(),
+sent:false
+}).then(function(){
+console.log("[NNY] LINE queue追加成功");
 }).catch(function(e){
-console.error("[NNY] LINE proxy error:",e.message);
-_saveStat("err_network",e.message);
+console.error("[NNY] LINE queue追加失敗:",e);
+_saveStat("err_queue",e.message);
 });
 }
 function adminLoadSS(no,imgEl){
