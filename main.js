@@ -2589,9 +2589,6 @@ html+='</div>';
 html+='<span class="apc-chevron" id="apce-'+p.id+'" style="margin-left:4px;">›</span>';
 html+='</div>';
 html+='<div class="apc-body" style="display:none;" id="apcpanel-'+p.id+'">';
-html+='<label style="display:flex;align-items:center;gap:8px;margin-bottom:12px;cursor:pointer;">';
-html+='<input type="checkbox" '+(p.pub?"checked":"")+'onchange="togglePub('+p.id+',this.checked)" style="width:18px;height:18px;accent-color:var(--g1);">';
-html+='<span style="font-size:12px;font-weight:700;">'+(adminLang==="vi"?"Hiển thị":"公開")+'</span></label>';
 html+='<div class="apc-field"><label class="apc-lbl">'+(adminLang==="vi"?"Biểu tượng (Emoji)":"絵文字")+'</label>';
 html+='<input class="apc-inp" id="ai-emoji-'+p.id+'" value="'+(p.e||"🥗")+'" style="width:80px;font-size:20px;text-align:center;"></div>';
 html+='<div class="apc-field"><label class="apc-lbl">'+(adminLang==="vi"?"Tên sản phẩm (Tiếng Việt)":"商品名（ベトナム語）")+'</label>';
@@ -2654,7 +2651,7 @@ var f=ev.target.files[0];if(!f)return;
 var reader=new FileReader();
 reader.onload=function(e){
 var p=PRODUCTS.find(function(x){return x.id===id;});
-if(p){p.img=e.target.result;saveProducts();renderAdminProducts2();}
+if(p){p.img=e.target.result;saveProducts();if(typeof fbSaveProduct==="function")fbSaveProduct(p);renderAdminProducts2();}
 };
 reader.readAsDataURL(f);
 }
@@ -2664,7 +2661,7 @@ var f=ev.dataTransfer.files[0];if(!f||!f.type.startsWith("image/"))return;
 var reader=new FileReader();
 reader.onload=function(e){
 var p=PRODUCTS.find(function(x){return x.id===id;});
-if(p){p.img=e.target.result;saveProducts();renderAdminProducts2();}
+if(p){p.img=e.target.result;saveProducts();if(typeof fbSaveProduct==="function")fbSaveProduct(p);renderAdminProducts2();}
 };
 reader.readAsDataURL(f);
 }
@@ -2710,13 +2707,13 @@ var newId=Math.max.apply(null,PRODUCTS.map(function(p){return p.id;}))+1;
 PRODUCTS.push({id:newId,e:"🌿",ja:"新商品",vi:"Sản phẩm mới",dja:"",dvi:"",price:0,stock:0,pub:false,img:null,unit:"個",unitvi:"sp",season:[]});
 saveProducts();renderAdminProducts2();
 }
-function pubAll(){PRODUCTS.forEach(function(p){p.pub=true;});saveProducts();renderAdminProducts2();renderProducts();}
-function unpubAll(){PRODUCTS.forEach(function(p){p.pub=false;});saveProducts();renderAdminProducts2();renderProducts();}
+function pubAll(){PRODUCTS.forEach(function(p){p.pub=true;if(typeof fbSaveProduct==="function")fbSaveProduct(p);});saveProducts();renderAdminProducts2();renderProducts();}
+function unpubAll(){PRODUCTS.forEach(function(p){p.pub=false;if(typeof fbSaveProduct==="function")fbSaveProduct(p);});saveProducts();renderAdminProducts2();renderProducts();}
 function pubSeason(){
 var s=new Date().getMonth();
 var seasonMap={0:"winter",1:"winter",2:"spring",3:"spring",4:"spring",5:"summer",6:"summer",7:"summer",8:"autumn",9:"autumn",10:"autumn",11:"winter"};
 var cur=seasonMap[s];
-PRODUCTS.forEach(function(p){p.pub=(p.season&&p.season.length)?p.season.indexOf(cur)>=0:true;});
+PRODUCTS.forEach(function(p){p.pub=(p.season&&p.season.length)?p.season.indexOf(cur)>=0:true;if(typeof fbSaveProduct==="function")fbSaveProduct(p);});
 saveProducts();renderAdminProducts2();renderProducts();
 }
 function saveProducts(){
