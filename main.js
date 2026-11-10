@@ -70,7 +70,7 @@ var CART_META = {};
 var lang = (function(){var l=localStorage.getItem("nny_lang");return(l==="ja"||l==="vi"||l==="en")?l:"vi";})();
 var season = "all";
 var nxtId = 200;
-var selDel = "";
+var selDel = "deliver";
 var selPay = "vietqr";
 var sheetsUrl = "https://script.google.com/macros/s/AKfycbxIB-iXq7SJiDintklAsRQe2EpQlmFGeUMRZ-IszpHqqA5dpmQq3sPJ0R9Az4bTDwx2WQ/exec";
 var sheetsViewUrl = "https://docs.google.com/spreadsheets/d/1HHiggHRhwGzERGsQRIwvGJ518Tt3DLSchxjOmOhjXW0/edit";
