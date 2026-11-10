@@ -450,10 +450,8 @@ html+='<div class="cc-item"><span>'+p.e+' '+nm+' × '+qty+'</span><span style="f
 });
 document.getElementById("cc-items").innerHTML=html;
 document.getElementById("cc-tot-val").textContent=vnd(tot);
-var _hasFreeShipConf=Object.keys(cart).some(function(ck){var _m=CART_META[ck];var _pid=_m?_m.id:(ck.indexOf("_")>0?ck.split("_")[0]:ck);var _pp=PRODUCTS.find(function(x){return Number(x.id)===Number(_pid);});return _pp&&_pp.freeShip;});
-var _sf=selDel==="deliver"&&!_hasFreeShipConf?_shippingFee:0,_gt=tot+_sf;
-var _sr=document.getElementById("cc-ship-row");if(_sr){if(_sf>0){_sr.style.display="";var _sv=document.getElementById("cc-ship-val");if(_sv)_sv.textContent=vnd(_sf);}else _sr.style.display="none";}
-var _gr=document.getElementById("cc-grand-row");if(_gr){if(_sf>0){_gr.style.display="";var _gv=document.getElementById("cc-grand-val");if(_gv)_gv.textContent=vnd(_gt);}else _gr.style.display="none";}
+var _sr=document.getElementById("cc-ship-row");if(_sr)_sr.style.display="none";
+var _gr=document.getElementById("cc-grand-row");if(_gr)_gr.style.display="none";
 var n=document.getElementById("inp-name").value, ph=document.getElementById("inp-phone").value,
 z=document.getElementById("inp-zalo").value, a=document.getElementById("inp-addr").value, em=document.getElementById("inp-email").value;
 document.getElementById("cc-cust").innerHTML=esc(n)+"<br>"+esc(ph)+(z?" · Zalo:"+esc(z):"")+"<br>"+esc(a)+(em?"<br>📧 "+esc(em):"");
