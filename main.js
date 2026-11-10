@@ -2518,24 +2518,27 @@ _sendLineMsg(o.lineUserId,msg,o.no);
 }
 function _sendLineMsg(userId,text,orderNo){
 if(!userId){console.warn("[NNY] LINE: userId未取得");return;}
-console.log("[NNY] LINE送信開始 userId:",userId.slice(0,8)+"...");
+var safeNo=orderNo?orderNo.replace(/[^a-zA-Z0-9]/g,"-"):"";
+console.log("[NNY] LINE送信開始 userId:",userId.slice(0,8)+"... orderNo:",safeNo);
+function _saveStat(stat,body){
+if(!fbDb||!safeNo)return;
+var d={lineSentAt:new Date().toISOString(),lineSentStatus:stat};
+if(body)d.lineErrBody=body.slice(0,200);
+fbDb.collection("orders").doc(safeNo).set(d,{merge:true}).catch(function(e){console.error("[NNY] LINE stat保存失敗:",e);});
+}
 fetch("https://hanoi-order.niconicoyasai.jp/line-proxy.php",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({userId:userId,text:text})
 }).then(function(r){
-r.text().then(function(t){
+return r.text().then(function(t){
 console.log("[NNY] LINE送信 status:"+r.status,t.slice(0,200));
-if(r.status===200&&fbDb&&orderNo){
-fbDb.collection("orders").doc(orderNo).set({lineSentAt:new Date().toISOString(),lineSentStatus:"ok"},{merge:true}).catch(function(){});
-}else if(r.status!==200){
-console.error("[NNY] LINE送信失敗:",t.slice(0,300));
-if(fbDb&&orderNo)fbDb.collection("orders").doc(orderNo).set({lineSentAt:new Date().toISOString(),lineSentStatus:"err_"+r.status,lineErrBody:t.slice(0,200)},{merge:true}).catch(function(){});
-}
+if(r.status===200){_saveStat("ok","");}
+else{console.error("[NNY] LINE送信失敗:",t.slice(0,300));_saveStat("err_"+r.status,t);}
 });
 }).catch(function(e){
 console.error("[NNY] LINE proxy error:",e.message);
-if(fbDb&&orderNo)fbDb.collection("orders").doc(orderNo).set({lineSentAt:new Date().toISOString(),lineSentStatus:"err_network",lineErrBody:e.message},{merge:true}).catch(function(){});
+_saveStat("err_network",e.message);
 });
 }
 function adminLoadSS(no,imgEl){
