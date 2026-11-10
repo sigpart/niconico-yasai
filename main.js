@@ -70,7 +70,7 @@ var CART_META = {};
 var lang = (function(){var l=localStorage.getItem("nny_lang");return(l==="ja"||l==="vi"||l==="en")?l:"vi";})();
 var season = "all";
 var nxtId = 200;
-var selDel = "deliver";
+var selDel = "";
 var selPay = "vietqr";
 var sheetsUrl = "https://script.google.com/macros/s/AKfycbxIB-iXq7SJiDintklAsRQe2EpQlmFGeUMRZ-IszpHqqA5dpmQq3sPJ0R9Az4bTDwx2WQ/exec";
 var sheetsViewUrl = "https://docs.google.com/spreadsheets/d/1HHiggHRhwGzERGsQRIwvGJ518Tt3DLSchxjOmOhjXW0/edit";
@@ -273,6 +273,7 @@ if(!Object.keys(cart).length){alert(L("カートに商品を追加してくだ�
 loadSaved(); showSavedBadge(); showView("info");
 }
 function goConfirm(){
+if(!selDel){alert(L("受け取り方法を選択してください","Please select a delivery method","Vui lòng chọn phương thức nhận hàng"));var el=document.getElementById("fc-del");if(el)el.scrollIntoView({behavior:"smooth",block:"center"});return;}
 if(selDel==="deliver"&&_shippingLoading){alert(L("送料を計算中です","Calculating shipping fee. Please wait.","Đang tính phí giao hàng."));return;}
 var _av2=document.getElementById("inp-addr")?document.getElementById("inp-addr").value.trim():"";if(selDel==="deliver"&&_av2&&_shippingFee===0&&!_shippingLoading){var _tcb=document.querySelector('[onclick="goConfirm()"]');if(_tcb){_tcb.disabled=true;_tcb.textContent=L("計算中...","Calculating...","Đang tính...");}calcShippingFee(_av2,function(){if(_tcb){_tcb.disabled=false;_tcb.textContent=L("✔ 注文内容を確認する","✔ Review Order","✔ Xem lại đơn hàng");}goConfirm();});return;}
 var fields=["inp-name","inp-phone","inp-addr","inp-email"];
