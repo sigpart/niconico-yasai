@@ -881,6 +881,13 @@ if(uid){_updateLineAuthUI(true);if(_lineAuthCheckTimer){clearInterval(_lineAuthC
 }
 window.addEventListener("focus",_checkLineAuthOnReturn);
 document.addEventListener("visibilitychange",function(){if(!document.hidden)_checkLineAuthOnReturn();});
+// liff.htmlからpostMessageでlineUserIdを受け取る（スマホ対応）
+window.addEventListener("message",function(ev){
+var d=ev.data;
+if(!d||typeof d!=="object"||!d.nny_line_uid)return;
+try{localStorage.setItem("nny_line_uid",d.nny_line_uid);}catch(e){}
+_checkLineAuthOnReturn();
+});
 function saveCust(){
 var e=document.getElementById("inp-email");
 try{localStorage.setItem(SAVED_KEY,JSON.stringify({name:document.getElementById("inp-name").value,phone:document.getElementById("inp-phone").value,zalo:document.getElementById("inp-zalo").value,addr:document.getElementById("inp-addr").value,email:e?e.value:"",delivery:selDel,payment:selPay,_ts:Date.now()}));}catch(err){}
