@@ -54,6 +54,7 @@ var PRODUCTS = [
 ];
 var ORDERS = [];
 var RECEIPT_ORDER = null;
+var SHOP_OPEN = true;
 // localStorageからORDERSを復元（スクショ含む）
 (function(){
 try{
@@ -475,6 +476,7 @@ document.getElementById("pay-lock-txt").textContent=(lang==="ja"?"🏦 銀行振
 }
 }
 function placeOrder(){
+if(!SHOP_OPEN){alert(lang==="ja"?"現在、農場を閉めています。ご注文はお受けできません。\n再開時にまたご利用ください。":"Nông trại hiện đang đóng cửa. Vui lòng thử lại sau khi mở cửa trở lại.");return;}
 var _nameEl=document.getElementById("inp-name"),_phoneEl=document.getElementById("inp-phone");
 var _nameVal=(_nameEl&&_nameEl.value||"").trim(),_phoneVal=(_phoneEl&&_phoneEl.value||"").trim();
 if(!_nameVal){
@@ -1191,6 +1193,28 @@ else{queueInfo="<div style='margin-top:6px;font-size:11px;color:var(--muted);'>F
 el.innerHTML="<button class='set-btn' onclick='showNotifDiag()' style='background:var(--g1);color:#fff;margin-bottom:10px;'>🔍 再診断 / Kiểm tra lại</button>"+rows.join("")+summary+queueInfo+"<div id='notif-diag-queue'></div>";
 }
 function applySite(){var badge=document.getElementById("site-badge").value;var h1ja=document.getElementById("site-h1-ja").value.replace(/\n/g,"<br>");var h1vi=document.getElementById("site-h1-vi").value.replace(/\n/g,"<br>");var sja=document.getElementById("site-sub-ja").value;var svi=document.getElementById("site-sub-vi").value;I.ja.heroEyebrow=badge;I.vi.heroEyebrow=badge;I.ja.heroH1=h1ja;I.vi.heroH1=h1vi;I.ja.heroSub=sja;I.vi.heroSub=svi;applyI18n();closeAdmin();}
+function _applyShopStatusUI(){
+var lbl=document.getElementById("shop-status-label");
+var btn=document.getElementById("shop-status-btn");
+var overlay=document.getElementById("shop-closed-overlay");
+if(SHOP_OPEN){
+if(lbl)lbl.innerHTML='<span style="color:#1a6b2a;">🟢 受付中 / Đang nhận đơn</span>';
+if(btn){btn.textContent="🛑 受付を停止する";btn.style.background="#c0392b";btn.style.color="#fff";}
+if(overlay)overlay.style.display="none";
+}else{
+if(lbl)lbl.innerHTML='<span style="color:#c0392b;">🔴 受付停止中 / Đang đóng cửa</span>';
+if(btn){btn.textContent="🟢 受付を再開する";btn.style.background="#1a6b2a";btn.style.color="#fff";}
+if(overlay)overlay.style.display="flex";
+}
+}
+function toggleShopOpen(){
+SHOP_OPEN=!SHOP_OPEN;
+_applyShopStatusUI();
+if(typeof fbDb!=="undefined"&&fbDb){
+fbDb.collection("pub_config").doc("admin_settings").set({siteOpen:SHOP_OPEN},{merge:true}).catch(function(e){console.error("[NNY] siteOpen save:",e);});
+fbDb.collection("settings").doc("app_config").set({siteOpen:SHOP_OPEN},{merge:true}).catch(function(e){});
+}
+}
 var BANK_CFG={code:"970422",bankName:"MB Bank",account:"",owner:"",descTemplate:"NICONICO {no}"};
 (function(){try{var b=localStorage.getItem("nny_bank");if(b)BANK_CFG=JSON.parse(b);}catch(e){}})();
 function fetchVietQR(amount,orderNo,cb){
@@ -1666,6 +1690,7 @@ var d=doc.data();
 if(d.ej){try{var ej=JSON.parse(d.ej);EJ.service=ej.service||EJ.service;EJ.template=ej.template||EJ.template;EJ.pubkey=ej.pubkey||EJ.pubkey;EJ.from=ej.from||EJ.from;EJ.admin=ej.admin||EJ.admin||"";if(EJ.pubkey)emailjs.init({publicKey:EJ.pubkey});localStorage.setItem("nny_ej",d.ej);if(typeof loadEJConfigUI==="function")loadEJConfigUI();}catch(e){}}
 if(d.lineCfg){try{var lc=JSON.parse(d.lineCfg);LINE_CHANNEL_TOKEN=lc.token||LINE_CHANNEL_TOKEN;LINE_ADMIN_USERID=lc.adminId||LINE_ADMIN_USERID;localStorage.setItem("nny_line_cfg",d.lineCfg);if(typeof loadLineCfgUI==="function")loadLineCfgUI();if(LINE_CHANNEL_TOKEN&&fbDb)fbDb.collection("pub_config").doc("line").set({token:LINE_CHANNEL_TOKEN},{merge:true}).catch(function(){});}catch(e){}}
 if(d.bank){try{var bk=JSON.parse(d.bank);BANK_CFG=Object.assign(BANK_CFG,bk);localStorage.setItem("nny_bank",d.bank);if(typeof loadBankConfigUI==="function")loadBankConfigUI();}catch(e){}}
+if(typeof d.siteOpen!=="undefined"){SHOP_OPEN=!!d.siteOpen;_applyShopStatusUI();}
 }).catch(function(){});
 // Firebase設定（messagingSenderIdなど）をpub_configから復元
 fbDb.collection("pub_config").doc("firebase_cfg").get().then(function(doc){
@@ -2219,6 +2244,7 @@ renderAdminDB2();
 renderAdminNotify2();
 renderAdminReviews();
 renderAdminChat();
+_applyShopStatusUI();
 }
 // 統計
 function initAdminStatsFilter(){
