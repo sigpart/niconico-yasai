@@ -3839,6 +3839,7 @@ var _hi=document.getElementById("hero-img");if(_hi){_hi.style.objectPosition="ce
 if(typeof normalizeReviews==="function")normalizeReviews();
 _needFbProductSync=true;
 applyI18n();
+_applyShopStatusUI();
 renderHistory();
 loadSheetUrl();
 updateLangBtn();
