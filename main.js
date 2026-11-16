@@ -3813,6 +3813,18 @@ var _elP=document.getElementById("adm-orders-list-pending");
 if(_elP&&!ORDERS.length){_elP.innerHTML='<div style="text-align:center;padding:24px;color:#c0392b;font-size:13px;line-height:1.6;">🔒 Firebaseメール認証が必要です<br><span style="font-size:12px;color:var(--muted);">設定 → Firebase → 管理者Firebase認証<br>でメールとパスワードを設定してください</span></div>';}
 }else if(typeof renderAdminOrders2==="function"){renderAdminOrders2();}
 });
+// ユーザー画面向け: siteOpenをポーリングでフォールバック同期（onSnapshot切断時対策）
+var _admScrU=document.getElementById("admin-screen");
+if(!_admScrU||!_admScrU.classList.contains("on")){
+fbDb.collection("pub_config").doc("admin_settings").get().then(function(doc){
+if(!doc.exists)return;
+var d=doc.data();
+if(typeof d.siteOpen!=="undefined"&&!_shopTogglePending){
+var v=!!d.siteOpen;
+if(v!==SHOP_OPEN){SHOP_OPEN=v;_applyShopStatusUI();}
+}
+}).catch(function(){});
+}
 },10000);
 }
 function showProductSkeletons(){
