@@ -1683,15 +1683,15 @@ d.p=true;chk();
 fbDb.collection("settings").doc("notify_list").get().then(function(doc){if(doc.exists&&doc.data().list)NOTIFY_LIST=doc.data().list;d.n=true;chk();}).catch(function(){d.n=true;chk();});
 } // end _doLoad
 _doLoad();
-// 匿名ユーザー向け: pub_config/admin_settings から設定を読み込む
-fbDb.collection("pub_config").doc("admin_settings").get().then(function(doc){
+// 匿名ユーザー向け: pub_config/admin_settings をリアルタイム監視
+fbDb.collection("pub_config").doc("admin_settings").onSnapshot(function(doc){
 if(!doc.exists)return;
 var d=doc.data();
 if(d.ej){try{var ej=JSON.parse(d.ej);EJ.service=ej.service||EJ.service;EJ.template=ej.template||EJ.template;EJ.pubkey=ej.pubkey||EJ.pubkey;EJ.from=ej.from||EJ.from;EJ.admin=ej.admin||EJ.admin||"";if(EJ.pubkey)emailjs.init({publicKey:EJ.pubkey});localStorage.setItem("nny_ej",d.ej);if(typeof loadEJConfigUI==="function")loadEJConfigUI();}catch(e){}}
 if(d.lineCfg){try{var lc=JSON.parse(d.lineCfg);LINE_CHANNEL_TOKEN=lc.token||LINE_CHANNEL_TOKEN;LINE_ADMIN_USERID=lc.adminId||LINE_ADMIN_USERID;localStorage.setItem("nny_line_cfg",d.lineCfg);if(typeof loadLineCfgUI==="function")loadLineCfgUI();if(LINE_CHANNEL_TOKEN&&fbDb)fbDb.collection("pub_config").doc("line").set({token:LINE_CHANNEL_TOKEN},{merge:true}).catch(function(){});}catch(e){}}
 if(d.bank){try{var bk=JSON.parse(d.bank);BANK_CFG=Object.assign(BANK_CFG,bk);localStorage.setItem("nny_bank",d.bank);if(typeof loadBankConfigUI==="function")loadBankConfigUI();}catch(e){}}
 if(typeof d.siteOpen!=="undefined"){SHOP_OPEN=!!d.siteOpen;_applyShopStatusUI();}
-}).catch(function(){});
+},function(){});
 // Firebase設定（messagingSenderIdなど）をpub_configから復元
 fbDb.collection("pub_config").doc("firebase_cfg").get().then(function(doc){
 if(!doc.exists)return;
@@ -3754,9 +3754,6 @@ PRODUCTS.push(d);changed=true;
 }
 });
 if(changed){applyViPatches();renderProducts();}
-}).catch(function(){});
-fbDb.collection("pub_config").doc("admin_settings").get().then(function(doc){
-if(doc.exists){var d=doc.data();if(d&&typeof d.siteOpen!=="undefined"){var newOpen=!!d.siteOpen;if(newOpen!==SHOP_OPEN){SHOP_OPEN=newOpen;_applyShopStatusUI();}}}
 }).catch(function(){});
 fbDb.collection("reviews").doc("all").get().then(function(doc){
 if(!doc.exists||!doc.data()||!doc.data().data)return;
