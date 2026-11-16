@@ -55,6 +55,7 @@ var PRODUCTS = [
 var ORDERS = [];
 var RECEIPT_ORDER = null;
 var SHOP_OPEN = true;
+var _shopTogglePending = false;
 // localStorageからORDERSを復元（スクショ含む）
 (function(){
 try{
@@ -1209,11 +1210,13 @@ if(overlay)overlay.style.display="flex";
 }
 function toggleShopOpen(){
 SHOP_OPEN=!SHOP_OPEN;
+_shopTogglePending=true;
 _applyShopStatusUI();
+console.log('[NNY] toggleShopOpen SHOP_OPEN='+SHOP_OPEN);
 if(typeof fbDb!=="undefined"&&fbDb){
-fbDb.collection("pub_config").doc("admin_settings").set({siteOpen:SHOP_OPEN},{merge:true}).catch(function(e){console.error("[NNY] siteOpen save:",e);});
+fbDb.collection("pub_config").doc("admin_settings").set({siteOpen:SHOP_OPEN},{merge:true}).then(function(){_shopTogglePending=false;console.log('[NNY] siteOpen saved ok');}).catch(function(e){console.error("[NNY] siteOpen save error:",e);_shopTogglePending=false;SHOP_OPEN=!SHOP_OPEN;_applyShopStatusUI();});
 fbDb.collection("settings").doc("app_config").set({siteOpen:SHOP_OPEN},{merge:true}).catch(function(e){});
-}
+}else{_shopTogglePending=false;}
 }
 var BANK_CFG={code:"970422",bankName:"MB Bank",account:"",owner:"",descTemplate:"NICONICO {no}"};
 (function(){try{var b=localStorage.getItem("nny_bank");if(b)BANK_CFG=JSON.parse(b);}catch(e){}})();
@@ -1690,7 +1693,7 @@ var d=doc.data();
 if(d.ej){try{var ej=JSON.parse(d.ej);EJ.service=ej.service||EJ.service;EJ.template=ej.template||EJ.template;EJ.pubkey=ej.pubkey||EJ.pubkey;EJ.from=ej.from||EJ.from;EJ.admin=ej.admin||EJ.admin||"";if(EJ.pubkey)emailjs.init({publicKey:EJ.pubkey});localStorage.setItem("nny_ej",d.ej);if(typeof loadEJConfigUI==="function")loadEJConfigUI();}catch(e){}}
 if(d.lineCfg){try{var lc=JSON.parse(d.lineCfg);LINE_CHANNEL_TOKEN=lc.token||LINE_CHANNEL_TOKEN;LINE_ADMIN_USERID=lc.adminId||LINE_ADMIN_USERID;localStorage.setItem("nny_line_cfg",d.lineCfg);if(typeof loadLineCfgUI==="function")loadLineCfgUI();if(LINE_CHANNEL_TOKEN&&fbDb)fbDb.collection("pub_config").doc("line").set({token:LINE_CHANNEL_TOKEN},{merge:true}).catch(function(){});}catch(e){}}
 if(d.bank){try{var bk=JSON.parse(d.bank);BANK_CFG=Object.assign(BANK_CFG,bk);localStorage.setItem("nny_bank",d.bank);if(typeof loadBankConfigUI==="function")loadBankConfigUI();}catch(e){}}
-if(typeof d.siteOpen!=="undefined"){SHOP_OPEN=!!d.siteOpen;_applyShopStatusUI();}
+if(typeof d.siteOpen!=="undefined"&&!_shopTogglePending){SHOP_OPEN=!!d.siteOpen;_applyShopStatusUI();}
 },function(){});
 // Firebase設定（messagingSenderIdなど）をpub_configから復元
 fbDb.collection("pub_config").doc("firebase_cfg").get().then(function(doc){
