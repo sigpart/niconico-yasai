@@ -3755,6 +3755,9 @@ PRODUCTS.push(d);changed=true;
 });
 if(changed){applyViPatches();renderProducts();}
 }).catch(function(){});
+fbDb.collection("pub_config").doc("admin_settings").get().then(function(doc){
+if(doc.exists){var d=doc.data();if(d&&typeof d.siteOpen!=="undefined"){var newOpen=!!d.siteOpen;if(newOpen!==SHOP_OPEN){SHOP_OPEN=newOpen;_applyShopStatusUI();}}}
+}).catch(function(){});
 fbDb.collection("reviews").doc("all").get().then(function(doc){
 if(!doc.exists||!doc.data()||!doc.data().data)return;
 var fbRv=doc.data().data;var changed=false;
