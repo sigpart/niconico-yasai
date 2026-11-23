@@ -852,17 +852,10 @@ area.style.display="block";
 var uid="";try{uid=localStorage.getItem("nny_line_uid")||"";}catch(e){}
 if(uid){_updateLineAuthUI(true);}else{
 _updateLineAuthUI(false);
-var _isPWA=(window.navigator.standalone===true||window.matchMedia("(display-mode:standalone)").matches);
-if(_isPWA){
-// PWAモード: 別タブ(Safari)でliff.htmlを開きPWA画面はそのまま維持
-window.open("/liff.html","_blank");
+// liff.line.me URLでLINEアプリを起動（パスワード不要）
+// 認証後liff.htmlがliff.openWindow(external)でSafariにuidを渡す
+window.open("https://liff.line.me/"+LIFF_ID,"_blank");
 scheduleLineAuthCheck();
-}else{
-// 通常ブラウザ: 同タブで遷移し認証後に画面復元
-try{localStorage.setItem("nny_line_return_view",curView);}catch(e){}
-location.href="/liff.html";
-scheduleLineAuthCheck();
-}
 }
 }else{area.style.display="none";}
 }
@@ -3864,6 +3857,9 @@ function initApp(){
 try{
 var _lp=new URLSearchParams(window.location.search);
 if(_lp.get("line_auth")==="ok"){
+// LINEアプリ認証後にliff.openWindowで渡されたuid
+var _uid_param=_lp.get("uid")||"";
+if(_uid_param){try{localStorage.setItem("nny_line_uid",_uid_param);}catch(e){}}
 var _lu=localStorage.getItem("nny_line_uid")||"";
 if(_lu){setTimeout(function(){showToast("✅ LINE通知が有効になりました");},800);}
 if(history.replaceState)history.replaceState(null,"",location.pathname);

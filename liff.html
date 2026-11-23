@@ -19,7 +19,7 @@ p{color:#5a7060;font-size:13px;margin:0 0 16px;line-height:1.6;}
   <h2 id="ttl">LINE認証中...</h2>
   <p id="msg">しばらくお待ちください</p>
   <a id="add-btn" href="https://lin.ee/Ybvi1Bf" style="display:none;" class="add-btn">📲 友だち追加する</a>
-  <button id="back-btn" onclick="location.href='https://hanoi-order.niconicoyasai.jp/?line_auth=ok'" style="display:none;margin-top:12px;background:#1a6b2a;color:#fff;border:none;border-radius:10px;padding:12px 28px;font-size:15px;font-weight:700;cursor:pointer;">← 注文画面に戻る</button>
+  <button id="back-btn" onclick="location.href='https://hanoi-order.niconicoyasai.jp/?line_auth=ok'+(_authUserId?'&uid='+encodeURIComponent(_authUserId):'')" style="display:none;margin-top:12px;background:#1a6b2a;color:#fff;border:none;border-radius:10px;padding:12px 28px;font-size:15px;font-weight:700;cursor:pointer;">← 注文画面に戻る</button>
 </div>
 <script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
 <script>
@@ -30,28 +30,34 @@ function showFriendBtn(){
   document.getElementById("msg").textContent="NICO NICO YASAIのLINE公式アカウントを友だち追加すると注文・配達通知が届きます。";
   document.getElementById("add-btn").style.display="inline-block";
 }
-function showDone(){
+var _authUserId="";
+function showDone(userId){
   document.getElementById("ico").textContent="✅";
   document.getElementById("ttl").textContent="LINE認証完了！";
-  document.getElementById("msg").textContent="下のボタンで注文画面に戻ってください";
+  document.getElementById("msg").textContent="注文画面に自動で戻ります";
   document.getElementById("back-btn").style.display="inline-block";
+  var returnUrl="https://hanoi-order.niconicoyasai.jp/?line_auth=ok"+(userId?"&uid="+encodeURIComponent(userId):"");
   if(liff.isInClient()){
-    setTimeout(function(){liff.closeWindow();},1500);
-  } else {
-    // 2秒後に自動リダイレクト（ボタンも常時表示）
+    // LINEアプリ内: Safariを開いてuidを渡し、LINEアプリ内を閉じる
     setTimeout(function(){
-      location.href="https://hanoi-order.niconicoyasai.jp/?line_auth=ok";
+      liff.openWindow({url:returnUrl,external:true});
+      setTimeout(function(){liff.closeWindow();},500);
+    },1000);
+  } else {
+    // 通常ブラウザ: 2秒後にリダイレクト
+    setTimeout(function(){
+      location.href=returnUrl;
     },2000);
   }
 }
 function afterUserId(userId){
+  _authUserId=userId;
   try{localStorage.setItem("nny_line_uid",userId);}catch(e){}
-  // 元タブ（メインアプリ）にpostMessageで通知（スマホ別ブラウザ対応）
   try{if(window.opener)window.opener.postMessage({nny_line_uid:userId},"*");}catch(e){}
   liff.getFriendship().then(function(data){
-    if(data&&data.friendFlag){showDone();}
+    if(data&&data.friendFlag){showDone(userId);}
     else{showFriendBtn();}
-  }).catch(function(){showDone();});
+  }).catch(function(){showDone(userId);});
 }
 liff.init({liffId:LIFF_ID}).then(function(){
   if(!liff.isLoggedIn()){liff.login({redirectUri:location.href});return;}
