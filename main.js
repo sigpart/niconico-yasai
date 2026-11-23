@@ -852,7 +852,7 @@ area.style.display="block";
 var uid="";try{uid=localStorage.getItem("nny_line_uid")||"";}catch(e){}
 if(uid){_updateLineAuthUI(true);}else{
 _updateLineAuthUI(false);
-window.open("https://liff.line.me/"+LIFF_ID,"_blank");
+location.href="/liff.html";
 scheduleLineAuthCheck();
 }
 }else{area.style.display="none";}
