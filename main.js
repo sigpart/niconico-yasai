@@ -853,8 +853,8 @@ var uid="";try{uid=localStorage.getItem("nny_line_uid")||"";}catch(e){}
 if(uid){_updateLineAuthUI(true);}else{
 _updateLineAuthUI(false);
 // location.hrefでliff.line.me URLに遷移 → iOSユニバーサルリンクでLINEアプリ起動
-try{localStorage.setItem("nny_line_return_view",curView);}catch(e){}
-location.href="https://liff.line.me/"+LIFF_ID;
+// rvパラメータで戻り先画面を渡す
+location.href="https://liff.line.me/"+LIFF_ID+"?rv="+encodeURIComponent(curView||"info");
 scheduleLineAuthCheck();
 }
 }else{area.style.display="none";}
@@ -3863,7 +3863,7 @@ if(_uid_param){try{localStorage.setItem("nny_line_uid",_uid_param);}catch(e){}}
 var _lu=localStorage.getItem("nny_line_uid")||"";
 if(_lu){setTimeout(function(){showToast("✅ LINE通知が有効になりました");},800);}
 if(history.replaceState)history.replaceState(null,"",location.pathname);
-var _rv=localStorage.getItem("nny_line_return_view")||"";
+var _rv=_lp.get("rv")||localStorage.getItem("nny_line_return_view")||"info";
 localStorage.removeItem("nny_line_return_view");
 if(_rv==="info"){setTimeout(function(){if(typeof loadSaved==="function")loadSaved();if(typeof showSavedBadge==="function")showSavedBadge();showView("info");},800);}
 else if(_rv==="cart"){setTimeout(function(){goCart();},800);}
