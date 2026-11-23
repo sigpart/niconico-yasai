@@ -1294,7 +1294,7 @@ body+='<div class="qr-step"><span class="qr-step-num">2</span><span>'+(L("送金
 body+='<div class="qr-step"><span class="qr-step-num">3</span><span>'+(L("ボタンを押して注文確定","Press button to confirm order","Nhấn nút để xác nhận"))+'</span></div>';
 body+='</div>';
 body+='<div id="ss-upload-area-wrap"><div class="ss-upload-area" id="ss-drop-area" ondrop="handleSSDrop(event)" ondragover="handleSSDragOver(event)" ondragleave="handleSSDragLeave()">';
-body+='<input type="file" accept="image/jpeg,image/png,image/gif,image/webp" onchange="handleSSUpload(event)" capture="environment">';
+body+='<input type="file" accept="image/*" onchange="handleSSUpload(event)">';
 body+='<div class="ss-upload-ico">📷</div>';
 body+='<div class="ss-upload-txt">'+(L("送金スクリーンショットをアップロード","Upload payment screenshot","Tải lên ảnh chụp màn hình chuyển khoản"))+'</div>';
 body+='<div class="ss-upload-sub">'+(L("タップして選択","Tap to select","Nhấn để chọn ảnh"))+'</div>';
@@ -3850,6 +3850,17 @@ document.head.appendChild(style);
 }
 }
 function initApp(){
+// LINE認証リダイレクト完了チェック（?line_auth=ok）
+(function(){
+try{
+var _lp=new URLSearchParams(window.location.search);
+if(_lp.get("line_auth")==="ok"){
+var _lu=localStorage.getItem("nny_line_uid")||"";
+if(_lu){setTimeout(function(){showToast("✅ LINE通知が有効になりました");},800);}
+if(history.replaceState)history.replaceState(null,"",location.pathname);
+}
+}catch(e){}
+})();
 var _hi=document.getElementById("hero-img");if(_hi){_hi.style.objectPosition="center 30%";}
 if(typeof normalizeReviews==="function")normalizeReviews();
 _needFbProductSync=true;
