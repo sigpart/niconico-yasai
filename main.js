@@ -852,6 +852,7 @@ area.style.display="block";
 var uid="";try{uid=localStorage.getItem("nny_line_uid")||"";}catch(e){}
 if(uid){_updateLineAuthUI(true);}else{
 _updateLineAuthUI(false);
+try{localStorage.setItem("nny_line_return_view",curView);}catch(e){}
 location.href="/liff.html";
 scheduleLineAuthCheck();
 }
@@ -3858,6 +3859,11 @@ if(_lp.get("line_auth")==="ok"){
 var _lu=localStorage.getItem("nny_line_uid")||"";
 if(_lu){setTimeout(function(){showToast("✅ LINE通知が有効になりました");},800);}
 if(history.replaceState)history.replaceState(null,"",location.pathname);
+var _rv=localStorage.getItem("nny_line_return_view")||"";
+localStorage.removeItem("nny_line_return_view");
+if(_rv==="info"){setTimeout(function(){loadSaved();showSavedBadge();showView("info");},400);}
+else if(_rv==="cart"){setTimeout(function(){goCart();},400);}
+else if(_rv==="confirm"){setTimeout(function(){buildConfirm();showView("confirm");},400);}
 }
 }catch(e){}
 })();
