@@ -2611,9 +2611,9 @@ html+='</div>';
 html+='<div class="apc-info"><div class="apc-name">'+nm+'</div><div class="apc-meta">'+vnd(p.price)+'</div></div>';
 html+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:1;min-width:0;max-width:55%;overflow:hidden;" onclick="event.stopPropagation()">';
 html+=sqHtml;
-html+='<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;font-weight:800;color:'+(p.pub?'var(--g1)':'var(--muted)')+';white-space:nowrap;" onclick="event.stopPropagation()">';
+html+='<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;font-weight:800;color:var(--g1);white-space:nowrap;" onclick="event.stopPropagation()">';
 html+='<input type="checkbox" '+(p.pub?'checked':'')+' onchange="togglePub('+p.id+',this.checked)" style="width:16px;height:16px;accent-color:var(--g1);cursor:pointer;">';
-html+=(p.pub?(adminLang==="vi"?"Hiện":"公開"):(adminLang==="vi"?"Ẩn":"非公開"));
+html+=(adminLang==="vi"?"Hiện":"公開");
 html+='</label>';
 html+='</div>';
 html+='<span class="apc-chevron" id="apce-'+p.id+'" style="margin-left:4px;">›</span>';
@@ -3861,13 +3861,20 @@ if(_lp.get("line_auth")==="ok"){
 var _uid_param=_lp.get("uid")||"";
 if(_uid_param){try{localStorage.setItem("nny_line_uid",_uid_param);}catch(e){}}
 var _lu=localStorage.getItem("nny_line_uid")||"";
-if(_lu){setTimeout(function(){showToast("✅ LINE通知が有効になりました");},800);}
 if(history.replaceState)history.replaceState(null,"",location.pathname);
 var _rv=_lp.get("rv")||localStorage.getItem("nny_line_return_view")||"info";
 localStorage.removeItem("nny_line_return_view");
-if(_rv==="info"){setTimeout(function(){if(typeof loadSaved==="function")loadSaved();if(typeof showSavedBadge==="function")showSavedBadge();showView("info");},800);}
-else if(_rv==="cart"){setTimeout(function(){goCart();},800);}
-else if(_rv==="confirm"){setTimeout(function(){if(typeof buildConfirm==="function")buildConfirm();showView("confirm");},800);}
+// チェックボックスを自動チェック＆認証UI更新
+setTimeout(function(){
+var _cb=document.getElementById("inp-line-notify");
+if(_cb&&!_cb.checked){_cb.checked=true;}
+if(_lu&&typeof _updateLineAuthUI==="function"){_updateLineAuthUI(true);}
+if(_lu){showToast("✅ LINE通知が有効になりました");}
+},100);
+// Topページを挟まず直接対象画面へ
+if(_rv==="info"){if(typeof loadSaved==="function")loadSaved();if(typeof showSavedBadge==="function")showSavedBadge();showView("info");}
+else if(_rv==="cart"){goCart();}
+else if(_rv==="confirm"){if(typeof buildConfirm==="function")buildConfirm();showView("confirm");}
 }
 }catch(e){}
 })();
