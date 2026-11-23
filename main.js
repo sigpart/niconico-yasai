@@ -428,10 +428,13 @@ showToast(L("在庫上限に達しています（残り"+p.stock+"個）","Stock
 return;
 }
 cart[id]=cur+1;
+saveCart();
 renderProducts();
 bounceCart();
 }
-function chgQty(id,d){cart[id]=(cart[id]||0)+d;if(cart[id]<=0){delete cart[id];delete CART_META[id];}renderProducts();if(curView==="cart")renderCartView();}
+function chgQty(id,d){cart[id]=(cart[id]||0)+d;if(cart[id]<=0){delete cart[id];delete CART_META[id];}saveCart();renderProducts();if(curView==="cart")renderCartView();}
+function saveCart(){try{localStorage.setItem("nny_cart",JSON.stringify(cart));localStorage.setItem("nny_cart_meta",JSON.stringify(CART_META));}catch(e){}}
+function loadCart(){try{var c=localStorage.getItem("nny_cart");if(c){var obj=JSON.parse(c);Object.keys(obj).forEach(function(k){cart[k]=obj[k];});}var m=localStorage.getItem("nny_cart_meta");if(m){var mobj=JSON.parse(m);Object.keys(mobj).forEach(function(k){CART_META[k]=mobj[k];});}}catch(e){}}
 function cartTotal(){return Object.keys(cart).reduce(function(s,ck){var meta=CART_META[ck];var price=meta?meta.price:0;if(!price){var pid=ck.split("_")[0];var p=PRODUCTS.find(function(x){return x.id==pid;});price=p?p.price:0;}return s+price*(cart[ck]||0);},0);}
 function cartCount(){return Object.values(cart).reduce(function(a,b){return a+b;},0);}
 function updateCartBtn(){
@@ -546,7 +549,8 @@ else{setTimeout(_doUpload,2000);}
 } else {
 if(typeof fbSaveOrder==="function")fbSaveOrder(Object.assign({},order,{screenshot:null}));
 }
-cart={};
+cart={};CART_META={};
+try{localStorage.removeItem("nny_cart");localStorage.removeItem("nny_cart_meta");}catch(e){}
 saveCust();
 renderProducts(); updateCartBtn();
 buildReceipt(order);
@@ -3852,6 +3856,7 @@ document.head.appendChild(style);
 }
 }
 function initApp(){
+loadCart();
 // LINE認証リダイレクト完了チェック（?line_auth=ok）
 (function(){
 try{
