@@ -36,7 +36,8 @@ function showDone(userId){
   document.getElementById("ttl").textContent="LINE認証完了！";
   document.getElementById("msg").textContent="注文画面に自動で戻ります";
   document.getElementById("back-btn").style.display="inline-block";
-  var returnUrl="https://hanoi-order.niconicoyasai.jp/?line_auth=ok"+(userId?"&uid="+encodeURIComponent(userId):"");
+  var _rvParam=(new URLSearchParams(window.location.search)).get("rv")||"info";
+  var returnUrl="https://hanoi-order.niconicoyasai.jp/?line_auth=ok&rv="+encodeURIComponent(_rvParam)+(userId?"&uid="+encodeURIComponent(userId):"");
   if(liff.isInClient()){
     // LINEアプリ内: Safariを開いてuidを渡し、LINEアプリ内を閉じる
     setTimeout(function(){
