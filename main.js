@@ -852,9 +852,17 @@ area.style.display="block";
 var uid="";try{uid=localStorage.getItem("nny_line_uid")||"";}catch(e){}
 if(uid){_updateLineAuthUI(true);}else{
 _updateLineAuthUI(false);
+var _isPWA=(window.navigator.standalone===true||window.matchMedia("(display-mode:standalone)").matches);
+if(_isPWA){
+// PWAモード: 別タブ(Safari)でliff.htmlを開きPWA画面はそのまま維持
+window.open("/liff.html","_blank");
+scheduleLineAuthCheck();
+}else{
+// 通常ブラウザ: 同タブで遷移し認証後に画面復元
 try{localStorage.setItem("nny_line_return_view",curView);}catch(e){}
 location.href="/liff.html";
 scheduleLineAuthCheck();
+}
 }
 }else{area.style.display="none";}
 }
@@ -3861,9 +3869,9 @@ if(_lu){setTimeout(function(){showToast("✅ LINE通知が有効になりまし�
 if(history.replaceState)history.replaceState(null,"",location.pathname);
 var _rv=localStorage.getItem("nny_line_return_view")||"";
 localStorage.removeItem("nny_line_return_view");
-if(_rv==="info"){setTimeout(function(){loadSaved();showSavedBadge();showView("info");},400);}
-else if(_rv==="cart"){setTimeout(function(){goCart();},400);}
-else if(_rv==="confirm"){setTimeout(function(){buildConfirm();showView("confirm");},400);}
+if(_rv==="info"){setTimeout(function(){if(typeof loadSaved==="function")loadSaved();if(typeof showSavedBadge==="function")showSavedBadge();showView("info");},800);}
+else if(_rv==="cart"){setTimeout(function(){goCart();},800);}
+else if(_rv==="confirm"){setTimeout(function(){if(typeof buildConfirm==="function")buildConfirm();showView("confirm");},800);}
 }
 }catch(e){}
 })();
