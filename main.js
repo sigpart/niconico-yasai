@@ -814,7 +814,7 @@ return o.name+" 様\n\nNICO NICO 便をご利用いただきありがとうご�
 "【ご注文内容】\n"+lines+shipLine+"\n\n【合計金額】"+vnd(o.tot)+"\n【受け取り方法】"+(dmap[o.delivery]||o.delivery)+"\n【お支払い】"+(pmap[o.payment]||o.payment)+"\n【お届け先】"+o.addr+
 (o.note?"\n【備考】"+o.note:"")+
 "\n\n💬 農家との直接チャット\n購入後、チャットボタンより農家と直接やりとりが可能です。\n以下のURLより注文履歴を開き、チャットボタンをタップしてください。\nhttps://hanoi-order.niconicoyasai.jp/"+
-"\n\n━━━━━━━━━━━━━━━━\n通常土曜日〜日曜日16:00までのご注文はエムハノイよりお届け。\n平日はバンホー農場よりお届けいたします。\n雨天等の天候の影響により、当日ご希望のお野菜が変更になる場合や、配達に時間がかかる場合がございます。あらかじめご了承ください。\nご質問はNICONICOYASAI公式LINE: https://lin.ee/R9dAJtD\n\nNICO NICO 便\n※ニコニコ野菜バンホー農場\n━━━━━━━━━━━━━━━━";
+"\n\n━━━━━━━━━━━━━━━━\n通常金曜日〜日曜日16:00の間にいただいたご注文はエムハノイにて、直接お受取りあるいはGrabにて、お届けいたします。\n平日（月曜日〜木曜日）のご注文分はバンホー農場よりGrabにて、お届けいたします。\n雨天等の天候の影響により、当日ご希望のお野菜が変更になる場合や、配達に時間がかかる場合がございます。あらかじめご了承ください。\nご質問はNICONICOYASAI公式LINE: https://lin.ee/R9dAJtD\n\nNICO NICO 便\n※ニコニコ野菜バンホー農場\n━━━━━━━━━━━━━━━━";
 } else {
 return "Kính gửi "+o.name+"\n\nCảm ơn bạn đã đặt hàng tại NICO NICO YASAI.\n\n"+
 "━━━━━━━━━━━━━━━━\n■ Mã đơn: "+o.no+"\n■ Ngày: "+o.ts+"\n━━━━━━━━━━━━━━━━\n\n"+
