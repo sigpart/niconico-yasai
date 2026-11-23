@@ -852,9 +852,9 @@ area.style.display="block";
 var uid="";try{uid=localStorage.getItem("nny_line_uid")||"";}catch(e){}
 if(uid){_updateLineAuthUI(true);}else{
 _updateLineAuthUI(false);
-// liff.line.me URLでLINEアプリを起動（パスワード不要）
-// 認証後liff.htmlがliff.openWindow(external)でSafariにuidを渡す
-window.open("https://liff.line.me/"+LIFF_ID,"_blank");
+// location.hrefでliff.line.me URLに遷移 → iOSユニバーサルリンクでLINEアプリ起動
+try{localStorage.setItem("nny_line_return_view",curView);}catch(e){}
+location.href="https://liff.line.me/"+LIFF_ID;
 scheduleLineAuthCheck();
 }
 }else{area.style.display="none";}
