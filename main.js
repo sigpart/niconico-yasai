@@ -3504,8 +3504,8 @@ return s;
 function adjVariantStock(id,v,d){var p=PRODUCTS.find(function(x){return Number(x.id)===Number(id);});if(!p)return;var sk="stock"+v.replace("g","");p[sk]=Math.max(0,((p[sk]||0)+d));var inp=document.getElementById("sq-"+id+"-"+v);if(inp)inp.value=p[sk];saveProducts();if(typeof fbSaveProduct==="function")fbSaveProduct(p);flashStockSaved(id);}
 function setVariantStock(id,v,val){var p=PRODUCTS.find(function(x){return Number(x.id)===Number(id);});if(!p)return;var sk="stock"+v.replace("g","");p[sk]=Math.max(0,parseInt(val)||0);saveProducts();if(typeof fbSaveProduct==="function")fbSaveProduct(p);flashStockSaved(id);}
 function saveVariantPrice(id,v,val){var p=PRODUCTS.find(function(x){return Number(x.id)===Number(id);});if(!p)return;p["price"+v.replace("g","")]=Math.max(0,parseInt(val)||0);saveProducts();if(typeof fbSaveProduct==="function")fbSaveProduct(p);flashStockSaved(id);}
-function addVariantToCart(id,v,price){var p=PRODUCTS.find(function(x){return Number(x.id)===Number(id);});if(!p)return;var sk="stock"+v.replace("g","");var stk=p[sk]!==undefined?p[sk]:p.stock;var ck=id+"_"+v;if(stk>0&&(cart[ck]||0)>=stk){showToast(L("在庫がありません","Out of stock","Hết hàng"));return;}cart[ck]=(cart[ck]||0)+1;CART_META[ck]={id:Number(id),variant:v,price:price};updateCartBtn();showToast(p.e+" "+p.ja+" "+v+" "+L("をカートに追加しました","added to cart","đã thêm vào giỏ"));}
-function chgVariantQty(ck,d){cart[ck]=(cart[ck]||0)+d;if(cart[ck]<=0){delete cart[ck];delete CART_META[ck];}updateCartBtn();renderProducts();if(curView==="cart")renderCartView();}
+function addVariantToCart(id,v,price){var p=PRODUCTS.find(function(x){return Number(x.id)===Number(id);});if(!p)return;var sk="stock"+v.replace("g","");var stk=p[sk]!==undefined?p[sk]:p.stock;var ck=id+"_"+v;if(stk>0&&(cart[ck]||0)>=stk){showToast(L("在庫がありません","Out of stock","Hết hàng"));return;}cart[ck]=(cart[ck]||0)+1;CART_META[ck]={id:Number(id),variant:v,price:price};saveCart();updateCartBtn();showToast(p.e+" "+p.ja+" "+v+" "+L("をカートに追加しました","added to cart","đã thêm vào giỏ"));}
+function chgVariantQty(ck,d){cart[ck]=(cart[ck]||0)+d;if(cart[ck]<=0){delete cart[ck];delete CART_META[ck];}saveCart();updateCartBtn();renderProducts();if(curView==="cart")renderCartView();}
 function closeVariantModal(){}
 function openOwnerScreen(){var os=document.getElementById("owner-screen");if(!os)return;document.querySelectorAll(".admin-screen,#admin-screen,[id=admin-screen]").forEach(function(el){el.style.cssText="display:none!important";el.classList.remove("on");});var us=document.getElementById("user-screen");if(us)us.style.cssText="display:none!important";os.style.cssText="display:flex!important;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:#f0f4f0;overflow-y:auto;";os.classList.add("on");if(typeof fbEnabled!=="undefined"&&fbEnabled&&typeof fbDb!=="undefined"&&fbDb){fbDb.collection("orders").get().then(function(snap){var a=[];snap.forEach(function(doc){a.push(doc.data());});if(a.length)ORDERS=a;renderOwnerDashboard();}).catch(function(){renderOwnerDashboard();});}else{renderOwnerDashboard();}}
 function closeOwnerScreen(){
@@ -3857,6 +3857,7 @@ document.head.appendChild(style);
 }
 function initApp(){
 loadCart();
+updateCartBtn();
 // LINE認証リダイレクト完了チェック（?line_auth=ok）
 (function(){
 try{
